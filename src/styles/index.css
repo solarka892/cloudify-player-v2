@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,36 @@
+# Node / frontend
+node_modules/
+dist/
+*.local
+.vite/
+*.log
+
+# Rust / Tauri
+target/
+src-tauri/gen/schemas/
+
+# Secrets — tokens, client ids and signing keys never go into git
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.jks
+*.keystore
+keystore.properties
+
+# Local databases
+*.sqlite
+*.sqlite-*
+*.db
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local notes for Claude Code (kept out of the public repo)
+CLAUDE.md
+.claude/

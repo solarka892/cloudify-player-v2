@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Cloudify",
+  "mainBinaryName": "cloudify",
+  "version": "../package.json",
+  "identifier": "io.github.solarka892.cloudify",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Cloudify",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 960,
+        "minHeight": 600,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self' ipc: http://ipc.localhost",
+        "connect-src": "'self' ipc: http://ipc.localhost https://*.sndcdn.com https://*.soundcloud.cloud",
+        "img-src": "'self' asset: http://asset.localhost data: blob: https://*.sndcdn.com",
+        "media-src": "'self' asset: http://asset.localhost blob: https://*.sndcdn.com https://*.soundcloud.cloud",
+        "style-src": "'self' 'unsafe-inline'",
+        "font-src": "'self' data:"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Music",
+    "shortDescription": "Unofficial SoundCloud desktop client",
+    "copyright": "© 2026 solarka892. Not affiliated with SoundCloud.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+[package]
+name = "soundcloud"
+description = "Client for SoundCloud's internal web API (api-v2), as used by soundcloud.com"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
