@@ -87,6 +87,13 @@ claim all of it:
   Grid", the "Nit" waveform strip — carry over. They are evidence of what was
   tried, not a reference.
 - Do not imitate SoundCloud's own branding (its orange, its logo).
+- **Look and feel: like Yandex Music** (its «Моя волна» / My Vibe screen),
+  chosen by the user on 2026-11-02 after rejecting light, retro and
+  instrument-style concepts: a black ground, a living colour "blob" as the
+  centrepiece of the wave, very large bold type, a calm left sidebar, a column
+  of wave suggestions with real artwork. Yandex Music's craft level is the
+  bar. Its brand marks (the star logo, its signature yellow, its name) are not
+  copied — Cloudify keeps its own name, mark and colours.
 
 ## Evidence on Hand
 
