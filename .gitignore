@@ -34,3 +34,7 @@ Thumbs.db
 # Local notes for Claude Code (kept out of the public repo)
 CLAUDE.md
 .claude/
+
+# Design exploration: mockups and screenshots carry third-party artwork
+.impeccable/mocks/
+.impeccable/review/
