@@ -33,22 +33,32 @@ it:
 
 1. `GET https://soundcloud.com/` with a browser UA.
 2. Collect every `<script src>` that ends in `.js` (they sit on
-   `a-v2.sndcdn.com/assets/`, about a dozen of them).
+   `a-v2.sndcdn.com/assets/`, about a dozen of them). The page also loads
+   third-party scripts — a consent banner from `cdn.cookielaw.org`, a tracker
+   from `dwt.soundcloud.com` — so read only `*.sndcdn.com` bundles: the app
+   talks to nobody but SoundCloud.
 3. Fetch them **from last to first** — the key is usually in one of the last —
    and look for `client_id` followed by `:` or `=` and a quoted run of 20+
-   letters and digits (32 in practice).
+   letters and digits (32 in practice). The same bundle holds other
+   `client_id`s (`…apps.googleusercontent.com`, `com.soundcloud.services.siwa`);
+   requiring the closing quote right after the run skips them. ✅ 2026-11:
+   nine bundles, the key in the last one (~3 MB).
 4. Keep it in memory for 24 hours. On a `401`/`403` from a read route, fetch a
-   fresh one and retry **once**.
+   fresh one and retry **once**. If the lookup finds the same key again, the
+   refusal was about something else (usually a dead session): don't retry, and
+   don't look again on every following refusal.
 
-Never hard-code it, never commit it: it rotates.
+A bad or missing `client_id` is a plain `401`, the same answer as a missing
+token. Never hard-code it, never commit it: it rotates.
 
 ## Errors — what a status really means
 
 | Reply | Meaning |
 |---|---|
-| `401` | Route exists, wants a (valid) token — or the `client_id` rotated. Retry once with a fresh id; a second `401` means the session is over. |
+| `400` `{"error": "invalid parameter"}` | A query value the route does not accept, e.g. an unknown search filter value. |
+| `401` | Route exists, wants a (valid) token — or the `client_id` rotated. Retry once with a fresh id; a second `401` means the session is over (or, when no token was sent, that the key is refused). |
 | `403` with `x-datadome: protected` | **DataDome**, a bot filter in front of SoundCloud, refused the request. Nothing is wrong with the key or the token. See "Writes". |
-| `403` on playback of a restricted track | No session was sent. Send the token on both playback hops. |
+| `403` on playback of a restricted track | No session was sent. Send the token on both playback hops. A `403` on the second hop is about rights, not the key: don't spend a key lookup on it. |
 | `404` | Wrong path **or wrong method**. |
 | `415` on a write | The request had no body. Send `{}`. |
 | `422` | The body shape is wrong. |
@@ -65,10 +75,14 @@ Two styles, and they are not interchangeable:
 
 - **Cursor** — collections under `/users/…`, `/me/…`, `/stream`: send
   `linked_partitioning=1&limit=200`, follow the absolute `next_href` from each
-  reply (add `client_id` again) until it is missing.
+  reply (add `client_id` again) until it is missing. Some `next_href`s already
+  carry a `client_id` of their own (seen on `/tracks/{id}/related` and
+  `/tracks/{id}/comments`): strip it before the URL leaves the crate, add the
+  current one on use. `limit` above 200 is capped to 200.
 - **Offset** — the `/search…` family: `limit` (≤200) and numeric `offset`. Its
   `next_href` is only `…&offset=N`, so expose `offset` to the UI rather than a
-  URL. Pages do not overlap.
+  URL. Pages do not overlap. Search can return one item more than `limit`, so
+  take the next offset from `next_href` rather than counting.
 
 ## Shapes worth knowing
 
@@ -84,13 +98,16 @@ Two styles, and they are not interchangeable:
 `followers_count`, `followings_count`, `track_count`, `description`, `city`,
 `country_code`.
 
-**Playlist:** `id`, `urn`, `title`, `track_count`, `artwork_url` (often
-`null`), `is_album`, `user`, `tracks[]`, `duration`, `sharing`.
+**Playlist:** `id`, `title`, `track_count`, `artwork_url` (often `null`),
+`is_album`, `set_type`, `user`, `tracks[]`, `duration`, `sharing`. No `urn`
+on playlist objects (2026-11): build `soundcloud:playlists:{id}`.
 
 - **Artwork size:** URLs end in `-large` (100px). Swap for `-t500x500` (or
   `-t300x300`, `-original`) for bigger art.
 - **Missing artwork:** a track falls back to its uploader's avatar; a playlist
-  to its first track's art, then to the owner's avatar.
+  to its first track's art, then to the owner's avatar. A user without a
+  picture has SoundCloud's grey `https://a1.sndcdn.com/images/default_avatar_large.png`
+  — treat it as no avatar.
 - **`tag_list`** is space-separated, with multi-word tags in double quotes:
   `house "deep house" techno`.
 - **`downloadable`** alone is not enough to offer the artist's own file: a
@@ -101,17 +118,27 @@ Two styles, and they are not interchangeable:
 
 ## Playback ✅
 
-A track carries several `media.transcodings`. Seen on an ordinary track:
+A track carries several `media.transcodings`. Counted over ~550 search
+results in 2026-11 — most tracks now come as HLS AAC only, MP3 is the
+exception:
 
-| `format.protocol` | `format.mime_type` | `preset` | `quality` |
-|---|---|---|---|
-| `progressive` | `audio/mpeg` | `mp3_0_0` / `mp3_1_0` | `sq` |
-| `hls` | `audio/mpeg` | `mp3_0_0` / `mp3_1_0` | `sq` |
-| `hls` | `audio/mpegurl` | `abr_sq` | `sq` |
-| `hls` | `audio/mp4; codecs="mp4a.40.2"` | `aac_160k` | `sq` |
-| `hls` | `audio/mp4; codecs="mp4a.40.2"` | `aac_96k` | `lq` |
+| `format.protocol` | `format.mime_type` | `preset` | `quality` | seen on |
+|---|---|---|---|---|
+| `hls` | `audio/mp4; codecs="mp4a.40.2"` | `aac_96k` | `lq` | nearly every track |
+| `hls` | `audio/mpegurl` | `abr_sq` | `sq` | nearly every track |
+| `hls` | `audio/mp4; codecs="mp4a.40.2"` | `aac_160k` | `sq` | most, not all (44–89% per query) |
+| `progressive` | `audio/mpeg` | `mp3_1_0` / `mp3_0_1` | `sq` | a few tracks; all 14 Go+ previews seen |
+| `hls` | `audio/mpeg` | `mp3_1_0` / `mp3_0_1` | `sq` | alongside progressive MP3 |
+| `cbc-encrypted-hls`, `ctr-encrypted-hls` | as the `hls` rows | `aac_160k`, `aac_96k`, `abr_sq` | | label releases, often as the **only** ones |
 
-Each also has `snipped` (true for a Go+ preview) and a `url`.
+Each also has `snipped` (true for a Go+ preview) and a `url` on
+`api-v2.soundcloud.com/media/…`.
+
+Label releases (`MONETIZE` + `AD_SUPPORTED`) are often offered to an
+anonymous caller **only encrypted**: 22 of the first 50 results for
+"daft punk". There is nothing to play then; say so before the user clicks
+(the list payloads carry the transcodings). Whether a session changes that
+is not known.
 
 Resolving one into something playable is a second request:
 
@@ -123,15 +150,21 @@ GET <transcoding.url>?client_id=<id>&track_authorization=<track.track_authorizat
 | Transcoding | Resolves to | Notes |
 |---|---|---|
 | progressive mp3 | `cf-media.sndcdn.com/…128.mp3?Policy=…` | Plain MP3, 128 kbps, supports HTTP `Range`. |
+| progressive mp3, Go+ preview | `cf-preview-media.sndcdn.com/preview/0/30/…128.mp3?Policy=…` | The 30-second preview. |
 | hls mp3 | `cf-hls-media.sndcdn.com/playlist/…` | m3u8 of raw MP3 frames. |
-| hls aac | `playback.media-streaming.soundcloud.cloud/…` | m3u8. |
-| hls `abr_sq` | — | **404 on resolve. Skip it.** |
+| hls aac | `playback.media-streaming.soundcloud.cloud/…/playlist.m3u8` | m3u8. |
+| hls `abr_sq` | — | **404 (`{}`) on resolve. Skip it.** |
+| encrypted hls | `playback.media-streaming.soundcloud.cloud/cbcs/…` | Resolves fine, but it is DRM. Skip it. |
 
 Order of preference: whole track before preview (`snipped: false` first),
-then progressive mp3, then hls mp3, then hls aac. **Drop anything whose
-protocol or preset says `encrypted`** (`cbc-encrypted-hls` is FairPlay,
-`ctr-encrypted-hls` is Widevine/PlayReady): there is no key, so it would load
-and play silence.
+then progressive mp3, then hls mp3, then hls aac; within one of those, higher
+quality first (`sq` before `lq`, so `aac_160k` before `aac_96k`). **Drop
+anything whose protocol or preset says `encrypted`** (`cbc-encrypted-hls` is
+FairPlay, `ctr-encrypted-hls` is Widevine/PlayReady): there is no key, so it
+would load and play silence. If a resolve is refused, try the next one.
+
+`track_authorization` was not checked on an ordinary public track (the hop
+answered `200` without it and with garbage). Send it anyway: the website does.
 
 - The signed URL is short-lived. Resolve right before playing; never cache it.
 - The CDN answers `access-control-allow-origin: *`, so the webview can route
@@ -189,9 +222,20 @@ payload.
 GET /resolve?url=https://soundcloud.com/artist/track
 ```
 
-Returns the object itself; `kind` is `track`, `user` or `playlist`.
-`on.soundcloud.com` short links work too. Check the host is SoundCloud before
-sending anything, since links come from the user.
+Returns the object itself; `kind` is `track`, `user` or `playlist` (a
+playlist with stubs, as below). Check the host is SoundCloud before sending
+anything, since links come from the user.
+
+It is picky (2026-11): `www.soundcloud.com`, `m.soundcloud.com`, a trailing
+slash and a missing scheme are all `404`. Normalise to
+`https://soundcloud.com/<path>` first; the query and fragment are ignored
+(drop them — `si` and `utm_*` are share tracking).
+
+**`on.soundcloud.com` short links are a `404` on `/resolve`.** The short-link
+host itself answers a plain `GET` with `302` and the full link in `Location`
+(with `ref`, `si`, `utm_*` tracking added); an unknown code is a `404`. Read
+the `Location` without following it, check it lands on `soundcloud.com`,
+then resolve that.
 
 ### Tracks ✅
 
@@ -206,9 +250,10 @@ GET /tracks/{id}/playlists_without_albums    "in playlists"
 GET /tracks/{id}/download                    🔒 the artist's original file
 ```
 
-`/tracks?ids=` does **not** keep the requested order — re-sort afterwards.
-Comments carry `timestamp`, milliseconds into the track (absent on untimed
-ones).
+`/tracks?ids=` does **not** keep the requested order — re-sort afterwards. It
+answers a bare JSON array (not `{ collection }`), and 51 ids is a `400`.
+`/related` pages by cursor like the user lists. Comments carry `timestamp`,
+milliseconds into the track (absent on untimed ones).
 
 ### Playlists ✅
 
@@ -219,7 +264,10 @@ GET /playlists/{id}?representation=full
 ⚠️ **Only the first ~5 tracks are complete.** The rest are stubs
 (`{ id, kind, policy, monetization_model }`). Fill them in with
 `/tracks?ids=` in batches of 50, then put them back in the playlist's order.
-Measured: a 478-track playlist came back as 5 full + 473 stubs.
+Measured: a 478-track playlist came back as 5 full + 473 stubs (and a
+479-track one as 5 + 474 in 2026-11). Playlists inside lists
+(`/users/{id}/albums`, `/search/playlists`) carry the same 5 + stubs;
+`/mixed-selections` sends them with `tracks: []`.
 
 ### Users ✅ (all public, `client_id` is enough)
 
@@ -230,7 +278,7 @@ GET /users/{id}/toptracks           most played
 GET /users/{id}/albums
 GET /users/{id}/playlists           albums included, flagged is_album
 GET /users/{id}/playlists_without_albums
-GET /users/{id}/likes               items: { created_at, track | playlist }
+GET /users/{id}/likes               items: { created_at, kind: "like", track | playlist }, both mixed
 GET /users/{id}/playlist_likes      items: { created_at, playlist }
 GET /users/{id}/followings
 GET /users/{id}/followers
@@ -246,9 +294,14 @@ otherwise); unused.
 
 ```
 GET /me
-GET /me/play-history?limit=200&linked_partitioning=1   items: { played_at, track }
-GET /stream?limit=200&linked_partitioning=1            the feed from people you follow
+GET /me/play-history/tracks?limit=200&linked_partitioning=1   items: { played_at, track }
+GET /stream?limit=200&linked_partitioning=1                   the feed from people you follow
 ```
+
+`/me/play-history` without `/tracks` is a `404`; anonymously
+`/me/play-history/tracks` answers `401`, so that is the route (2026-11). Its
+items have not been seen signed in; `played_at` may be an epoch number rather
+than an ISO string, so accept both.
 
 `/me` is how a token is validated: `200` means good, `401` means dead (after
 the one `client_id` retry). The play history repeats a track once per play —
@@ -267,20 +320,24 @@ GET /search/queries?q=…          autocomplete: [{ output, query }]
 ```
 
 Replies: `{ collection, total_results, next_href }`. Offset paging (see above).
-A blank query should not be sent at all.
+A blank query should not be sent at all. `/search/queries` ignores `limit`
+(nine back for five asked).
 
-Track filters, as query parameters:
+Track filters, as query parameters (all ✅ 2026-11):
 
 | parameter | values |
 |---|---|
-| `filter.genre` | a genre name, e.g. `House` |
-| `filter.duration` | `short` `medium` `long` `epic` |
+| `filter.genre` | a genre name **in lowercase**: `house`, `deep house`, `r&b & soul` |
+| `filter.duration` | `short` `medium` `long` `epic` (under 2 min, 2–10, 10–30, over 30) |
 | `filter.created_at` | `last_hour` `last_day` `last_week` `last_month` `last_year` |
 | `filter.license` | `to_share` `to_modify_commercially` `to_use_commercially` |
 | `filter.content_tier` | `SUB_HIGH_TIER` — what the website's Go+ tab adds |
 
-An unknown filter value comes back as an empty result, indistinguishable from
-"nothing found" — so reject bad values before sending.
+An unknown value of the fixed-list filters is a `400 {"error": "invalid
+parameter"}`. A genre that matches nothing — including the right genre in the
+wrong case: `House` finds nothing, `house` finds 3.7 million — comes back as
+an empty result, indistinguishable from "nothing found". So reject bad values
+before sending, and lowercase the genre.
 
 ### Discovery ✅
 
@@ -291,11 +348,15 @@ GET /stations/soundcloud:artist-stations:{user_id}/tracks?limit=50
 GET /recent-tracks/{tag}
 ```
 
-- `/mixed-selections` is the website's home page: rows like "Trending by
-  genre" or "Curated by SoundCloud", each `{ id, title, items: { collection } }`
-  where the items are playlists. Skip rows that carry anything else.
-- Stations return `{ collection: [track] }` once, **no paging**. The station
-  object itself (`/stations/{urn}`) is a `404`; only `/tracks` works.
+- `/mixed-selections` is the website's home page: rows, each
+  `{ urn, title, items: { collection } }` where the items are playlists. Skip
+  rows that carry anything else. Signed out (2026-11) there are three:
+  "Artists to watch out for" and "Curated by SoundCloud" hold playlists;
+  "Trending by genre" holds `system-playlist` items (`soundcloud:system-playlists:trending-by-genre:…`),
+  which need routes of their own — skipped.
+- Stations return `{ collection: [track] }` once, **no paging**, and ignore
+  `limit` (48 back for 5 asked). The station object itself
+  (`/stations/{urn}`) is a `404`; only `/tracks` works.
 - `/charts` is **dead** (`404`). Genre browsing is `/recent-tracks/{tag}`.
 
 ### Notifications 🔒 ⚠️
@@ -443,5 +504,7 @@ not an error.
 - Message and comment bodies — needs one signed-in session watched in DevTools.
 - How `client_id` gets rate-limited, and when.
 - What a Go+ subscriber receives.
+- Whether a session gets unencrypted streams for label releases that an
+  anonymous caller is offered only encrypted.
 - Uploading tracks (a policy → S3 → create flow; routes not found by guessing).
 - Blocking or reporting a user (`/users/{id}/block` is a 404).
