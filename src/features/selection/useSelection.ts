@@ -124,7 +124,7 @@ export function useSelection() {
       mood: next,
       seed: useSelectionStore.getState().seed,
       skipped: skippedTracks(),
-      exclude: new Set([current.id]),
+      exclude: new Set([current.track.id]),
     });
     if (upcoming.length > 0) player.replaceUpcoming(upcoming);
   }, []);

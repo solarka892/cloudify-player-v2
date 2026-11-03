@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import type { Track } from "@/api/types";
 import { makeFilter } from "@/features/library/filter";
 import { useAllLikes } from "@/features/library/queries";
-import { shuffled } from "@/features/library/shuffle";
 import { type QueueSource, usePlayer } from "@/features/player/store";
 import { canPlay } from "@/features/selection/buildQueue";
 
@@ -26,9 +25,19 @@ export function playInOrder(tracks: readonly Track[], source: QueueSource, start
   return true;
 }
 
-/** Plays every playable track of `tracks` in a fresh random order. */
+/**
+ * Plays every playable track of `tracks` in a fresh random order, from a random
+ * one. The queue remembers the list's own order: shuffle off brings it back.
+ */
 export function playShuffled(tracks: readonly Track[], source: QueueSource): boolean {
-  return playInOrder(shuffled(tracks.filter(canPlay)), source);
+  const playable = tracks.filter(canPlay);
+  if (playable.length === 0) {
+    usePlayer.getState().say("Здесь нечего включить: ни один трек не играет в этом приложении");
+    return false;
+  }
+  const first = Math.floor(Math.random() * playable.length);
+  usePlayer.getState().playQueue(playable, first, source, { shuffle: true });
+  return true;
 }
 
 /** A shuffle of the likes started before every page was in; the rest joins once it is. */
@@ -36,8 +45,8 @@ let unfinishedShuffle: { source: QueueSource; query: string } | null = null;
 
 /**
  * Shuffles the likes that match `query` (all of them for an empty one). When
- * some pages are still on their way it starts with what is here and mixes the
- * rest into everything after the first track the moment they arrive.
+ * some pages are still on their way it starts with what is here, and the rest
+ * joins the queue the moment it arrives.
  */
 export function shuffleLikes(loaded: readonly Track[], query: string, complete: boolean) {
   const source: QueueSource = { kind: "likes" };
@@ -59,11 +68,11 @@ export function useLikesInBackground() {
     const player = usePlayer.getState();
     // Something else plays by now: leave it alone.
     if (player.source !== source) return;
-    const heard = new Set(player.queue.slice(0, player.index + 1).map((track) => track.id));
     const all = makeFilter(
       items.map((like) => like.track),
       trackText,
     )(query);
-    player.replaceUpcoming(shuffled(all.filter((t) => canPlay(t) && !heard.has(t.id))));
+    // Mixed into what is ahead while shuffled, in the likes' order once shuffle is off.
+    player.extendSource(all.filter(canPlay));
   }, [complete, items]);
 }
