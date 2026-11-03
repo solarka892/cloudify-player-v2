@@ -43,11 +43,17 @@ pub fn run() {
             commands::session::sign_out,
             commands::library::my_likes,
             commands::library::my_playlists,
+            commands::library::my_albums,
+            commands::library::my_liked_playlists,
+            commands::library::my_reposts,
+            commands::library::my_followings,
             commands::library::play_history,
             commands::library::playlist,
+            commands::people::artist_top_tracks,
             commands::player::stream,
             commands::player::waveform,
             commands::player::track_station,
+            commands::player::artist_station,
         ])
         .run(tauri::generate_context!())
         .expect("Cloudify failed to start");

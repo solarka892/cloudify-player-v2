@@ -106,9 +106,23 @@ export interface LikedTrack {
   track: Track;
 }
 
+export interface LikedPlaylist {
+  likedAt: string | null;
+  playlist: Playlist;
+}
+
 export interface PlayedTrack {
   playedAt: string | null;
   track: Track;
+}
+
+/** A track or a playlist, told apart by `kind`. */
+export type TrackOrPlaylist = ({ kind: "track" } & Track) | ({ kind: "playlist" } & Playlist);
+
+export interface Repost {
+  repostedAt: string | null;
+  caption: string | null;
+  item: TrackOrPlaylist;
 }
 
 /** One page of a cursor-paged list. `next` is opaque: pass it back as `cursor`. */

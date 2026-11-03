@@ -1,6 +1,8 @@
 //! The signed-in user's library. Twins: `src/api/library.ts`.
 
-use soundcloud::{LikedTrack, Page, PageRequest, PlayedTrack, Playlist};
+use soundcloud::{
+    LikedPlaylist, LikedTrack, Page, PageRequest, PlayedTrack, Playlist, Repost, User,
+};
 use tauri::State;
 
 use crate::error::CommandResult;
@@ -28,6 +30,52 @@ pub async fn my_playlists(
     let client = state.client().await;
     let me = client.my_user_id().await?;
     Ok(client.user_playlists(me, page.unwrap_or_default()).await?)
+}
+
+/// The user's own albums.
+#[tauri::command]
+pub async fn my_albums(
+    page: Option<PageRequest>,
+    state: State<'_, AppState>,
+) -> CommandResult<Page<Playlist>> {
+    let client = state.client().await;
+    let me = client.my_user_id().await?;
+    Ok(client.user_albums(me, page.unwrap_or_default()).await?)
+}
+
+/// Playlists and albums the user liked, latest like first; `isAlbum` tells them apart.
+#[tauri::command]
+pub async fn my_liked_playlists(
+    page: Option<PageRequest>,
+    state: State<'_, AppState>,
+) -> CommandResult<Page<LikedPlaylist>> {
+    let client = state.client().await;
+    let me = client.my_user_id().await?;
+    Ok(client
+        .user_liked_playlists(me, page.unwrap_or_default())
+        .await?)
+}
+
+/// Tracks and playlists the user reposted, latest first.
+#[tauri::command]
+pub async fn my_reposts(
+    page: Option<PageRequest>,
+    state: State<'_, AppState>,
+) -> CommandResult<Page<Repost>> {
+    let client = state.client().await;
+    let me = client.my_user_id().await?;
+    Ok(client.user_reposts(me, page.unwrap_or_default()).await?)
+}
+
+/// The people the user follows.
+#[tauri::command]
+pub async fn my_followings(
+    page: Option<PageRequest>,
+    state: State<'_, AppState>,
+) -> CommandResult<Page<User>> {
+    let client = state.client().await;
+    let me = client.my_user_id().await?;
+    Ok(client.user_followings(me, page.unwrap_or_default()).await?)
 }
 
 /// What was played on SoundCloud, latest first.

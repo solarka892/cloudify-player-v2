@@ -32,3 +32,13 @@ pub async fn track_station(track_id: u64, state: State<'_, AppState>) -> Command
         .track_station(track_id, STATION_SIZE)
         .await?)
 }
+
+/// SoundCloud's radio from an artist: their tracks and music like them.
+#[tauri::command]
+pub async fn artist_station(user_id: u64, state: State<'_, AppState>) -> CommandResult<Vec<Track>> {
+    Ok(state
+        .client()
+        .await
+        .artist_station(user_id, STATION_SIZE)
+        .await?)
+}

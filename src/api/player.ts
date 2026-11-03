@@ -15,3 +15,8 @@ export function waveform(url: string): Promise<Waveform> {
 export function trackStation(trackId: number): Promise<Track[]> {
   return call<Track[]>("track_station", { trackId });
 }
+
+/** SoundCloud's radio from an artist: their tracks and music like them. */
+export function artistStation(userId: number): Promise<Track[]> {
+  return call<Track[]>("artist_station", { userId });
+}
