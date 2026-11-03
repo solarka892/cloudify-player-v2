@@ -18,7 +18,8 @@ interface SearchState {
   opened: Opened | null;
   /** Searches made lately, newest first. */
   recent: string[];
-  run: (query: string) => void;
+  /** Searches for `query`, with something already opened from its results if given. */
+  run: (query: string, opened?: Opened) => void;
   close: () => void;
   show: (category: Category) => void;
   filter: (filters: TrackFilters) => void;
@@ -35,12 +36,12 @@ export const useSearch = create<SearchState>()((set, get) => ({
   filters: {},
   opened: null,
   recent: loadRecent(),
-  run: (text) => {
+  run: (text, opened) => {
     const query = text.trim().replace(/\s+/g, " ");
     if (!query) return;
     const recent = remember(get().recent, query);
     saveRecent(recent);
-    set({ query, category: "all", filters: {}, opened: null, recent });
+    set({ query, category: "all", filters: {}, opened: opened ?? null, recent });
   },
   close: () => set({ query: null, opened: null }),
   show: (category) => set({ category, opened: null }),

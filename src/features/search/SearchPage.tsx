@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, LoaderCircle, Play, Radio, UserRound } from "lucide-react";
+import { BadgeCheck, LoaderCircle, Play, Radio } from "lucide-react";
 import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { artistTopTracks } from "@/api/people";
 import type { Me, Playlist, Track, User } from "@/api/types";
 import { useScrollRoot } from "@/app/scrollRoot";
-import { type Opener, OpenerContext, useOpener } from "@/features/library/nav";
+import { useOpener } from "@/features/library/nav";
 import { PageLight } from "@/features/library/PageLight";
 import { playInOrder } from "@/features/library/play";
 import { Shelf, TileRow } from "@/features/library/Rows";
@@ -31,7 +31,7 @@ import {
   useTrackResults,
   useUserResults,
 } from "@/features/search/queries";
-import { type Category, type Opened, useSearch } from "@/features/search/store";
+import { type Category, useSearch } from "@/features/search/store";
 import {
   RowsSkeleton,
   TrackListHead,
@@ -102,16 +102,18 @@ export function SearchPage({ me }: { me: Me }) {
   const resultsAt = useRef(0);
   const comingBack = useRef(false);
 
-  const opener = useMemo<Opener>(() => {
-    const open = (item: Opened) => {
-      if (!useSearch.getState().opened) resultsAt.current = scroller?.scrollTop ?? 0;
-      useSearch.getState().open(item);
-      scroller?.scrollTo({ top: 0 });
-    };
-    return {
-      artist: (user) => open({ kind: "artist", user }),
-      playlist: (playlist) => open({ kind: "playlist", playlist }),
-    };
+  // Whatever opens an artist or playlist here (a row, a tile, the player's
+  // artist name), the results remember where they were and the page starts at the top.
+  useEffect(() => {
+    if (!scroller) return;
+    return useSearch.subscribe((now, before) => {
+      if (now.query !== before.query) {
+        resultsAt.current = 0;
+      } else if (now.opened && now.opened !== before.opened) {
+        if (!before.opened) resultsAt.current = scroller.scrollTop;
+        scroller.scrollTo({ top: 0 });
+      }
+    });
   }, [scroller]);
 
   const back = useMemo(
@@ -153,15 +155,13 @@ export function SearchPage({ me }: { me: Me }) {
     <div className="relative isolate min-h-full bg-ground">
       <PageLight cover={cover} />
       <div className="@container relative z-10 px-14 pb-12">
-        <OpenerContext value={opener}>
-          {opened?.kind === "artist" ? (
-            <ArtistView key={opened.user.id} user={opened.user} back={back} />
-          ) : opened?.kind === "playlist" ? (
-            <PlaylistView key={opened.playlist.id} me={me} playlist={opened.playlist} back={back} />
-          ) : (
-            <Results key={query} me={me} query={query} best={best} users={users} />
-          )}
-        </OpenerContext>
+        {opened?.kind === "artist" ? (
+          <ArtistView key={opened.user.id} user={opened.user} back={back} />
+        ) : opened?.kind === "playlist" ? (
+          <PlaylistView key={opened.playlist.id} me={me} playlist={opened.playlist} back={back} />
+        ) : (
+          <Results key={query} me={me} query={query} best={best} users={users} />
+        )}
       </div>
     </div>
   );
@@ -308,6 +308,7 @@ function ArtistHeader({ user }: { user: User }) {
   return (
     <StageHeader
       title={user.username}
+      open={{ label: `Открыть ${user.username}`, run: () => open.artist(user) }}
       lead={
         <>
           <span className="inline-flex items-center gap-1.5 align-[-3px]">
@@ -350,15 +351,6 @@ function ArtistHeader({ user }: { user: User }) {
               top.busyId === user.id,
               <Play className="size-5 fill-current stroke-none" aria-hidden="true" />,
             )}
-          </button>
-          <button
-            type="button"
-            onClick={() => open.artist(user)}
-            aria-label={`Открыть ${user.username}`}
-            title="Открыть артиста"
-            className={roundButton}
-          >
-            <UserRound className="size-5" aria-hidden="true" />
           </button>
         </>
       }

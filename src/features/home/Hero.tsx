@@ -1,5 +1,6 @@
 import { Pause, Play, SkipForward, ThumbsDown } from "lucide-react";
 import type { Me } from "@/api/types";
+import { useOpener } from "@/features/library/nav";
 import { currentTrack, usePlayer } from "@/features/player/store";
 import { useLoudness } from "@/features/player/useLoudness";
 import { MOODS, moodById } from "@/features/selection/moods";
@@ -20,6 +21,7 @@ export function Hero({ me }: { me: Me }) {
   const nowPlaying = usePlayer(currentTrack);
   const mood = moodById(selection.mood);
   const shown = active ? nowPlaying : selection.preview;
+  const open = useOpener();
   const loudness = useLoudness(nowPlaying ?? shown);
   const likes = me.user.likesCount;
 
@@ -139,9 +141,15 @@ export function Hero({ me }: { me: Me }) {
             {shown && (
               <>
                 <b className="block truncate font-bold text-[19px] leading-tight">{shown.title}</b>
-                <span className="block truncate font-bold text-fg-muted">
-                  {shown.user?.username}
-                </span>
+                {shown.user && (
+                  <button
+                    type="button"
+                    onClick={() => shown.user && open.artist(shown.user)}
+                    className="block max-w-full truncate font-bold text-fg-muted rounded text-left transition-colors duration-150 hover:text-fg"
+                  >
+                    {shown.user.username}
+                  </button>
+                )}
               </>
             )}
           </figcaption>

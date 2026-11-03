@@ -12,6 +12,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useEffect } from "react";
+import { useOpener } from "@/features/library/nav";
 import { useLikes } from "@/features/library/queries";
 import { currentTrack, type QueueSource, usePlayer } from "@/features/player/store";
 import { useLoudness } from "@/features/player/useLoudness";
@@ -60,6 +61,7 @@ export function PlayerBar() {
   const { toggle, next, previous, seek, setVolume, toggleMute, say } = usePlayer.getState();
   const loudness = useLoudness(track);
   const likes = useLikes();
+  const open = useOpener();
   const liked = track !== null && Boolean(likes.data?.items.some((i) => i.track.id === track.id));
 
   // A notice is news, not a state: it steps aside after a while.
@@ -107,7 +109,15 @@ export function PlayerBar() {
               </>
             ) : track ? (
               <>
-                <span className="truncate">{track.user?.username}</span>
+                {track.user && (
+                  <button
+                    type="button"
+                    onClick={() => track.user && open.artist(track.user)}
+                    className="min-w-0 truncate rounded text-left transition-colors duration-150 hover:text-fg"
+                  >
+                    {track.user.username}
+                  </button>
+                )}
                 {fromLabel && (
                   <span className="max-w-[65%] shrink-0 truncate whitespace-pre">
                     {track.user ? " · " : ""}

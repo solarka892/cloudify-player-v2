@@ -27,7 +27,7 @@ function measureTitle(text: string): number {
  * two lines, or three for a very long name. Measured, because «ШЩЖ» and
  * «ill» differ fourfold in width and a playlist can be called anything.
  */
-function FitTitle({ title }: { title: string }) {
+function FitTitle({ title, className = "" }: { title: string; className?: string }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const [fit, setFit] = useState({ size: 80, lines: 2 });
 
@@ -61,7 +61,7 @@ function FitTitle({ title }: { title: string }) {
     <h1
       ref={heading}
       style={{ fontSize: `${fit.size}px`, WebkitLineClamp: fit.lines }}
-      className={`font-display font-extrabold leading-[0.92] tracking-[-0.055em] [overflow-wrap:anywhere] [text-shadow:0_10px_50px_rgb(0_0_0/0.35)] ${fit.lines === 1 ? "whitespace-nowrap" : "line-clamp-2 text-balance"}`}
+      className={`font-display font-extrabold leading-[0.92] tracking-[-0.055em] [overflow-wrap:anywhere] [text-shadow:0_10px_50px_rgb(0_0_0/0.35)] ${fit.lines === 1 ? "whitespace-nowrap" : "line-clamp-2 text-balance"} ${className}`}
     >
       {title}
     </h1>
@@ -74,6 +74,7 @@ export function StageHeader({
   aside,
   back,
   actions,
+  open,
 }: {
   title: string;
   /** One line under the name: what it is and how much of it there is. */
@@ -83,6 +84,8 @@ export function StageHeader({
   back?: { label: string; onClick: () => void };
   /** Buttons under the lead that scroll away with the name (search's best match). */
   actions?: ReactNode;
+  /** Makes the name and the face a way in: a found artist opens their page. */
+  open?: { label: string; run: () => void };
 }) {
   return (
     <header className="flex items-end gap-10 pt-[clamp(88px,13vh,112px)] pb-6">
@@ -97,13 +100,47 @@ export function StageHeader({
             {back.label}
           </button>
         )}
-        <FitTitle title={title} />
+        {open ? (
+          <div className="group/name relative">
+            <FitTitle
+              title={title}
+              className="decoration-[0.06em] underline-offset-[0.12em] group-hover/name:underline"
+            />
+            <button
+              type="button"
+              onClick={open.run}
+              aria-label={open.label}
+              title={open.label}
+              className="absolute inset-0 cursor-pointer rounded-xl"
+            />
+          </div>
+        ) : (
+          <FitTitle title={title} />
+        )}
         <p className="mt-[18px] max-w-[60ch] text-[17px] text-white/80 leading-[1.45] [text-shadow:0_2px_16px_rgb(0_0_0/0.4)]">
           {lead}
         </p>
         {actions && <div className="mt-[26px] flex items-center gap-3">{actions}</div>}
       </div>
-      {aside && <div className="hidden shrink-0 @3xl:block">{aside}</div>}
+      {aside && (
+        <div className="hidden shrink-0 @3xl:block">
+          {open ? (
+            // The name's button is the one the keyboard reaches; this is the same way in for the pointer.
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={open.run}
+              aria-label={open.label}
+              title={open.label}
+              className="block cursor-pointer rounded-full transition-transform duration-300 ease-out hover:scale-[1.03]"
+            >
+              {aside}
+            </button>
+          ) : (
+            aside
+          )}
+        </div>
+      )}
     </header>
   );
 }

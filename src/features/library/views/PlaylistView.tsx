@@ -2,6 +2,7 @@ import { Play, Shuffle } from "lucide-react";
 import { useMemo, useRef } from "react";
 import type { Me, Playlist } from "@/api/types";
 import { CoverWall, WallSkeleton } from "@/features/library/CoverWall";
+import { useOpener } from "@/features/library/nav";
 import { playInOrder, playShuffled, trackText } from "@/features/library/play";
 import { usePlaylist } from "@/features/library/queries";
 import {
@@ -39,18 +40,35 @@ export function PlaylistView({
   const { query, onQuery, shown, filtering } = useListFilter(tracks, trackText, start);
   const source = { kind: "playlist", title: playlist.title, id: playlist.id } as const;
 
+  const open = useOpener();
   const kind = playlist.isAlbum ? "Альбом" : "Плейлист";
-  // Someone else's playlist names its author; your own needs no name.
-  const author = playlist.user && playlist.user.id !== me.user.id ? playlist.user.username : null;
+  // Someone else's playlist names its author, who opens; your own needs no name.
+  const author = playlist.user && playlist.user.id !== me.user.id ? playlist.user : null;
   const count = playlist.trackCount;
-  const lead = [
-    kind,
-    author,
+  const size = [
     `${formatCount(count)} ${plural(count, TRACKS)}`,
     playlist.durationMs > 0 ? formatLength(playlist.durationMs) : null,
   ]
     .filter(Boolean)
     .join(" · ");
+  const lead = (
+    <>
+      {kind} ·{" "}
+      {author && (
+        <>
+          <button
+            type="button"
+            onClick={() => open.artist(author)}
+            className="rounded underline-offset-4 transition-colors hover:text-white hover:underline"
+          >
+            {author.username}
+          </button>{" "}
+          ·{" "}
+        </>
+      )}
+      {size}
+    </>
+  );
 
   return (
     <>

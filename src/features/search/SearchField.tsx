@@ -152,8 +152,7 @@ export function SearchField() {
         key: `artist:${artist.id}`,
         group: "found",
         run: () => {
-          useSearch.getState().run(artist.username);
-          useSearch.getState().open({ kind: "artist", user: artist });
+          useSearch.getState().run(artist.username, { kind: "artist", user: artist });
           finish();
         },
         content: (

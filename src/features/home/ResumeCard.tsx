@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { SectionHeader } from "@/features/home/SectionHeader";
+import { useOpener } from "@/features/library/nav";
 import { useHistory } from "@/features/library/queries";
 import { loadResumePoint } from "@/features/player/resume";
 import { currentTrack, usePlayer } from "@/features/player/store";
@@ -19,6 +20,7 @@ export function ResumeCard({ className = "" }: { className?: string }) {
   // Where the previous session stopped, read once: what plays now is the player's business.
   const [point] = useState(loadResumePoint);
   const last = history.data?.items[0];
+  const open = useOpener();
 
   const track = point?.track ?? last?.track ?? null;
   const isLoaded = track !== null && loaded?.id === track.id;
@@ -44,18 +46,32 @@ export function ResumeCard({ className = "" }: { className?: string }) {
     <section aria-labelledby="resume-title" className={className}>
       <SectionHeader id="resume-title" title="Продолжить" />
       {track ? (
-        <button
-          type="button"
-          onClick={resume}
-          aria-label={`${isLoaded && playing ? "Пауза" : "Продолжить"}: ${track.title}`}
-          className="group mt-[18px] grid w-full grid-cols-[104px_minmax(0,1fr)] items-center gap-4 rounded-[22px] bg-panel p-4 text-left transition-colors duration-150 hover:bg-panel-hover"
-        >
-          <Artwork url={track.artworkUrl} size={300} className="size-[104px] rounded-[14px]" />
-          <span className="min-w-0">
+        <div className="relative mt-[18px] grid w-full grid-cols-[104px_minmax(0,1fr)] items-center gap-4 rounded-[22px] bg-panel p-4 text-left transition-colors duration-150 hover:bg-panel-hover">
+          {/* The whole card resumes; the artist's name on it opens their page. */}
+          <button
+            type="button"
+            onClick={resume}
+            aria-label={`${isLoaded && playing ? "Пауза" : "Продолжить"}: ${track.title}`}
+            className="absolute inset-0 rounded-[22px]"
+          />
+          <Artwork
+            url={track.artworkUrl}
+            size={300}
+            className="pointer-events-none relative size-[104px] rounded-[14px]"
+          />
+          <span className="pointer-events-none relative min-w-0">
             <b className="line-clamp-2 font-extrabold text-[16.5px] leading-[1.25]">
               {track.title}
             </b>
-            <span className="block truncate font-bold text-fg-muted">{track.user?.username}</span>
+            {track.user && (
+              <button
+                type="button"
+                onClick={() => track.user && open.artist(track.user)}
+                className="pointer-events-auto block max-w-full truncate font-bold text-fg-muted rounded text-left transition-colors duration-150 hover:text-fg"
+              >
+                {track.user.username}
+              </button>
+            )}
             {when && (
               <small className="mt-2.5 block font-bold text-[12.5px] text-fg-faint tabular-nums">
                 {when}
@@ -63,14 +79,17 @@ export function ResumeCard({ className = "" }: { className?: string }) {
             )}
           </span>
           {at > 0 && length > 0 && (
-            <span aria-hidden="true" className="relative col-span-2 h-1 rounded-sm bg-white/10">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none relative col-span-2 h-1 rounded-sm bg-white/10"
+            >
               <span
                 className="absolute inset-y-0 left-0 rounded-sm bg-linear-to-r from-glow-2 to-glow-1"
                 style={{ width: `${Math.min(100, (at / length) * 100)}%` }}
               />
             </span>
           )}
-        </button>
+        </div>
       ) : (
         <div className="mt-[18px] grid min-h-[136px] place-content-center rounded-[22px] bg-panel p-6 text-center text-[13.5px] text-fg-muted">
           {history.isPending ? "" : "Здесь будет трек, на котором ты остановился."}
