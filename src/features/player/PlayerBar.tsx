@@ -5,6 +5,9 @@ import {
   MicVocal,
   Pause,
   Play,
+  Repeat,
+  Repeat1,
+  Shuffle,
   SkipBack,
   SkipForward,
   Volume1,
@@ -14,36 +17,26 @@ import {
 import { useEffect } from "react";
 import { useOpener } from "@/features/library/nav";
 import { useLikes } from "@/features/library/queries";
-import { currentTrack, type QueueSource, usePlayer } from "@/features/player/store";
+import { usePanels } from "@/features/player/panels";
+import { from } from "@/features/player/source";
+import { currentTrack, hasNext, usePlayer } from "@/features/player/store";
 import { useLoudness } from "@/features/player/useLoudness";
 import { VolumeSlider } from "@/features/player/VolumeSlider";
 import { WaveformSeek } from "@/features/player/WaveformSeek";
 import { Artwork } from "@/ui/Artwork";
 import { formatSeconds } from "@/ui/format";
 
-function from(source: QueueSource | null): string {
-  switch (source?.kind) {
-    case "selection":
-      return "из подборки";
-    case "likes":
-      return "из лайков";
-    case "playlist":
-      return `из «${source.title}»`;
-    case "reposts":
-      return "из репостов";
-    case "artist":
-      return `популярное · ${source.title}`;
-    case "station":
-      return `радио · ${source.title}`;
-    case "search":
-      return `из поиска «${source.title}»`;
-    default:
-      return "";
-  }
-}
-
 const iconButton =
-  "grid size-8 place-content-center rounded-full text-fg-muted transition-colors duration-150 hover:text-fg disabled:cursor-default disabled:opacity-40 disabled:hover:text-fg-muted";
+  "relative grid size-8 place-content-center rounded-full text-fg-muted transition-colors duration-150 hover:text-fg disabled:cursor-default disabled:opacity-40 disabled:hover:text-fg-muted";
+/** A mode that is on takes the cover's colour and a dot under it. */
+const modeOn =
+  "text-glow-1 hover:text-glow-1 after:absolute after:-bottom-px after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-glow-1";
+
+const REPEAT_NAMES = {
+  off: "Повтор выключен",
+  all: "Повтор очереди",
+  one: "Повтор трека",
+} as const;
 
 /** The bar at the bottom: what plays, its real waveform, and the controls. */
 export function PlayerBar() {
@@ -57,8 +50,13 @@ export function PlayerBar() {
   const muted = usePlayer((s) => s.muted);
   const notice = usePlayer((s) => s.notice);
   const noticeAction = usePlayer((s) => s.noticeAction);
-  const hasNext = usePlayer((s) => s.index + 1 < s.queue.length || Boolean(s.options.refill));
-  const { toggle, next, previous, seek, setVolume, toggleMute, say } = usePlayer.getState();
+  const canNext = usePlayer(hasNext);
+  const shuffled = usePlayer((s) => s.original !== null);
+  const repeat = usePlayer((s) => s.repeat);
+  const endless = usePlayer((s) => Boolean(s.options.refill));
+  const queueOpen = usePanels((s) => s.queue);
+  const { toggle, next, previous, seek, setVolume, toggleMute, toggleShuffle, cycleRepeat, say } =
+    usePlayer.getState();
   const loudness = useLoudness(track);
   const likes = useLikes();
   const open = useOpener();
@@ -74,9 +72,18 @@ export function PlayerBar() {
   const shownVolume = muted ? 0 : volume;
   const VolumeIcon = shownVolume === 0 ? VolumeX : shownVolume < 0.5 ? Volume1 : Volume2;
   const fromLabel = from(source);
+  const shuffleName = endless
+    ? "Подборка и так вперемешку"
+    : shuffled
+      ? "Вернуть порядок (S)"
+      : "Перемешать (S)";
+  const RepeatIcon = repeat === "one" ? Repeat1 : Repeat;
 
   return (
-    <footer className="relative z-30 grid h-[84px] shrink-0 grid-cols-[clamp(180px,24vw,320px)_minmax(0,1fr)_auto] items-center gap-[clamp(16px,2.2vw,30px)] border-line border-t bg-dock pr-7 pl-[18px]">
+    <footer
+      data-player-bar
+      className="relative z-30 grid h-[84px] shrink-0 grid-cols-[clamp(180px,24vw,320px)_minmax(0,1fr)_auto] items-center gap-[clamp(16px,2.2vw,30px)] border-line border-t bg-dock pr-7 pl-[18px] max-[1100px]:grid-cols-[180px_minmax(0,1fr)_auto]"
+    >
       <div className="flex min-w-0 items-center gap-3.5">
         <Artwork
           url={track?.artworkUrl ?? null}
@@ -113,13 +120,14 @@ export function PlayerBar() {
                   <button
                     type="button"
                     onClick={() => track.user && open.artist(track.user)}
-                    className="min-w-0 truncate rounded text-left transition-colors duration-150 hover:text-fg"
+                    className="max-w-full shrink-0 truncate rounded text-left transition-colors duration-150 hover:text-fg"
                   >
                     {track.user.username}
                   </button>
                 )}
+                {/* The artist keeps its room; where the queue came from gives way first. */}
                 {fromLabel && (
-                  <span className="max-w-[65%] shrink-0 truncate whitespace-pre">
+                  <span className="min-w-0 truncate whitespace-pre">
                     {track.user ? " · " : ""}
                     {fromLabel}
                   </span>
@@ -133,13 +141,24 @@ export function PlayerBar() {
       </div>
 
       <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-[22px]">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={toggleShuffle}
+            disabled={!track || endless}
+            aria-pressed={shuffled}
+            aria-label={shuffleName}
+            title={shuffleName}
+            className={`${iconButton} ${shuffled ? modeOn : ""}`}
+          >
+            <Shuffle className="size-[18px]" aria-hidden="true" />
+          </button>
           <button
             type="button"
             onClick={previous}
             disabled={!track}
             aria-label="Назад"
-            title="Назад"
+            title="Назад (Shift+←)"
             className={iconButton}
           >
             <SkipBack className="size-5" aria-hidden="true" />
@@ -149,7 +168,8 @@ export function PlayerBar() {
             onClick={toggle}
             disabled={!track}
             aria-label={playing ? "Пауза" : "Играть"}
-            className="grid size-11 place-content-center rounded-full bg-white text-ink transition-transform duration-150 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
+            title={`${playing ? "Пауза" : "Играть"} (пробел)`}
+            className="mx-0.5 grid size-11 place-content-center rounded-full bg-white text-ink transition-transform duration-150 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
           >
             {playing && buffering ? (
               <LoaderCircle className="size-[19px] motion-safe:animate-spin" aria-hidden="true" />
@@ -165,12 +185,22 @@ export function PlayerBar() {
           <button
             type="button"
             onClick={() => next("skip")}
-            disabled={!track || !hasNext}
+            disabled={!track || !canNext}
             aria-label="Дальше"
-            title="Дальше"
+            title="Дальше (Shift+→)"
             className={iconButton}
           >
             <SkipForward className="size-5" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={cycleRepeat}
+            disabled={!track}
+            aria-label={REPEAT_NAMES[repeat]}
+            title={`${REPEAT_NAMES[repeat]} (R)`}
+            className={`${iconButton} ${repeat !== "off" ? modeOn : ""}`}
+          >
+            <RepeatIcon className="size-[18px]" aria-hidden="true" />
           </button>
         </div>
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 font-bold text-[12.5px] text-fg-faint tabular-nums">
@@ -210,10 +240,12 @@ export function PlayerBar() {
         </button>
         <button
           type="button"
-          disabled
-          aria-label="Очередь — скоро"
-          title="Очередь — скоро"
-          className={iconButton}
+          onClick={() => usePanels.getState().showQueue()}
+          aria-expanded={queueOpen}
+          aria-controls="queue-sheet"
+          aria-label="Очередь"
+          title="Очередь (Q)"
+          className={`${iconButton} ${queueOpen ? "bg-white/10 text-fg" : ""}`}
         >
           <ListMusic className="size-5" aria-hidden="true" />
         </button>
@@ -221,7 +253,7 @@ export function PlayerBar() {
           type="button"
           onClick={toggleMute}
           aria-label={muted ? "Включить звук" : "Выключить звук"}
-          title={muted ? "Включить звук" : "Выключить звук"}
+          title={`${muted ? "Включить звук" : "Выключить звук"} (M)`}
           className={iconButton}
         >
           <VolumeIcon className="size-5" aria-hidden="true" />

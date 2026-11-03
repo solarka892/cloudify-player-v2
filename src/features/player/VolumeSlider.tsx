@@ -45,7 +45,7 @@ export function VolumeSlider({ value, onChange }: VolumeSliderProps) {
       onPointerUp={() => setDragging(false)}
       onPointerCancel={() => setDragging(false)}
       onKeyDown={onKeyDown}
-      className="group flex h-5 w-[92px] touch-none items-center rounded-sm"
+      className="group flex h-5 w-[72px] touch-none items-center rounded-sm min-[1101px]:w-[92px]"
     >
       <span className="relative h-1 w-full rounded-sm bg-white/[0.14]">
         <span

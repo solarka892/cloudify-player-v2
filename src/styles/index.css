@@ -159,6 +159,33 @@
     mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
   }
 
+  /* The queue rises out of its button in the player; the key help rises from the bar. */
+  .sheet-rise {
+    transform-origin: calc(100% - 172px) calc(100% + 54px);
+    animation: sheet-rise 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sheet-up {
+    animation: sheet-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes sheet-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.97);
+    }
+  }
+  @keyframes sheet-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sheet-rise,
+    .sheet-up {
+      animation: none;
+    }
+  }
+
   /* Your music under the light: three columns, two rows in a narrow window. */
   .home-grid {
     display: grid;

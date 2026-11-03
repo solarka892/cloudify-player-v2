@@ -15,29 +15,16 @@ import { useLikesInBackground } from "@/features/library/play";
 import { ComingSoon } from "@/features/placeholder/ComingSoon";
 import { useCoverGlow } from "@/features/player/coverGlow";
 import { startAudioEngine } from "@/features/player/engine";
+import { useHotkeys } from "@/features/player/hotkeys";
+import { KeysHelp } from "@/features/player/KeysHelp";
 import { PlayerBar } from "@/features/player/PlayerBar";
+import { QueueSheet } from "@/features/player/QueueSheet";
 import { currentTrack, usePlayer } from "@/features/player/store";
 import { SearchPage } from "@/features/search/SearchPage";
 import { type Opened, useSearch } from "@/features/search/store";
 import { moodById } from "@/features/selection/moods";
 import { useSelection } from "@/features/selection/useSelection";
 import { useSessionExpired } from "@/features/session/useSession";
-
-/** Space plays and pauses, unless it is typing or pressing a button. */
-function useSpaceToPlay() {
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.code !== "Space" || event.repeat || event.metaKey || event.ctrlKey) return;
-      const target = event.target as HTMLElement | null;
-      if (target?.closest("input, textarea, button, [role='slider'], [contenteditable='true']"))
-        return;
-      event.preventDefault();
-      usePlayer.getState().toggle();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-}
 
 /** The signed-in window: the page under the floating top bar, the player at the bottom. */
 export function Shell({ me }: { me: Me }) {
@@ -54,7 +41,8 @@ export function Shell({ me }: { me: Me }) {
     () => startAudioEngine({ onSessionExpired: () => void sessionExpired() }),
     [sessionExpired],
   );
-  useSpaceToPlay();
+  // Space, the arrows, M, S, R, Q and ? — the same everywhere in the window.
+  useHotkeys();
   // Every like, loading from the start: the library and its shuffle need all of them.
   useLikesInBackground();
 
@@ -132,6 +120,8 @@ export function Shell({ me }: { me: Me }) {
           </main>
         </div>
         <PlayerBar />
+        <QueueSheet />
+        <KeysHelp />
       </div>
     </OpenerContext>
   );
