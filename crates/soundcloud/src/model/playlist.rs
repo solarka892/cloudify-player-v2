@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::artwork::playlist_artwork;
+use super::artwork::{is_default_avatar, playlist_artwork, track_artwork};
 use super::tags::parse_tags;
 use super::{Track, User, text};
 use crate::raw;
@@ -29,6 +29,9 @@ pub struct Playlist {
     pub description: Option<String>,
     pub genre: Option<String>,
     pub tags: Vec<String>,
+    /// Up to four different artworks of its first tracks, for a 2×2 mosaic.
+    /// Lists carry the first few tracks whole, so this costs no extra request.
+    pub covers: Vec<String>,
     /// Every track, complete and in order — filled by `Client::playlist` and
     /// `Client::resolve` only. Lists leave it out to stay light; `track_count`
     /// still says how many there are.
@@ -57,6 +60,7 @@ impl Playlist {
             first_track_art,
             user.as_ref().and_then(|user| user.avatar_url.as_deref()),
         );
+        let covers = mosaic(&entries);
         let playlist = Self {
             id: raw.id,
             urn: raw
@@ -76,10 +80,37 @@ impl Playlist {
             description: text(raw.description),
             genre: text(raw.genre),
             tags: raw.tag_list.as_deref().map(parse_tags).unwrap_or_default(),
+            covers,
             tracks: None,
         };
         (playlist, entries)
     }
+}
+
+/// Covers in a playlist mosaic.
+const MOSAIC: usize = 4;
+
+/// The first different artworks among the complete entries, each falling back
+/// to its uploader's avatar the way a track's own artwork does.
+fn mosaic(entries: &[raw::Track]) -> Vec<String> {
+    let mut covers: Vec<String> = Vec::with_capacity(MOSAIC);
+    for entry in entries.iter().filter(|entry| entry.is_complete()) {
+        let avatar = entry
+            .user
+            .as_ref()
+            .and_then(|user| user.avatar_url.as_deref())
+            .filter(|url| !url.trim().is_empty() && !is_default_avatar(url));
+        let Some(cover) = track_artwork(text(entry.artwork_url.clone()), avatar) else {
+            continue;
+        };
+        if !covers.contains(&cover) {
+            covers.push(cover);
+        }
+        if covers.len() == MOSAIC {
+            break;
+        }
+    }
+    covers
 }
 
 /// Puts fetched tracks back in the playlist's order.
@@ -147,6 +178,38 @@ mod tests {
             playlist.artwork_url.as_deref(),
             Some("https://i1.sndcdn.com/avatars-1-large.jpg")
         );
+    }
+
+    #[test]
+    fn covers_are_the_first_different_artworks_of_complete_tracks() {
+        let raw: raw::Playlist = serde_json::from_str(
+            r#"{"id":5,"title":"p","tracks":[
+                {"id":1,"title":"a","artwork_url":"https://i1.sndcdn.com/artworks-1-large.jpg"},
+                {"id":2,"title":"b","artwork_url":"https://i1.sndcdn.com/artworks-1-large.jpg"},
+                {"id":3,"title":"c","artwork_url":null,
+                 "user":{"id":9,"username":"u","avatar_url":"https://i1.sndcdn.com/avatars-9-large.jpg"}},
+                {"id":4,"title":"d","artwork_url":"",
+                 "user":{"id":8,"username":"v","avatar_url":"https://a1.sndcdn.com/images/default_avatar_large.png"}},
+                {"id":5,"kind":"track","policy":"ALLOW"},
+                {"id":6,"title":"f","artwork_url":"https://i1.sndcdn.com/artworks-6-large.jpg"},
+                {"id":7,"title":"g","artwork_url":"https://i1.sndcdn.com/artworks-7-large.jpg"},
+                {"id":8,"title":"h","artwork_url":"https://i1.sndcdn.com/artworks-8-large.jpg"}
+            ]}"#,
+        )
+        .unwrap();
+        let playlist = Playlist::from_raw(raw);
+        assert_eq!(
+            playlist.covers,
+            [
+                "https://i1.sndcdn.com/artworks-1-large.jpg",
+                "https://i1.sndcdn.com/avatars-9-large.jpg",
+                "https://i1.sndcdn.com/artworks-6-large.jpg",
+                "https://i1.sndcdn.com/artworks-7-large.jpg",
+            ]
+        );
+        let bare: raw::Playlist = serde_json::from_str(r#"{"id":6,"title":"empty"}"#).unwrap();
+        let json = serde_json::to_value(Playlist::from_raw(bare)).unwrap();
+        assert_eq!(json["covers"], serde_json::json!([]));
     }
 
     #[test]
