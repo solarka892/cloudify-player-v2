@@ -577,3 +577,6 @@ only path; revisit if likes and follows through it really get refused.
   anonymous caller is offered only encrypted.
 - Uploading tracks (a policy → S3 → create flow; routes not found by guessing).
 - Blocking or reporting a user (`/users/{id}/block` is a 404).
+- The user's liked stations (the website's library has a «Stations» tab): no
+  route known. The library builds its own from the artists most present in
+  the likes, through `/stations/soundcloud:artist-stations:{id}/tracks`.
