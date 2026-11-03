@@ -2,3 +2,6 @@
 //! Each one has a typed twin in `src/api/`.
 
 pub mod app;
+pub mod library;
+pub mod player;
+pub mod session;
