@@ -5,4 +5,5 @@ pub mod app;
 pub mod library;
 pub mod people;
 pub mod player;
+pub mod search;
 pub mod session;

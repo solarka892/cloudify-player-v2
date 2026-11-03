@@ -136,6 +136,57 @@ export interface PageRequest {
   cursor?: string;
 }
 
+/** One page of search results; pass `nextOffset` back as `offset` for the next. */
+export interface SearchPage<T> {
+  items: T[];
+  /** SoundCloud's estimate of all matches. */
+  total: number | null;
+  /** `null` at the end. */
+  nextOffset: number | null;
+}
+
+export interface OffsetRequest {
+  offset?: number;
+  /** Items per page, clamped to 1…200. */
+  limit?: number;
+}
+
+/** Anything the mixed search can return, told apart by `kind`. */
+export type Resource =
+  | ({ kind: "track" } & Track)
+  | ({ kind: "user" } & User)
+  | ({ kind: "playlist" } & Playlist);
+
+/** An autocomplete line: `output` to show, `query` to search for. */
+export interface Suggestion {
+  output: string;
+  query: string;
+}
+
+/** Under 2 minutes, 2–10, 10–30, over 30. */
+export type DurationFilter = "short" | "medium" | "long" | "epic";
+
+export type CreatedWithin = "last-hour" | "last-day" | "last-week" | "last-month" | "last-year";
+
+/** What the licence allows. */
+export type LicenseFilter = "to-share" | "to-use-commercially" | "to-modify-commercially";
+
+/** Narrows a track search, as the website's filters do; unset narrows nothing. */
+export interface TrackFilters {
+  /** Any case; SoundCloud matches it lowercased. */
+  genre?: string | null;
+  duration?: DurationFilter | null;
+  created?: CreatedWithin | null;
+  license?: LicenseFilter | null;
+  goPlusOnly?: boolean;
+}
+
+/** How many of the tracks a search finds carry a genre (lowercase). */
+export interface GenreCount {
+  genre: string;
+  count: number;
+}
+
 export interface Stream {
   /** Signed and short-lived: resolve right before playing, never keep. */
   url: string;
