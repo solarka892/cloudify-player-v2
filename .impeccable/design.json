@@ -538,6 +538,11 @@
         "section": "layout"
       },
       {
+        "name": "The Every Name Opens Rule",
+        "body": "An artist's name or face, wherever it is shown (a tile, a row, the player, the home screen, a playlist's lead, the search hero), opens that artist's page: in place of the results while searching, else in the library. A name inside a row or card that plays sits above the row's own play target, so the rest of the row still plays.",
+        "section": "layout"
+      },
+      {
         "name": "The Read First Rule",
         "body": "Found tracks are rows, not covers: a found title is read before it is played, and re-uploads come with long, messy names that a caption under a cover cuts short. The wall of covers is for music you already know (the library).",
         "section": "layout"
