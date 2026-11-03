@@ -2,7 +2,6 @@ import { Play, Shuffle } from "lucide-react";
 import { useMemo, useRef } from "react";
 import type { Me, Playlist } from "@/api/types";
 import { CoverWall, WallSkeleton } from "@/features/library/CoverWall";
-import { SECTION_NAMES, type SectionId, useOpenView } from "@/features/library/nav";
 import { playInOrder, playShuffled, trackText } from "@/features/library/play";
 import { usePlaylist } from "@/features/library/queries";
 import {
@@ -26,13 +25,13 @@ const TRACKS = ["трек", "трека", "треков"] as const;
 export function PlaylistView({
   me,
   playlist: known,
-  from,
+  back,
 }: {
   me: Me;
   playlist: Playlist;
-  from: SectionId;
+  /** The way back to where it was opened from. */
+  back: { label: string; onClick: () => void };
 }) {
-  const open = useOpenView();
   const full = usePlaylist(known.id);
   const playlist = full.data ?? known;
   const tracks = useMemo(() => full.data?.tracks ?? [], [full.data]);
@@ -58,10 +57,7 @@ export function PlaylistView({
       <StageHeader
         title={playlist.title}
         lead={lead}
-        back={{
-          label: SECTION_NAMES[from],
-          onClick: () => open({ kind: "section", section: from }),
-        }}
+        back={back}
         aside={<Mosaic playlist={playlist} coverSize={500} className={asideCover} />}
       />
       <StageActions>

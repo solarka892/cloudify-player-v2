@@ -5,7 +5,7 @@ import type { Track } from "@/api/types";
 import { useScrollRoot } from "@/app/scrollRoot";
 import { leavesGroup, usePointing } from "@/features/library/light";
 import { useLikedIds, useToggleLike } from "@/features/library/likes";
-import { sectionOf, useLibraryNav, useOpenView } from "@/features/library/nav";
+import { useOpener } from "@/features/library/nav";
 import { TrackMenu } from "@/features/library/TrackMenu";
 import { currentTrack, type QueueSource, usePlayer } from "@/features/player/store";
 import { canPlay } from "@/features/selection/buildQueue";
@@ -40,7 +40,7 @@ export function TrackTile({
   onPoint: () => void;
   onLike: () => void;
 }) {
-  const open = useOpenView();
+  const open = useOpener();
   const more = useRef<HTMLButtonElement>(null);
   const [menu, setMenu] = useState(false);
   const badge = stateBadge(track);
@@ -138,9 +138,7 @@ export function TrackTile({
         ) : artist ? (
           <button
             type="button"
-            onClick={() =>
-              open({ kind: "artist", user: artist, from: sectionOf(useLibraryNav.getState().view) })
-            }
+            onClick={() => open.artist(artist)}
             className="mt-0.5 block max-w-full truncate rounded text-left font-bold text-[13px] text-fg-muted transition-colors hover:text-fg"
           >
             {artist.username}

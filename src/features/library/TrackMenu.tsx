@@ -3,7 +3,7 @@ import { type ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { trackStation } from "@/api/player";
 import type { Track } from "@/api/types";
-import { sectionOf, useLibraryNav, useOpenView } from "@/features/library/nav";
+import { useOpener } from "@/features/library/nav";
 import { playInOrder } from "@/features/library/play";
 import { type QueueSource, usePlayer } from "@/features/player/store";
 import { describeError } from "@/ui/errors";
@@ -68,7 +68,7 @@ export function TrackMenu({
   onClose: () => void;
 }) {
   const box = useRef<HTMLDivElement>(null);
-  const open = useOpenView();
+  const open = useOpener();
   const say = usePlayer((s) => s.say);
 
   useEffect(() => {
@@ -128,9 +128,7 @@ export function TrackMenu({
         icon={UserRound}
         disabled={!artist}
         onClick={done(() => {
-          if (artist) {
-            open({ kind: "artist", user: artist, from: sectionOf(useLibraryNav.getState().view) });
-          }
+          if (artist) open.artist(artist);
         })}
       >
         Перейти к артисту

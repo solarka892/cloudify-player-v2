@@ -73,6 +73,7 @@ export function StageHeader({
   lead,
   aside,
   back,
+  actions,
 }: {
   title: string;
   /** One line under the name: what it is and how much of it there is. */
@@ -80,6 +81,8 @@ export function StageHeader({
   /** The opened thing's cover or face, on wide stages. */
   aside?: ReactNode;
   back?: { label: string; onClick: () => void };
+  /** Buttons under the lead that scroll away with the name (search's best match). */
+  actions?: ReactNode;
 }) {
   return (
     <header className="flex items-end gap-10 pt-[clamp(88px,13vh,112px)] pb-6">
@@ -98,6 +101,7 @@ export function StageHeader({
         <p className="mt-[18px] max-w-[60ch] text-[17px] text-white/80 leading-[1.45] [text-shadow:0_2px_16px_rgb(0_0_0/0.4)]">
           {lead}
         </p>
+        {actions && <div className="mt-[26px] flex items-center gap-3">{actions}</div>}
       </div>
       {aside && <div className="hidden shrink-0 @3xl:block">{aside}</div>}
     </header>

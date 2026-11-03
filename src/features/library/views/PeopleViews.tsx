@@ -4,7 +4,7 @@ import { useMemo, useRef } from "react";
 import { artistStation } from "@/api/player";
 import type { Me, Track, User } from "@/api/types";
 import { CoverWall, WallSkeleton } from "@/features/library/CoverWall";
-import { SECTION_NAMES, type SectionId, useOpenView } from "@/features/library/nav";
+import { useOpenView } from "@/features/library/nav";
 import { playInOrder, trackText } from "@/features/library/play";
 import { useAllFollowings, useAllLikes, useTopTracks } from "@/features/library/queries";
 import {
@@ -166,9 +166,15 @@ export function StationsView({ me }: { me: Me }) {
   );
 }
 
-/** Someone you follow, opened: their radio, and their most played tracks as covers. */
-export function ArtistView({ user, from }: { user: User; from: SectionId }) {
-  const open = useOpenView();
+/** An artist, opened: their radio, and their most played tracks as covers. */
+export function ArtistView({
+  user,
+  back,
+}: {
+  user: User;
+  /** The way back to where it was opened from. */
+  back: { label: string; onClick: () => void };
+}) {
   const top = useTopTracks(user.id);
   const radio = useArtistRadio();
   const tracks = useMemo(() => top.data?.items ?? [], [top.data]);
@@ -189,10 +195,7 @@ export function ArtistView({ user, from }: { user: User; from: SectionId }) {
       <StageHeader
         title={user.username}
         lead={lead || "Артист на SoundCloud"}
-        back={{
-          label: SECTION_NAMES[from],
-          onClick: () => open({ kind: "section", section: from }),
-        }}
+        back={back}
         aside={
           <Artwork
             url={user.avatarUrl}

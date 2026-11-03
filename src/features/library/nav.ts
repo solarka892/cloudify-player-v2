@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import { create } from "zustand";
 import type { Playlist, User } from "@/api/types";
 import { useScrollRoot } from "@/app/scrollRoot";
@@ -60,4 +60,31 @@ export function useOpenView(): (view: LibraryView) => void {
 /** The section a view belongs to: its own, or the one it was opened from. */
 export function sectionOf(view: LibraryView): SectionId {
   return view.kind === "section" ? view.section : view.from;
+}
+
+/** Where an artist or a playlist pressed on a tile or in a menu opens. */
+export interface Opener {
+  artist: (user: User) => void;
+  playlist: (playlist: Playlist) => void;
+}
+
+/**
+ * A page that opens things in place of its own (search) says so here; without
+ * one they open in the library, from the section that is open there.
+ */
+export const OpenerContext = createContext<Opener | null>(null);
+
+export function useOpener(): Opener {
+  const own = useContext(OpenerContext);
+  const open = useOpenView();
+  return useMemo(
+    () =>
+      own ?? {
+        artist: (user) =>
+          open({ kind: "artist", user, from: sectionOf(useLibraryNav.getState().view) }),
+        playlist: (playlist) =>
+          open({ kind: "playlist", playlist, from: sectionOf(useLibraryNav.getState().view) }),
+      },
+    [own, open],
+  );
 }
