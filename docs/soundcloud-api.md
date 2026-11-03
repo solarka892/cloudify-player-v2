@@ -340,6 +340,30 @@ wrong case: `House` finds nothing, `house` finds 3.7 million — comes back as
 an empty result, indistinguishable from "nothing found". So reject bad values
 before sending, and lowercase the genre.
 
+**Counts by field (`facet`)** ✅ 2026-11-04. Add `facet=genre` to
+`/search/tracks` and the reply gains
+`facets: [{ name: "genre", facets: [{ value, count, filter }] }]` — the genres
+among this search's tracks, values already lowercase (`hip-hop & rap`,
+`alternative rock`), each with its count and the ready query parameter
+(`filter.genre=hip-hop+%26+rap`). The counts respect the other `filter.*`
+parameters sent with it; nine genres come back, not sorted. That is what the
+app's genre filter offers: `search_track_genres` asks with `limit=1`, the
+other filters, and no genre (so choosing one never hides the rest).
+`facet=model` on `/search` counts the kinds instead: `sound`, `set`
+(playlists and albums) and `person`. Search replies also carry a
+`query_urn` (`soundcloud:search:<hex>`), repeated in `next_href`; nothing
+needs it.
+
+What a search really returns (2026-11-04, «pyrokinesis», «molchat doma»,
+«deep house», no session): `/search` puts the best-matching person first —
+the artist when the query is their name — then mostly tracks; the same artist
+also leads `/search/users`. A genre query has no such person: `deep house`
+first finds a verified account called `x`. So the app makes an artist the
+page's hero only when a near-top person's name *is* the query and they are
+verified or have 5 000+ followers. Among artists' own tracks, label releases
+(`MONETIZE` + `AD_SUPPORTED`) are again offered only encrypted to an anonymous
+caller: 23 of the first 120 for «pyrokinesis».
+
 ### Discovery ✅
 
 ```

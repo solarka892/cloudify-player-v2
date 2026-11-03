@@ -255,6 +255,27 @@ pub(crate) struct Suggestion {
     pub query: Option<String>,
 }
 
+/// A search reply asked for `facet=…`: counts of the matches by one field,
+/// `[{ name: "genre", facets: [{ value, count, filter }] }]`.
+#[derive(Debug, Default, Deserialize)]
+pub(crate) struct Faceted {
+    #[serde(default)]
+    pub facets: Lenient<FacetGroup>,
+}
+
+#[derive(Debug, Deserialize)]
+pub(crate) struct FacetGroup {
+    pub name: Option<String>,
+    #[serde(default)]
+    pub facets: Lenient<Facet>,
+}
+
+#[derive(Debug, Deserialize)]
+pub(crate) struct Facet {
+    pub value: Option<String>,
+    pub count: Option<u64>,
+}
+
 #[derive(Debug, Deserialize)]
 pub(crate) struct Waveform {
     pub width: Option<u32>,

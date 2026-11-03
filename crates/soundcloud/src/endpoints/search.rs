@@ -27,6 +27,44 @@ pub struct TrackFilters {
     pub go_plus_only: bool,
 }
 
+/// How many of the tracks a search finds carry one genre, as SoundCloud
+/// counts them.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GenreCount {
+    /// Lowercase, the spelling [`TrackFilters::genre`] is matched in:
+    /// `hip-hop & rap`.
+    pub genre: String,
+    pub count: u64,
+}
+
+/// The genre counts of a `facet=genre` reply, most tracks first. Blank and
+/// empty genres are dropped, and spellings that differ only in case merged.
+fn genre_counts(raw: raw::Faceted) -> Vec<GenreCount> {
+    let mut counts: Vec<GenreCount> = Vec::new();
+    for facet in raw
+        .facets
+        .0
+        .into_iter()
+        .filter(|group| group.name.as_deref() == Some("genre"))
+        .flat_map(|group| group.facets.0)
+    {
+        let (Some(value), Some(count)) = (facet.value, facet.count) else {
+            continue;
+        };
+        let genre = value.trim().to_lowercase();
+        if genre.is_empty() || count == 0 {
+            continue;
+        }
+        match counts.iter_mut().find(|known| known.genre == genre) {
+            Some(known) => known.count += count,
+            None => counts.push(GenreCount { genre, count }),
+        }
+    }
+    counts.sort_by(|a, b| b.count.cmp(&a.count).then_with(|| a.genre.cmp(&b.genre)));
+    counts
+}
+
 /// Length bands: under 2 minutes, 2–10, 10–30, over 30.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -197,6 +235,31 @@ impl Client {
         .await
     }
 
+    /// The genres among the tracks a search finds, most tracks first: what a
+    /// genre filter can offer for this search. Counted with the other filters
+    /// applied but not the genre, so choosing one never hides the rest.
+    pub async fn search_track_genres(
+        &self,
+        query: &str,
+        filters: &TrackFilters,
+    ) -> Result<Vec<GenreCount>> {
+        let query = query.trim();
+        if query.is_empty() {
+            return Err(Error::invalid("the search is empty"));
+        }
+        let others = TrackFilters {
+            genre: None,
+            ..filters.clone()
+        };
+        let extra = others.query();
+        // One track comes along with the counts; the counts are what is wanted.
+        let mut params = vec![("q", query), ("facet", "genre"), ("limit", "1")];
+        params.extend(extra.iter().map(|(name, value)| (*name, value.as_str())));
+        let url = self.api_url("/search/tracks", &params);
+        let raw: raw::Faceted = self.get_json(url, Kind::Read).await?;
+        Ok(genre_counts(raw))
+    }
+
     pub async fn search_users(&self, query: &str, page: OffsetRequest) -> Result<SearchPage<User>> {
         self.search_page("/search/users", query, &[], page, |raw| {
             Some(User::from_raw(raw))
@@ -356,6 +419,44 @@ mod tests {
         assert!("bogus".parse::<DurationFilter>().is_err());
         assert!("cc-by".parse::<LicenseFilter>().is_err());
         assert!(serde_json::from_str::<TrackFilters>(r#"{"duration":"bogus"}"#).is_err());
+    }
+
+    #[test]
+    fn genre_counts_are_cleaned_merged_and_sorted() {
+        let raw: raw::Faceted = serde_json::from_str(
+            r#"{"facets":[
+                {"name":"genre","facets":[
+                    {"value":"rock","count":24,"filter":"filter.genre=rock"},
+                    {"value":"hip-hop & rap","count":433},
+                    {"value":"Rock","count":6},
+                    {"value":"  ","count":9},
+                    {"value":"ambient","count":0},
+                    {"count":3},
+                    {"value":"alternative rock","count":124}
+                ]},
+                {"name":"model","facets":[{"value":"sound","count":2265}]}
+            ]}"#,
+        )
+        .unwrap();
+        assert_eq!(
+            genre_counts(raw),
+            [
+                GenreCount {
+                    genre: "hip-hop & rap".into(),
+                    count: 433
+                },
+                GenreCount {
+                    genre: "alternative rock".into(),
+                    count: 124
+                },
+                GenreCount {
+                    genre: "rock".into(),
+                    count: 30
+                },
+            ]
+        );
+        let none: raw::Faceted = serde_json::from_str(r#"{"collection":[]}"#).unwrap();
+        assert!(genre_counts(none).is_empty());
     }
 
     #[test]

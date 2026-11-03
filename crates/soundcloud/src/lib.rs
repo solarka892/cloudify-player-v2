@@ -24,7 +24,9 @@ mod raw;
 
 pub use auth::Token;
 pub use client::{Client, ClientBuilder};
-pub use endpoints::search::{CreatedWithin, DurationFilter, LicenseFilter, TrackFilters};
+pub use endpoints::search::{
+    CreatedWithin, DurationFilter, GenreCount, LicenseFilter, TrackFilters,
+};
 pub use error::{Error, ErrorKind, Result};
 pub use model::{
     ArtworkSize, Comment, FeedItem, LikedPlaylist, LikedTrack, Me, Monetization, Plan, PlayedTrack,

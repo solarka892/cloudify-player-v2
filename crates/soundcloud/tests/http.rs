@@ -474,6 +474,42 @@ async fn search_pages_by_offset_with_filters() {
 }
 
 #[tokio::test]
+async fn genre_counts_leave_the_genre_out_and_keep_the_other_filters() {
+    let world = World::new().await;
+    world.serve_key(KEY_A).await;
+    Mock::given(path("/search/tracks"))
+        .and(query_param("q", "pyrokinesis"))
+        .and(query_param("facet", "genre"))
+        .and(query_param("limit", "1"))
+        .and(query_param("filter.duration", "long"))
+        .and(query_param_is_missing("filter.genre"))
+        .respond_with(ok_json(json!({
+            "collection": [track(1)],
+            "total_results": 13,
+            "facets": [{ "name": "genre", "facets": [
+                { "value": "rock", "count": 1, "filter": "filter.genre=rock" },
+                { "value": "ambient", "count": 2, "filter": "filter.genre=ambient" },
+            ]}],
+        })))
+        .expect(1)
+        .mount(&world.api)
+        .await;
+
+    let filters: TrackFilters =
+        serde_json::from_value(json!({ "genre": "Rock", "duration": "long" })).unwrap();
+    let genres = world
+        .client()
+        .search_track_genres("pyrokinesis", &filters)
+        .await
+        .unwrap();
+    let counts: Vec<(&str, u64)> = genres
+        .iter()
+        .map(|genre| (genre.genre.as_str(), genre.count))
+        .collect();
+    assert_eq!(counts, [("ambient", 2), ("rock", 1)]);
+}
+
+#[tokio::test]
 async fn stream_prefers_progressive_mp3_and_sends_the_session_on_both_hops() {
     let world = World::new().await;
     world.serve_key(KEY_A).await;
