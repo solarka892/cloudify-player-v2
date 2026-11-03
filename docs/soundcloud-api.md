@@ -299,9 +299,10 @@ GET /stream?limit=200&linked_partitioning=1                   the feed from peop
 ```
 
 `/me/play-history` without `/tracks` is a `404`; anonymously
-`/me/play-history/tracks` answers `401`, so that is the route (2026-11). Its
-items have not been seen signed in; `played_at` may be an epoch number rather
-than an ISO string, so accept both.
+`/me/play-history/tracks` answers `401`, so that is the route (2026-11).
+✅ Signed in (2026-11-03, through the app) it answers and its items decode
+with the current model; the raw `played_at` was not inspected, so keep
+accepting both an ISO string and an epoch number.
 
 `/me` is how a token is validated: `200` means good, `401` means dead (after
 the one `client_id` retry). The play history repeats a track once per play —
@@ -477,6 +478,19 @@ Ways to get it:
 
 Validate any token with `GET /me` before storing it. Store it in the OS
 keyring only.
+
+How the app does way 1 (`src-tauri/src/signin.rs`, 2026-11): a separate
+window labelled `signin` opens `https://soundcloud.com/signin` as an
+**incognito** webview (nothing of the session stays in it, so switching
+accounts works), with a current Safari user agent on macOS so Google and Apple
+sign-in do not refuse an embedded webview. No capability names that window,
+so the remote page cannot call the app. An async command polls the window's
+cookie store every ~600 ms for `oauth_token` on `soundcloud.com` and
+`m.soundcloud.com` (accepting only that domain and its subdomains), checks the
+value with `/me`, stores it, and closes the window. A value `/me` refused is
+not tried twice; closing the window ends the wait. Reading cookies happens
+off the main thread: on Windows it deadlocks there. Not yet tried against a
+real account.
 
 Phones are redirected to `m.soundcloud.com`, where the cookie is set
 host-only — look for it on that host as well, or the sign-in never "finishes".

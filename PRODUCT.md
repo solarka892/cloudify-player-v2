@@ -73,8 +73,8 @@ claim all of it:
   inside the app (no CDNs), with Cyrillic.
 - Distributed only through GitHub releases, never the App Store or Google
   Play.
-- Undecided: how the personal selection («волна») is scored beyond SoundCloud's
-  own related tracks and stations; how much appearance customisation returns
+- Undecided: how the personal selection («Подборка») is scored beyond
+  SoundCloud's own related tracks and stations; how much appearance customisation returns
   after the old app's five skins and twenty palettes were removed.
 
 ## Brand Commitments
@@ -93,8 +93,9 @@ claim all of it:
   music, very large bold type, polish at Yandex Music's level. A close copy of
   its «Моя волна» screen (centred blob, the same suggestion column, the same
   sidebar) was rejected as "too copied", so Cloudify keeps its own layout,
-  names («Волна», not «Моя волна»), mark and colours — and none of Yandex's
-  brand marks (star logo, signature yellow).
+  names (the endless selection is «Подборка» — the user's choice on
+  2026-11-03 — not «Моя волна» or «Волна»), mark and colours — and none of
+  Yandex's brand marks (star logo, signature yellow).
 
 ## Evidence on Hand
 
