@@ -3,6 +3,7 @@ import type { Me } from "@/api/types";
 import { usePointedCover } from "@/features/library/light";
 import { type LibraryView, useLibraryNav } from "@/features/library/nav";
 import { AlbumsView, PlaylistsView } from "@/features/library/views/CollectionViews";
+import { OverviewView } from "@/features/library/views/OverviewView";
 import { ArtistView, FollowingsView, StationsView } from "@/features/library/views/PeopleViews";
 import { PlaylistView } from "@/features/library/views/PlaylistView";
 import { HistoryView, LikesWallView, RepostsView } from "@/features/library/views/WallViews";
@@ -65,9 +66,9 @@ function View({ view, me }: { view: LibraryView; me: Me }) {
     case "section":
       switch (view.section) {
         case "all":
-          return <LikesWallView key="all" me={me} shelf />;
+          return <OverviewView me={me} />;
         case "likes":
-          return <LikesWallView key="likes" me={me} shelf={false} />;
+          return <LikesWallView me={me} />;
         case "playlists":
           return <PlaylistsView me={me} />;
         case "albums":
@@ -86,7 +87,8 @@ function View({ view, me }: { view: LibraryView; me: Me }) {
 
 /**
  * «Библиотека»: one big word on the light, the white «Перемешать все» and the
- * filter, the sections as chips, then your music as a wall of its covers.
+ * filter, the sections as chips, then one row of each section — and each
+ * section in full as a wall of its covers.
  */
 export function LibraryPage({ me }: { me: Me }) {
   const view = useLibraryNav((s) => s.view);

@@ -1,46 +1,20 @@
 import { useMemo, useRef } from "react";
-import type { Me, Playlist, TrackOrPlaylist } from "@/api/types";
+import type { Me, TrackOrPlaylist } from "@/api/types";
 import { CoverWall, WallSkeleton } from "@/features/library/CoverWall";
-import { makeFilter, queryWords } from "@/features/library/filter";
 import { playInOrder, playShuffled, shuffleLikes, trackText } from "@/features/library/play";
-import {
-  useAllAlbums,
-  useAllLikedPlaylists,
-  useAllLikes,
-  useAllPlaylists,
-  useAllReposts,
-  useRecentPlays,
-} from "@/features/library/queries";
+import { useAllLikes, useAllReposts, useRecentPlays } from "@/features/library/queries";
 import { foundLine, NoMatch, StageNote } from "@/features/library/Stage";
 import { useListFilter } from "@/features/library/useListFilter";
 import { SectionTitle, SectionTop } from "@/features/library/views/actions";
-import { PlaylistGrid, Shelf } from "@/features/library/views/CollectionViews";
+import { PlaylistGrid } from "@/features/library/views/CollectionViews";
 import { formatCount } from "@/ui/format";
 
-const playlistText = (playlist: Playlist) => `${playlist.title} ${playlist.user?.username ?? ""}`;
-
-/**
- * «Всё» and «Лайки»: every like as a wall of covers, and on «Всё» your
- * playlists and albums on a shelf above it. «Перемешать все» really means all.
- */
-export function LikesWallView({ me, shelf }: { me: Me; shelf: boolean }) {
+/** «Лайки»: every like as a wall of covers. «Перемешать все» really means all of them. */
+export function LikesWallView({ me }: { me: Me }) {
   const likes = useAllLikes();
-  const own = useAllPlaylists();
-  const liked = useAllLikedPlaylists();
-  const albums = useAllAlbums();
   const tracks = useMemo(() => likes.items.map((like) => like.track), [likes.items]);
   const start = useRef<HTMLDivElement>(null);
   const { query, onQuery, shown, filtering } = useListFilter(tracks, trackText, start);
-
-  // The shelf follows the same filter: type a playlist's name and it stays.
-  const collection = useMemo(
-    () => [...own.items, ...liked.items, ...albums.items],
-    [own.items, liked.items, albums.items],
-  );
-  const shelfShown = useMemo(
-    () => (queryWords(query).length ? makeFilter(collection, playlistText)(query) : collection),
-    [collection, query],
-  );
 
   const total = tracks.length;
   const count = likes.complete ? total : me.user.likesCount;
@@ -59,11 +33,10 @@ export function LikesWallView({ me, shelf }: { me: Me; shelf: boolean }) {
         }}
         query={query}
         onQuery={onQuery}
-        placeholder={shelf ? "Найти у себя" : "Найти в лайках"}
+        placeholder="Найти в лайках"
         found={foundLine(filtering, shown.length, total)}
       />
       <div ref={start} />
-      {shelf && shelfShown.length > 0 && <Shelf items={shelfShown} me={me} />}
       <section aria-labelledby="likes-wall">
         <SectionTitle
           id="likes-wall"

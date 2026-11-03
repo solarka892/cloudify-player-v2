@@ -366,7 +366,12 @@ export async function answer(
     case "playlist": {
       const found = [...playlists, ...playlistsLiked].find((p) => p.id === args.id);
       if (!found) throw new ApiError("not-found", "dev: no such playlist");
-      return { ...found, tracks: [...station, ...likes].slice(0, 8) };
+      // As many tracks as the playlist says it has, so an opened one looks its real size.
+      const pool = [...station, ...likes];
+      return {
+        ...found,
+        tracks: Array.from({ length: found.trackCount }, (_, i) => pool[i % pool.length] as Track),
+      };
     }
     case "track_station":
       return station;

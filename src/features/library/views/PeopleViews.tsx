@@ -36,7 +36,7 @@ function followersLine(user: User): string {
 }
 
 /** Plays an artist's radio; one at a time, with the reason when SoundCloud says no. */
-function useArtistRadio() {
+export function useArtistRadio() {
   const radio = useMutation({
     mutationFn: (user: User) => artistStation(user.id),
     onSuccess: (tracks, user) => playInOrder(tracks, { kind: "station", title: user.username }),
@@ -93,7 +93,10 @@ export function FollowingsView({ me }: { me: Me }) {
 }
 
 /** The artists you like most, by how many of their tracks sit in your likes. */
-function topArtists(tracks: readonly Track[], limit: number): { user: User; count: number }[] {
+export function topArtists(
+  tracks: readonly Track[],
+  limit: number,
+): { user: User; count: number }[] {
   const byArtist = new Map<number, { user: User; count: number }>();
   for (const track of tracks) {
     if (!track.user) continue;

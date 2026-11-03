@@ -3,7 +3,7 @@ import { AudioLines } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Track } from "@/api/types";
 import { useScrollRoot } from "@/app/scrollRoot";
-import { usePointedCover } from "@/features/library/light";
+import { leavesGroup, usePointing } from "@/features/library/light";
 import { currentTrack, usePlayer } from "@/features/player/store";
 import { canPlay } from "@/features/selection/buildQueue";
 import { Artwork } from "@/ui/Artwork";
@@ -36,8 +36,7 @@ export function CoverWall({ tracks, label, onPlay, named }: CoverWallProps) {
   const [offset, setOffset] = useState(0);
   const nowId = usePlayer((s) => currentTrack(s)?.id ?? null);
   const playing = usePlayer((s) => s.playing);
-  const point = usePointedCover((s) => s.point);
-  const pause = useRef(0);
+  const pointAt = usePointing();
 
   // The wall's width sets its columns; where it starts sets the windowing.
   useLayoutEffect(() => {
@@ -76,25 +75,12 @@ export function CoverWall({ tracks, label, onPlay, named }: CoverWallProps) {
     if (rowHeight > 0) rows.measure();
   }, [rowHeight, rows]);
 
-  // A brief rest before the light follows, so sweeping across the wall does not flicker it.
-  const pointAt = (cover: string | null) => {
-    window.clearTimeout(pause.current);
-    pause.current = window.setTimeout(() => point(cover), cover ? 70 : 0);
-  };
-  // A wall that goes away takes its pointing with it.
-  useEffect(
-    () => () => {
-      window.clearTimeout(pause.current);
-      point(null);
-    },
-    [point],
-  );
-
   return (
     <ul
       ref={wall}
       aria-label={label}
       onMouseLeave={() => pointAt(null)}
+      onBlur={(event) => leavesGroup(event) && pointAt(null)}
       className="relative"
       style={{ height: Math.max(0, rows.getTotalSize() - gapY) }}
     >
@@ -129,7 +115,7 @@ export function CoverWall({ tracks, label, onPlay, named }: CoverWallProps) {
   );
 }
 
-function Cover({
+export function Cover({
   track,
   named,
   isNow,

@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useRef } from "react";
 import { playlist as fetchPlaylist } from "@/api/library";
 import type { Me, Playlist } from "@/api/types";
@@ -9,7 +8,7 @@ import { useAllAlbums, useAllLikedPlaylists, useAllPlaylists } from "@/features/
 import { foundLine, NoMatch, StageNote } from "@/features/library/Stage";
 import { PlaylistTile, TileGrid, TileSkeleton } from "@/features/library/Tiles";
 import { useListFilter } from "@/features/library/useListFilter";
-import { SectionTitle, SectionTop, useShuffleAllLikes } from "@/features/library/views/actions";
+import { SectionTop, useShuffleAllLikes } from "@/features/library/views/actions";
 import { usePlayer } from "@/features/player/store";
 import { describeError } from "@/ui/errors";
 import { formatCount, plural } from "@/ui/format";
@@ -38,7 +37,7 @@ export function usePlayPlaylist() {
 }
 
 /** Under a tile's title: the count for your own, the author (and year) for anyone else's. */
-function tileLine(playlist: Playlist, me: Me): string {
+export function tileLine(playlist: Playlist, me: Me): string {
   if (playlist.user && playlist.user.id !== me.user.id) {
     const year = playlist.isAlbum && playlist.createdAt ? playlist.createdAt.slice(0, 4) : null;
     return year ? `${playlist.user.username} · ${year}` : playlist.user.username;
@@ -73,64 +72,6 @@ export function PlaylistGrid({
         />
       ))}
     </TileGrid>
-  );
-}
-
-/**
- * «Плейлисты и альбомы» on «Всё»: one row of tiles that scrolls sideways,
- * with arrows for a mouse wheel that only goes up and down.
- */
-export function Shelf({ items, me }: { items: readonly Playlist[]; me: Me }) {
-  const open = useOpenView();
-  const { play, busyId } = usePlayPlaylist();
-  const strip = useRef<HTMLUListElement>(null);
-  const move = (direction: 1 | -1) =>
-    strip.current?.scrollBy({
-      left: direction * strip.current.clientWidth * 0.8,
-      behavior: "smooth",
-    });
-  const arrow =
-    "mb-[18px] grid size-8 place-content-center rounded-full bg-white/[0.07] text-fg-muted transition-colors hover:bg-white/10 hover:text-fg";
-
-  return (
-    <section aria-labelledby="shelf-title" className="mb-10">
-      <div className="flex items-center gap-2">
-        <SectionTitle
-          id="shelf-title"
-          title="Плейлисты и альбомы"
-          count={formatCount(items.length)}
-        />
-        <button
-          type="button"
-          onClick={() => open({ kind: "section", section: "playlists" })}
-          className="mb-[18px] ml-auto rounded-md px-1 font-bold text-[13.5px] text-fg-muted leading-none transition-colors hover:text-fg"
-        >
-          Все
-        </button>
-        <button type="button" onClick={() => move(-1)} aria-label="Листать назад" className={arrow}>
-          <ChevronLeft className="size-[18px]" aria-hidden="true" />
-        </button>
-        <button type="button" onClick={() => move(1)} aria-label="Листать дальше" className={arrow}>
-          <ChevronRight className="size-[18px]" aria-hidden="true" />
-        </button>
-      </div>
-      <ul
-        ref={strip}
-        aria-label="Плейлисты и альбомы"
-        className="-mx-14 grid snap-x auto-cols-[176px] grid-flow-col gap-4 overflow-x-auto scroll-px-14 px-14 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {items.map((playlist) => (
-          <PlaylistTile
-            key={playlist.id}
-            playlist={playlist}
-            line={tileLine(playlist, me)}
-            busy={busyId === playlist.id}
-            onOpen={() => open({ kind: "playlist", playlist, from: "all" })}
-            onPlay={() => play(playlist)}
-          />
-        ))}
-      </ul>
-    </section>
   );
 }
 
