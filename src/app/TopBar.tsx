@@ -1,7 +1,8 @@
-import { LogOut, Search } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Me, Plan } from "@/api/types";
 import { roomForTrafficLights } from "@/app/chrome";
+import { SearchField } from "@/features/search/SearchField";
 import { useSignOut } from "@/features/session/useSession";
 import { Artwork } from "@/ui/Artwork";
 import { Logo } from "@/ui/Mark";
@@ -21,54 +22,6 @@ const PLANS: Record<Plan, string | null> = {
   dj: "SoundCloud DJ",
   other: null,
 };
-
-const isMac = /Mac/.test(navigator.userAgent);
-
-/** Search lives here; until it is built, the field says so instead of pretending. */
-function SearchField() {
-  const input = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        input.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  return (
-    <div className="relative ml-auto w-[340px] min-w-[180px] shrink">
-      <label className="flex h-10 items-center gap-2.5 rounded-[20px] bg-white/[0.07] px-4 text-fg-muted transition-colors focus-within:bg-white/10">
-        <Search className="size-5 shrink-0" aria-hidden="true" />
-        <input
-          ref={input}
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          onKeyDown={(event) => event.key === "Escape" && setQuery("")}
-          placeholder="Трек, артист, плейлист"
-          aria-label="Поиск"
-          className="h-full min-w-0 flex-1 bg-transparent font-semibold text-fg outline-none placeholder:text-fg-muted [&::-webkit-search-cancel-button]:hidden"
-        />
-        <kbd className="rounded-md bg-white/[0.08] px-[7px] py-1 font-bold font-sans text-[11px] leading-none">
-          {isMac ? "⌘K" : "Ctrl K"}
-        </kbd>
-      </label>
-      {query.trim() && (
-        <p
-          role="status"
-          className="absolute inset-x-0 top-12 rounded-2xl border border-line bg-panel px-4 py-3 text-[13px] text-fg-muted shadow-[0_18px_40px_-16px_rgb(0_0_0/0.8)]"
-        >
-          Поиск ещё не готов — он следующий в списке.
-        </p>
-      )}
-    </div>
-  );
-}
 
 function AccountMenu({ me }: { me: Me }) {
   const [open, setOpen] = useState(false);
@@ -142,7 +95,8 @@ export function TopBar({
   scrolled,
 }: {
   me: Me;
-  tab: Tab;
+  /** `null` while the search page is open: then no tab is current. */
+  tab: Tab | null;
   onTab: (tab: Tab) => void;
   scrolled: boolean;
 }) {

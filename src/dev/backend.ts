@@ -20,6 +20,7 @@ import type {
   User,
   Waveform,
 } from "@/api/types";
+import { answerSearch, type SearchPools } from "@/dev/search";
 
 const art = (key: string, ext = "jpg") => `https://i1.sndcdn.com/artworks-${key}-large.${ext}`;
 
@@ -300,7 +301,101 @@ function silence(seconds: number): string {
   return URL.createObjectURL(new Blob([bytes], { type: "audio/wav" }));
 }
 
-const everything = [...allLikes.map((like) => like.track), played, ...station];
+// Search: the stand-ins, each with the re-uploads a real search turns up
+// («artist - title (slowed)»), and a few house mixes for a genre query.
+const reuploaders = [
+  user(31, "music archive"),
+  user(32, "slowed + reverb"),
+  user(33, "Русская Рэп-Сцена"),
+  user(34, "nightdrive"),
+];
+const houseSessions = user(41, "Deep House Sessions", art("2NtS3vNB8BrD-0"));
+const houseMixes = [
+  track(3001, "Deep House Mix 2026", houseSessions, "58:20", "2NtS3vNB8BrD-0", {
+    genre: "Deep House",
+  }),
+  track(3002, "Sunset Session — deep house", houseSessions, "12:40", "qxQGZJ1fRxnQ6Qui-8MIgjg", {
+    genre: "Deep House",
+  }),
+  track(
+    3003,
+    "Night Drive (Deep House Edit)",
+    reuploaders[3] as User,
+    "6:05",
+    "000152760858-gios79",
+    {
+      genre: "House",
+    },
+  ),
+];
+const VERSIONS = [
+  "",
+  " (slowed)",
+  " (sped up)",
+  " (live)",
+  " (remix)",
+  " (acoustic)",
+  " (instrumental)",
+  " [HQ]",
+  " — radio edit",
+  " (cover)",
+];
+const searchTracks: Track[] = [...likes, played, ...station, ...houseMixes].flatMap((base, j) =>
+  VERSIONS.map((version, k): Track => {
+    const reupload = k > 0 && (j + k) % 3 !== 0;
+    const length = k === 3 ? Math.round(base.fullDurationMs * 1.6) : base.fullDurationMs;
+    return {
+      ...base,
+      id: base.id * 10 + k,
+      urn: `${base.urn}-${k}`,
+      title: reupload
+        ? `${base.user?.username} - ${base.title}${version}`
+        : `${base.title}${version}`,
+      user: reupload ? (reuploaders[(j + k) % reuploaders.length] as User) : base.user,
+      createdAt: new Date(Date.UTC(2026, 10, 3) - (j * 37 + k * 113) * 28_800_000).toISOString(),
+      playbackCount: Math.round(1_200_000 / (1 + k * 3 + j)),
+      license: k % 5 === 3 ? "cc-by" : k % 7 === 6 ? "cc-by-nc" : "all-rights-reserved",
+      fullDurationMs: length,
+      durationMs: base.access.preview ? 30_000 : length,
+    };
+  }),
+);
+const FOLLOWING: Record<number, [number, boolean]> = {
+  11: [412_000, true],
+  12: [21_300, false],
+  13: [120_400, true],
+  14: [34_842, true],
+  15: [256_000, true],
+  16: [9_100, false],
+  17: [301_000, true],
+  18: [1_840_000, true],
+  19: [58_444, true],
+  41: [114_207, true],
+};
+const searchPools: SearchPools = {
+  tracks: searchTracks,
+  users: [...Object.values(artists), ...reuploaders, houseSessions].map((a) => ({
+    ...a,
+    followersCount: FOLLOWING[a.id]?.[0] ?? 40 + a.id * 3,
+    verified: FOLLOWING[a.id]?.[1] ?? false,
+    trackCount: 12 + (a.id % 9) * 17,
+  })),
+  playlists: [
+    ...playlists,
+    ...playlistsLiked,
+    {
+      ...playlist(6, "Deep House 2026", 74, [
+        "2NtS3vNB8BrD-0",
+        "qxQGZJ1fRxnQ6Qui-8MIgjg",
+        "000152760858-gios79",
+        "fIyU231zLp5SUYfA-y4f7Sw",
+      ]),
+      user: houseSessions,
+    },
+  ],
+};
+
+const everything = [...allLikes.map((like) => like.track), played, ...station, ...searchTracks];
 
 export async function answer(
   command: string,
@@ -391,7 +486,10 @@ export async function answer(
       };
       return stream;
     }
-    default:
+    default: {
+      const searched = answerSearch(searchPools, command, args);
+      if (searched !== undefined) return searched;
       throw new ApiError("app", `dev backend: no stand-in for ${command}`);
+    }
   }
 }

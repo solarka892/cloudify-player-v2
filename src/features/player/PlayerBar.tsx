@@ -34,6 +34,8 @@ function from(source: QueueSource | null): string {
       return `популярное · ${source.title}`;
     case "station":
       return `радио · ${source.title}`;
+    case "search":
+      return `из поиска «${source.title}»`;
     default:
       return "";
   }

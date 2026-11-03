@@ -11,6 +11,8 @@ import { useCoverGlow } from "@/features/player/coverGlow";
 import { startAudioEngine } from "@/features/player/engine";
 import { PlayerBar } from "@/features/player/PlayerBar";
 import { currentTrack, usePlayer } from "@/features/player/store";
+import { SearchPage } from "@/features/search/SearchPage";
+import { useSearch } from "@/features/search/store";
 import { moodById } from "@/features/selection/moods";
 import { useSelection } from "@/features/selection/useSelection";
 import { useSessionExpired } from "@/features/session/useSession";
@@ -38,6 +40,7 @@ export function Shell({ me }: { me: Me }) {
   const page = useRef<HTMLElement>(null);
   const [scroller, setScroller] = useState<HTMLElement | null>(null);
   const sessionExpired = useSessionExpired();
+  const searching = useSearch((s) => s.query !== null);
 
   useEffect(() => setScroller(page.current), []);
 
@@ -60,6 +63,8 @@ export function Shell({ me }: { me: Me }) {
   );
 
   const open = (next: Tab) => {
+    // A tab leaves the search; the field's recent searches bring it back.
+    useSearch.getState().close();
     setTab(next);
     // A section always opens at its top.
     page.current?.scrollTo({ top: 0 });
@@ -72,14 +77,16 @@ export function Shell({ me }: { me: Me }) {
   return (
     <div className="flex h-full flex-col">
       <div className="relative min-h-0 flex-1">
-        <TopBar me={me} tab={tab} onTab={open} scrolled={scrolled} />
+        <TopBar me={me} tab={searching ? null : tab} onTab={open} scrolled={scrolled} />
         <main
           ref={page}
           onScroll={(event) => setScrolled(event.currentTarget.scrollTop > 8)}
           className="h-full overflow-y-auto overscroll-contain"
         >
           <ScrollRoot value={scroller}>
-            {tab === "home" ? (
+            {searching ? (
+              <SearchPage me={me} />
+            ) : tab === "home" ? (
               <HomePage me={me} onOpenLibrary={openLibrary} />
             ) : tab === "library" ? (
               <LibraryPage me={me} />

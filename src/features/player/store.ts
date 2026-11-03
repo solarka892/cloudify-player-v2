@@ -10,7 +10,8 @@ export type QueueSource =
   | { kind: "history" }
   | { kind: "reposts" }
   | { kind: "artist"; title: string }
-  | { kind: "station"; title: string };
+  | { kind: "station"; title: string }
+  | { kind: "search"; title: string };
 
 export type SkipReason = "skip" | "dislike" | "ended" | "unavailable";
 
