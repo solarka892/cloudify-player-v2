@@ -1,45 +1,43 @@
 import { useEffect, useRef } from "react";
 
 // The light behind «Подборка»: three soft bands in the cover's colours whose
-// swell follows the playing track's waveform. Drawn in a fixed 1440×440 space
-// and stretched to the width; paths are rewritten in place, never re-rendered.
+// swell follows the playing track's waveform.
+//
+// Drawn small and shown big: the bands are painted, already blurred, into a
+// canvas a quarter of the size of their 1440×440 drawing space, and the browser
+// stretches that picture to the window. The light is nothing but soft edges, so
+// it looks the same — and each frame costs a few thousand pixels instead of the
+// millions an SVG blur over the whole hero re-renders (which made the window lag).
 
 const WIDTH = 1440;
 const HEIGHT = 440;
 const STEP = 24;
+/** Canvas pixels per drawing unit. */
+const SCALE = 0.25;
+
+/** Gradient stops: [offset, which glow colour]. */
+const GRADIENTS = {
+  a: [
+    [0, 2],
+    [0.5, 1],
+    [1, 3],
+  ],
+  b: [
+    [0, 3],
+    [0.55, 2],
+    [1, 1],
+  ],
+} as const;
 
 const BANDS = [
-  {
-    gradient: "ribbon-a",
-    width: 130,
-    blur: "ribbon-wide",
-    amp: 120,
-    freq: 0.9,
-    speed: 0.16,
-    y: 250,
-    opacity: 0.85,
-  },
-  {
-    gradient: "ribbon-b",
-    width: 70,
-    blur: "ribbon-soft",
-    amp: 100,
-    freq: 1.25,
-    speed: -0.22,
-    y: 232,
-    opacity: 0.95,
-  },
-  {
-    gradient: "ribbon-a",
-    width: 26,
-    blur: "ribbon-soft",
-    amp: 84,
-    freq: 1.7,
-    speed: 0.3,
-    y: 268,
-    opacity: 0.95,
-  },
+  { gradient: "a", width: 130, blur: 48, amp: 120, freq: 0.9, speed: 0.16, y: 250, opacity: 0.85 },
+  { gradient: "b", width: 70, blur: 26, amp: 100, freq: 1.25, speed: -0.22, y: 232, opacity: 0.95 },
+  { gradient: "a", width: 26, blur: 26, amp: 84, freq: 1.7, speed: 0.3, y: 268, opacity: 0.95 },
 ] as const;
+
+/** WebKit before Safari 18 has no canvas filters; there one CSS blur softens the whole light. */
+const canvasCanBlur =
+  typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
 
 export interface RibbonProps {
   playing: boolean;
@@ -63,16 +61,17 @@ function swellAt(loudness: readonly number[] | null, u: number): number {
 }
 
 export function Ribbon({ playing, energy, pace, loudness, className = "" }: RibbonProps) {
-  const svg = useRef<SVGSVGElement>(null);
-  const paths = useRef<(SVGPathElement | null)[]>([]);
+  const canvas = useRef<HTMLCanvasElement>(null);
   const live = useRef({ playing, energy, pace, loudness });
   useEffect(() => {
     live.current = { playing, energy, pace, loudness };
   }, [playing, energy, pace, loudness]);
 
   useEffect(() => {
-    const node = svg.current;
-    if (!node) return;
+    const node = canvas.current;
+    const ctx = node?.getContext("2d");
+    if (!node || !ctx) return;
+    const root = document.documentElement;
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
     let phase = 0;
     // Mood changes ease in rather than jump.
@@ -84,17 +83,38 @@ export function Ribbon({ playing, energy, pace, loudness, className = "" }: Ribb
     let onScreen = true;
 
     const draw = () => {
+      // The glow colours cross-fade in CSS; reading them here follows the fade.
+      const style = getComputedStyle(root);
+      const glow = [1, 2, 3].map((n) => style.getPropertyValue(`--glow-${n}`).trim() || "#ff9d6b");
       const { loudness: wave } = live.current;
-      for (const [i, band] of BANDS.entries()) {
-        const points: string[] = [];
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, node.width, node.height);
+      ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+      ctx.globalCompositeOperation = "screen";
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      for (const band of BANDS) {
+        const gradient = ctx.createLinearGradient(0, 0, WIDTH, 0);
+        for (const [offset, colour] of GRADIENTS[band.gradient]) {
+          gradient.addColorStop(offset, glow[colour - 1] ?? "#ff9d6b");
+        }
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = band.width;
+        ctx.globalAlpha = band.opacity;
+        if (canvasCanBlur) ctx.filter = `blur(${band.blur * SCALE}px)`;
+        ctx.beginPath();
         for (let x = -60; x <= WIDTH + 60; x += STEP) {
           const u = x / WIDTH;
-          const wave_ = Math.sin(u * Math.PI * 2 * band.freq + phase * band.speed * 6);
-          const y = band.y + wave_ * band.amp * shownEnergy * swellAt(wave, u + phase * 0.02);
-          points.push(`${x},${y.toFixed(1)}`);
+          const sway = Math.sin(u * Math.PI * 2 * band.freq + phase * band.speed * 6);
+          const y = band.y + sway * band.amp * shownEnergy * swellAt(wave, u + phase * 0.02);
+          if (x === -60) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
         }
-        paths.current[i]?.setAttribute("d", `M${points.join(" L")}`);
+        ctx.stroke();
       }
+      ctx.filter = "none";
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = "source-over";
     };
 
     const tick = (now: number) => {
@@ -124,6 +144,8 @@ export function Ribbon({ playing, energy, pace, loudness, className = "" }: Ribb
 
     draw();
     run();
+    // Without motion the light still follows the cover's colours, at a walk.
+    const repaint = still ? setInterval(draw, 2000) : 0;
     const visibility = new IntersectionObserver(([entry]) => {
       onScreen = entry?.isIntersecting ?? true;
       if (onScreen) run();
@@ -134,66 +156,21 @@ export function Ribbon({ playing, energy, pace, loudness, className = "" }: Ribb
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       halt();
+      clearInterval(repaint);
       visibility.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
   return (
-    <svg
-      ref={svg}
-      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-      preserveAspectRatio="none"
-      aria-hidden="true"
-      className={`ribbon-fade ${className}`}
-    >
-      <defs>
-        <linearGradient id="ribbon-a" x1="0" x2="1">
-          <stop offset="0" style={{ stopColor: "var(--glow-2)" }} />
-          <stop offset="0.5" style={{ stopColor: "var(--glow-1)" }} />
-          <stop offset="1" style={{ stopColor: "var(--glow-3)" }} />
-        </linearGradient>
-        <linearGradient id="ribbon-b" x1="0" x2="1">
-          <stop offset="0" style={{ stopColor: "var(--glow-3)" }} />
-          <stop offset="0.55" style={{ stopColor: "var(--glow-2)" }} />
-          <stop offset="1" style={{ stopColor: "var(--glow-1)" }} />
-        </linearGradient>
-        <filter
-          id="ribbon-soft"
-          filterUnits="userSpaceOnUse"
-          x="-200"
-          y="-300"
-          width="1840"
-          height="1040"
-        >
-          <feGaussianBlur stdDeviation="26" />
-        </filter>
-        <filter
-          id="ribbon-wide"
-          filterUnits="userSpaceOnUse"
-          x="-200"
-          y="-300"
-          width="1840"
-          height="1040"
-        >
-          <feGaussianBlur stdDeviation="48" />
-        </filter>
-      </defs>
-      {BANDS.map((band, i) => (
-        <path
-          key={`${band.gradient}-${band.width}`}
-          ref={(node) => {
-            paths.current[i] = node;
-          }}
-          fill="none"
-          stroke={`url(#${band.gradient})`}
-          strokeWidth={band.width}
-          strokeLinecap="round"
-          filter={`url(#${band.blur})`}
-          opacity={band.opacity}
-          style={{ mixBlendMode: "screen" }}
-        />
-      ))}
-    </svg>
+    <div aria-hidden="true" className={`ribbon-fade ${className}`}>
+      <canvas
+        ref={canvas}
+        width={WIDTH * SCALE}
+        height={HEIGHT * SCALE}
+        className="block size-full"
+        style={canvasCanBlur ? undefined : { filter: "blur(10px)" }}
+      />
+    </div>
   );
 }

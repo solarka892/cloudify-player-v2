@@ -117,7 +117,7 @@ export function Hero({ me }: { me: Me }) {
                 type="button"
                 aria-pressed={option.id === selection.mood}
                 onClick={() => selection.chooseMood(option.id)}
-                className="h-9 rounded-full bg-[rgb(10_10_12/0.66)] px-[15px] font-bold text-white/90 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.16)] backdrop-blur-[6px] transition-colors duration-150 hover:text-white aria-pressed:bg-white aria-pressed:text-ink aria-pressed:shadow-none"
+                className="h-9 rounded-full bg-[rgb(10_10_12/0.66)] px-[15px] font-bold text-white/90 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.16)] transition-colors duration-150 hover:text-white aria-pressed:bg-white aria-pressed:text-ink aria-pressed:shadow-none"
               >
                 {option.label}
               </button>

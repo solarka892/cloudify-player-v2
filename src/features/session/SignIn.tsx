@@ -67,7 +67,7 @@ export function SignIn({ expired }: { expired: boolean }) {
         рекламы.
       </p>
       {expired && (
-        <p className="mt-4 inline-flex w-fit max-w-full items-center gap-2.5 rounded-full bg-[rgb(10_10_12/0.72)] px-4 py-2 font-bold text-[14px] text-fg backdrop-blur-[6px]">
+        <p className="mt-4 inline-flex w-fit max-w-full items-center gap-2.5 rounded-full bg-[rgb(10_10_12/0.72)] px-4 py-2 font-bold text-[14px] text-fg">
           <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-glow-1" />
           Вход устарел: SoundCloud больше не принимает старый ключ. Войди заново.
         </p>
@@ -106,10 +106,7 @@ export function SignIn({ expired }: { expired: boolean }) {
               : ""}
       </p>
       {tokenOpen && (
-        <form
-          onSubmit={submitToken}
-          className="mt-2 max-w-[560px] rounded-[22px] bg-panel/90 p-4 backdrop-blur-md"
-        >
+        <form onSubmit={submitToken} className="mt-2 max-w-[560px] rounded-[22px] bg-panel/95 p-4">
           <label htmlFor="token" className="block font-bold text-[13.5px]">
             Ключ входа <span className="text-fg-faint">(cookie oauth_token)</span>
           </label>
