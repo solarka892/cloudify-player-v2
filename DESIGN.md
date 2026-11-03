@@ -82,6 +82,8 @@ spacing:
   gutter-tight: "28px"
   grid-gap: "32px"
   grid-row-gap: "40px"
+  wall-gap: "24px"
+  wall-row-gap: "28px"
   gutter: "56px"
 components:
   button-primary:
@@ -133,6 +135,85 @@ components:
     typography: "{typography.badge}"
     rounded: "8px"
     padding: "4px 8px"
+  chip-section:
+    backgroundColor: "{colors.smoke}"
+    textColor: "{colors.fg}"
+    rounded: "{rounded.pill}"
+    height: "36px"
+    padding: "0 15px"
+  chip-section-current:
+    backgroundColor: "#ffffff"
+    textColor: "{colors.ink}"
+  input-filter:
+    backgroundColor: "{colors.smoke}"
+    textColor: "{colors.fg}"
+    rounded: "20px"
+    height: "40px"
+    width: "340px"
+    padding: "0 6px 0 16px"
+  input-filter-focus:
+    backgroundColor: "{colors.smoke-hover}"
+  button-jump:
+    backgroundColor: "{colors.smoke}"
+    textColor: "{colors.fg}"
+    rounded: "{rounded.pill}"
+    size: "40px"
+  track-tile:
+    backgroundColor: "{colors.panel-hover}"
+    textColor: "{colors.fg}"
+    typography: "{typography.title}"
+    rounded: "{rounded.md}"
+    width: "196px"
+  track-tile-play:
+    backgroundColor: "#ffffff"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
+    size: "56px"
+  track-tile-round:
+    backgroundColor: "rgb(10 10 12 / 0.72)"
+    textColor: "#ffffff"
+    rounded: "{rounded.pill}"
+    size: "36px"
+  track-tile-round-hover:
+    backgroundColor: "rgb(40 40 46 / 0.9)"
+  badge-preview:
+    backgroundColor: "rgb(0 0 0 / 0.65)"
+    textColor: "rgb(255 255 255 / 0.9)"
+    rounded: "6px"
+    padding: "4px 6px"
+  tile-playlist:
+    backgroundColor: "{colors.panel}"
+    rounded: "{rounded.tile}"
+    padding: "10px"
+  tile-playlist-hover:
+    backgroundColor: "{colors.panel-hover}"
+  tile-person:
+    rounded: "{rounded.tile}"
+    padding: "10px"
+  tile-person-hover:
+    backgroundColor: "{colors.panel}"
+  tile-play:
+    backgroundColor: "#ffffff"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
+    size: "44px"
+  menu-floating:
+    backgroundColor: "{colors.panel}"
+    rounded: "{rounded.menu}"
+    width: "240px"
+    padding: "6px"
+  menu-item:
+    textColor: "{colors.fg-muted}"
+    typography: "{typography.body}"
+    rounded: "{rounded.md}"
+    height: "40px"
+    padding: "0 12px"
+  menu-item-hover:
+    backgroundColor: "rgb(255 255 255 / 0.06)"
+    textColor: "{colors.fg}"
+  aside-cover:
+    rounded: "{rounded.cover}"
+    width: "clamp(180px, 20cqi, 240px)"
   player-bar:
     backgroundColor: "{colors.dock}"
     height: "84px"
@@ -161,6 +242,7 @@ The mood is close to a large streaming service's dark "for you" screen in polish
 - White pill for the primary action; smoky round buttons with a 1 px inner rim for the rest.
 - Heavy Manrope (600 and up) for all running text; Unbounded only for names of places.
 - Rounded tonal panels instead of borders and shadows.
+- Big real covers as the way into music: a wall you point at, and the light takes the hues of what you point at.
 - Motion that is slow, soft, cheap at idle, and off under reduced motion.
 
 ## Colors
@@ -184,8 +266,8 @@ The three hex values in the frontmatter are the registered initial values shown 
 - **Muted** (`fg-muted`): artist names, secondary lines, idle icons, nav tabs at rest.
 - **Faint** (`fg-faint`): counts, durations, timestamps, the disclaimer. It is the lowest text tone allowed and is used only for short labels.
 - **Ink** (`ink`): text and icons on white pills and the selected chip.
-- **Smoke** (`smoke`, `smoke-hover`) with **Rim** (`rim`): the translucent dark fill and 1 px inner rim of secondary round buttons and mood chips that sit on the light.
-- **Veil** (`veil`): white at 7 % for wells: the search field, the token input, state badges, the keyboard hint.
+- **Smoke** (`smoke`, `smoke-hover`) with **Rim** (`rim`): the translucent dark fill and 1 px inner rim of everything that sits on the light: secondary round buttons, mood and section chips, the library's filter well and its jump round. Over a cover (the heart and «…» rounds on a track tile) the smoke deepens to black at 72 %, 90 % on hover, so the rounds hold up on any artwork.
+- **Veil** (`veil`): white at 7 % for wells on ground: the top bar's search field, the token input, state badges, the keyboard hint.
 
 ### Named Rules
 **The Music Paints Rule.** No component gets a fixed accent colour. Anything that needs emphasis takes `glow-1`/`glow-2` (or white for actions); everything else stays on the neutral scale.
@@ -193,6 +275,10 @@ The three hex values in the frontmatter are the registered initial values shown 
 **The No Yellow Turn Rule.** Moods may rotate the cover's hues (`hueShift`), but a rotated hue that lands between 44° and 68° is pushed out to orange or lime. A cover's own yellow is the music's and stays; a yellow the app produces itself is never allowed.
 
 **The Cross-Fade Rule.** Glow colours never jump. They are registered with `@property` and transition over 1.6 s on `:root`; reduced motion switches them instantly.
+
+**The Pointed Light Rule.** A page's own light may borrow colours locally by setting `--glow-*` on its wrapper: first from the cover the pointer or focus rests on, else from the opened playlist or person, else it keeps the playing track's. Pointing answers the hand in 0.6 s after a 70 ms rest (so a sweep across covers does not flicker); everything else crosses over in 1.6 s; leaving the covers gives the light back. Only the light relights: progress fills, focus ring and selection keep the playing track's colours.
+
+**The Smoke On Light Rule.** Anything placed on the light is smoke with a rim, never veil: a white wash vanishes into the light's brightest band. Veil is for wells on ground.
 
 ## Typography
 
@@ -204,14 +290,15 @@ Both are self-hosted through fontsource, with Cyrillic, and ship inside the app.
 **Character:** Unbounded's wide, rounded extra-bold makes one word fill the screen like a poster; Manrope at semibold and heavier keeps every small line sturdy and legible on near-black.
 
 ### Hierarchy
-- **Display** (Unbounded 800, `min(132px, 15cqi)`, 0.92, −0.055em, single line): the one big word of a full screen: «Подборка», «Cloudify» on sign-in, the offline title. It scales with its container so it never wraps or clips in a 960 px window, and carries a soft dark text shadow to sit on the light.
+- **Display** (Unbounded 800, `min(132px, 15cqi)`, 0.92, −0.055em, single line): the one big word of a full screen: «Подборка», «Cloudify» on sign-in, the offline title. It scales with its container so it never wraps or clips in a 960 px window, and carries a soft dark text shadow to sit on the light. «Библиотека» is the same face one step smaller (`min(108px, 12.5cqi)`), because its actions and chips share the first screen.
+- **Fitted name** (Unbounded 800, 0.92, −0.055em, same text shadow): the name of an opened playlist or person, which can be anything. It is measured, not guessed: one line up to 112 px while that stays at 64 px or more; otherwise balanced over two lines up to 84 px (no smaller than 44 px); a very long name gets three lines at 34–60 px. Never clipped mid-letter, never shrunk to body size.
 - **Headline** (Unbounded 800, `clamp(64px, 8vw, 112px)`, 0.92, −0.055em): the title of a section page that is not built yet.
 - **Section** (Unbounded 700, 19px, 1, −0.02em): section titles («Продолжить», «Лайки», «Плейлисты») and the wordmark beside the mark.
 - **Lead** (Manrope 600, 17px, 1.45, max 42–52ch): the one line under a display word, in white at 80 % with a soft shadow when it sits on the light.
-- **Title** (Manrope 800, 14–16.5px, about 1.25): track and playlist titles in rows, cards and the player; 19px bold under the hero cover.
+- **Title** (Manrope 800, 14–16.5px, about 1.25): track and playlist titles in rows, cards, tiles and the player (14.5px under a track tile, 14px under playlist and person tiles); 19px bold under the hero cover.
 - **Body** (Manrope 600, 14px, 1.4): the default for everything; nav tabs and secondary buttons go to 700 at 15px.
-- **Label** (Manrope 700, 12.5–13.5px, tabular figures): counts, durations, times, timestamps, plan names, helper text.
-- **Badge** (Manrope 800, 11px, 1): state badges on rows («Go+ · 30 с», «не в твоём регионе») and the keyboard hint.
+- **Label** (Manrope 700, 12.5–13.5px, tabular figures): counts, durations, times, timestamps, plan names, helper text; the count inside a section chip (12.5px at 55 %), the match count inside the filter («120 из 1 312»), the line under a playlist, person or station tile.
+- **Badge** (Manrope 800, 11px, 1): state badges on rows («Go+ · 30 с», «не в твоём регионе») and the keyboard hint; 10.5px on the Go+ chip that sits on a cover.
 
 ### Named Rules
 **The Place Name Rule.** Unbounded names places: the hero word, page titles, section titles and the wordmark. It never sets a track title, a button, a label or a sentence.
@@ -226,8 +313,18 @@ A full-height window: the page scrolls under a floating 68 px top bar, and an 84
 - **Hero:** a two-column grid, the text column flexible and the cover column `clamp(220px, 21vw, 300px)`, 48 px apart. The text starts at `clamp(88px, 13vh, 112px)` from the top, so it clears the top bar on short windows. Inside the text column the rhythm is 18 px (word to lead), 26 px (lead to actions), 22 px (actions to moods); actions are 12 px apart, chips 8 px.
 - **Home grid:** three columns at 400 : 520 : 344 with 32 px gaps («Продолжить», «Лайки», «Плейлисты»). At 1179 px and narrower it becomes two columns with a 40 px row gap: resume and playlists on top, likes across the full width below.
 - **Sections:** an 18 px gap from the section title to its content (12 px for track lists, whose rows carry their own padding). Track rows are 50 px tall.
+- **Library page:** no side column. The light spans the full width (a 480 px box, the ribbon 420 px tall from 24 px down), and the content sits on it at the 56 px gutter: «Библиотека» from `clamp(88px, 13vh, 104px)` with 24 px below it, then the actions row (the white shuffle pill, the 340 px filter well, the jump round pushed to the far end; 12 px apart), then the section chips (8 px apart, 32 px below), then the content.
+- **Shelves («Всё»):** one shelf per section, 40 px apart, title 18 px above its row. A shelf is exactly one row of as many items as fit the width, at least 168 px each with 18 px gaps; it never scrolls sideways and never wraps. Its title opens the whole section.
+- **Walls (a section in full):** track covers in columns of at least 196 px (six across a 1440 px window), 24 px apart across and 28 px down, the caption included in each row. Playlist, person and station tiles use a 164 px minimum grid with 18 / 20 px gaps.
+- **Opened playlist or person:** a back link, the fitted name with its lead line, and the face at the right (`clamp(180px, 20cqi, 240px)`, 40 px from the text, bottoms aligned). The face hides when the content column is narrower than 768 px; the name then takes the full width.
+- **Sticky actions:** the actions row sticks 68 px from the top, under the top bar, and spans the full width; once the page has scrolled past it, it grows the top bar's backing (ground at 80 %, strong blur) over 200 ms.
 - **Player bar:** three columns: now playing at `clamp(180px, 24vw, 320px)`, the transport with the waveform taking all remaining width, then secondary controls and a 92 px volume slider; column gaps `clamp(16px, 2.2vw, 30px)`.
 - **Full-screen states** (sign-in, unreachable): the same light centred vertically, content capped at 1100 px, scrolling instead of clipping in a small window, the disclaimer pinned at the bottom.
+
+### Named Rules
+**The Windowed Wall Rule.** A wall that can hold thousands of covers keeps only the rows near the screen in the page (two rows of overscan), all rows one fixed height, so 5 000 likes scroll and filter as lightly as one screen. Loading walls show quiet `panel` tiles in the wall's own rhythm.
+
+**The One Row Shelf Rule.** A shelf shows one row that fits the window and nothing more; the rest is one click away through its title, never behind a sideways scroll.
 
 ## Elevation & Depth
 
@@ -236,19 +333,22 @@ Depth is tonal and luminous, not shadowed. Surfaces step up from ground (`ground
 ### Shadow Vocabulary
 - **Floating menu** (`box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.8)`): popovers that float over content (the account menu, the search notice), together with a `line` border.
 - **Hero cover** (`box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.8)`): the large cover in the hero, so it lifts off the light.
-- **Inner rim** (`box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16)`): the edge of smoky buttons and chips on the light. It is an edge, not a lift.
+- **Opened face**: the face beside an opened playlist or person uses the hero cover shadow; it is that cover's twin.
+- **Play round over a cover** (`box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.8)` on the 56 px round of a track tile, `0 10px 24px -10px rgb(0 0 0 / 0.8)` on the 44 px round of a playlist or station tile): the white round floats over artwork.
+- **Inner rim** (`box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16)`): the edge of smoky buttons, chips and the filter well on the light, and of the rounds on a cover. It is an edge, not a lift.
+- **Now playing ring** (`box-shadow: 0 0 0 3px var(--glow-1)`): the cover of the playing track on a wall or shelf. A ring in the music's colour, not a lift.
 - **Text on light** (`text-shadow: 0 10px 50px rgb(0 0 0 / 0.35)` on display, `0 2px 16px rgb(0 0 0 / 0.4)` on the lead): keeps type readable whatever colour the light takes.
 
 ### Named Rules
-**The Tonal Step Rule.** Cards and tiles are flat panels; they never get a drop shadow. A shadow means the thing is floating over other content (a menu) or is the hero cover.
+**The Tonal Step Rule.** Cards and tiles are flat panels; they never get a drop shadow. A shadow means the thing is floating over other content (a menu, a white play round over artwork) or is the hero cover and its twin, the opened face.
 
 **The Grain Over Light Rule.** Any surface that shows the ribbon also carries the grain overlay.
 
-**The Cheap Light Rule.** The ribbon redraws at about 30 fps while playing and 15 fps while paused, rewrites its SVG paths in place, stops when it is off screen or the window is hidden, and does not animate at all under reduced motion. Mood changes ease in over roughly half a second.
+**The Cheap Light Rule.** The ribbon redraws at about 30 fps while playing and 15 fps while paused, paints into a canvas a quarter of its drawn size (the light is all soft edges, so stretching it costs nothing visible), stops when it is off screen or the window is hidden, and does not animate at all under reduced motion. Mood changes ease in over roughly half a second.
 
 ## Shapes
 
-Everything is round. Interactive controls are full pills or circles; containers use large soft radii that shrink as they nest: hero cover 26 px, cards 22 px, tiles and section notices 18 px, popovers 16 px, artwork inside a card 14 px, inner controls and mosaics 12 px, list thumbnails 9 px, badges 8 px. Progress tracks and waveform bars are 4 px and 2 px rounded strips. Mosaics clip four covers into one rounded square. The mark is a single rounded stroke: one swell of a sound wave.
+Everything is round. Interactive controls are full pills or circles; containers use large soft radii that shrink as they nest: hero cover and an opened playlist's face 26 px, cards 22 px, tiles and section notices 18 px, popovers 16 px, artwork inside a card 14 px, track covers on walls and shelves, inner controls, menu items and mosaics 12 px, list thumbnails 9 px, badges 8 px, the Go+ chip on a cover 6 px. People are always circles: a followed artist's tile and an opened artist's face. Progress tracks and waveform bars are 4 px and 2 px rounded strips. Mosaics clip four covers into one rounded square. The mark is a single rounded stroke: one swell of a sound wave.
 
 ## Components
 
@@ -266,6 +366,7 @@ Confident and soft: big pills, quick spring on press.
 ### Chips
 - **Style:** 36 px pills, smoke fill with the inner rim and a 6 px backdrop blur, Manrope 700, white at 90 %.
 - **State:** the selected mood turns solid white with ink text and drops the rim. One is always selected.
+- **Section chips:** the library's sections («Всё», «Лайки», «Плейлисты», …) in the same material, each with its count after the name in label figures at 55 %, filled in as each list arrives; sections that are made, not stored (stations, history) carry no count. The current section is white. They navigate (`aria-current`), they are not toggles.
 
 ### Cards / Containers
 - **Corner Style:** 22 px for cards, 18 px for tiles.
@@ -278,17 +379,46 @@ Confident and soft: big pills, quick spring on press.
 ### Inputs / Fields
 - **Style:** veil fill (white at 7 %), no border; the search field is a 40 px pill-like well (20 px radius) with a search icon and a keyboard hint; the token field is 44 px with 12 px corners.
 - **Focus:** the search well brightens to white at 10 %; other fields show the `glow-1` outline. The caret is `glow-1`.
+- **Filter well (on the light):** the same 40 px, 20 px-radius well, but smoke with the inner rim (see The Smoke On Light Rule); on focus the smoke deepens. Inside, after the text: the match count while filtering («120 из 1 312») and a 28 px clear round once there is text. ⌘F / Ctrl+F jumps into it; Escape empties it.
 
 ### Navigation
 - **Style:** three text tabs in the top bar, Manrope 700 at 15px, 38 px pills.
 - **States:** muted at rest, white on hover; the current tab gets a white-10 % pill and white text.
 - **Top bar:** transparent over the light, growing an 80 % ground backing with a strong backdrop blur once the page scrolls more than 8 px. The whole bar is a window drag region.
 
+### Track Tile
+A track as its big cover: square, 12 px corners, `panel-hover` while loading. The title (Manrope 800, 14.5px) and the artist (muted 13px, a link to the artist) are always shown under it, never only on hover.
+- **Hover / focus anatomy:** the cover scales to 1.04 over 300 ms; a black veil at 35 % comes up; a 56 px white play round appears in the centre (pause when it is the playing track); a heart round and a «…» round (36 px, deep smoke with the rim) rise 4 px into the bottom-right corner. All of it also shows on keyboard focus, and stays while the menu is open. The veil and play round are pointer-transparent: the cover itself is the play button.
+- **Now playing:** the cover gets the `glow-1` ring, a small `AudioLines` round at the top right (dimmed when paused), and the title turns `glow-1`. A liked heart is filled `glow-1`.
+- **Go+ preview:** a «Go+ · 30 с» chip at the top left of the cover.
+- **Unplayable:** the cover drops to 35 % and its caption to 45 %, the cover is disabled and shows no play round, and the second line is the reason (faint) instead of the artist.
+
+### Shelves
+A section on «Всё» is a shelf: its title in Section type, the count in faint label figures, and a chevron, all one button that opens the whole section; on hover the chevron moves 2 px right and turns white. Under it, exactly one row of track tiles or of playlist, person or station tiles.
+
+### Playlist, Person and Station Tiles
+Things you open rather than play.
+- **Playlist (and album):** an 18 px `panel` tile with 10 px padding, a 12 px-cornered mosaic, title and a faint line («38 треков», «Альбом · Artist»); lifts to `panel-hover`. The whole tile opens the playlist; a 44 px white play round rises into the cover's corner on hover or focus (a spinner while it starts) and plays straight away.
+- **Person:** no panel at rest, a circular face, name and a faint line; hover shows the `panel` behind it. Opens the artist.
+- **Station:** a playlist-style panel tile with the artist's face as a square cover; pressing anywhere plays the radio, and the white round shows it.
+
+### Library Actions Row
+The white shuffle pill («Перемешать все 1 574», which shuffles every like, not the loaded ones), the filter well, and at the far end a 40 px smoke jump round that appears only on pages at least four screens long and points toward the further end. On an opened item the pill is that item's own action («Слушать», «Радио артиста») with 54 px smoke rounds beside it. The row sticks under the top bar and grows its frosted backing once stuck.
+
+### Opened Item Header
+A back link to the section it came from (32 px, white at 75 % with a chevron; a white-10 % pill on hover), then the fitted name, then one lead line (17px, white at 80 %, max 60ch) saying what it is and how much of it there is. On wide stages the face sits at the right: a playlist's mosaic with 26 px corners, an artist's face as a circle, both with the hero cover shadow. The page's light takes this face's colours.
+
+### Floating Track Menu
+From a tile's «…» round: a 240 px `panel` with a `line` border, 16 px corners, 6 px padding and the floating-menu shadow, opening below the round or above it when the player bar is in the way. Items are 40 px rows with an 18 px icon and bold muted text, 12 px corners, white at 6 % with white text on hover or focus. Focus lands on the first item; Escape, a click elsewhere, a resize or any scroll closes it.
+
 ### Track Row
 50 px rows: a 44 px thumbnail (9 px corners), title in Manrope 800 with the artist below in muted 13px, an optional state badge, and the full duration in faint tabular figures. Hover tints the row white at 5 %. The playing track's title turns `glow-1`. A track that cannot play is disabled with its art and text at 40 %, and its badge says why before anyone presses play.
 
 ### The Ribbon (signature)
-Three stroked SVG bands (130, 70 and 26 px wide), blurred by 48 and 26 px, drawn in two gradients across `glow-2`, `glow-1` and `glow-3`, blended with `screen`. Their swell follows the playing track's loudness curve; moods set energy (height), pace (speed) and a hue turn. It sits behind the hero (440 px tall, from 40 px below the top) and behind the full-screen states, always with grain and faded edges.
+Three stroked bands (130, 70 and 26 px wide in a 1440 × 440 drawing), blurred by 48 and 26 px, drawn in two gradients across `glow-2`, `glow-1` and `glow-3`, blended with `screen`, painted into a quarter-size canvas and stretched. Their swell follows the playing track's loudness curve; moods set energy (height), pace (speed) and a hue turn. It reads its colours from its own element, so a wrapper that sets `--glow-*` relights it without touching the rest of the window. It sits behind the hero (440 px tall, from 40 px below the top), behind the library (420 px, under a 480 px grain box) and behind the full-screen states, always with grain and faded edges.
+
+### Player Notice
+The line under the playing title in the player bar can carry a short notice («Дальше: …», «Ссылка на трек скопирована») in white instead of the artist, for 7 seconds. It may carry one action that takes back what it reports («Вернуть»), set in Manrope 800 `glow-1`, underlined on hover; pressing it clears the notice.
 
 ### Waveform Seek
 The player's progress bar is the playing track's real waveform: 4 px bars with 2 px gaps, 8–34 px tall, the played part filled with a `glow-1` → `glow-2` vertical gradient and the rest white at 18 %. It is a keyboard slider (arrows ±5 s, Page keys ±30 s). Without a waveform it draws a quiet even line.
@@ -303,11 +433,15 @@ The player's progress bar is the playing track's real waveform: 4 px bars with 2
 - **Do** show real artwork wherever a track, playlist or person appears, with the quiet tile fallback.
 - **Do** put grain over any surface that shows the light, and fade the light's edges.
 - **Do** stop or slow every running animation when the window is hidden, off screen, paused or under reduced motion.
-- **Do** say in the interface why something does not work (region, Go+ preview, offline, expired sign-in), on the row and before play.
+- **Do** say in the interface why something does not work (region, Go+ preview, offline, expired sign-in), on the row or tile and before play: unplayable covers are dimmed and disabled with the reason as their second line; Go+ previews carry their chip.
+- **Do** let a page's own light take the colours of what is pointed at or opened, and give it back when the pointer leaves.
+- **Do** window any list that can run into thousands, and keep the actions row in reach while it scrolls.
 
 ### Don't:
 - **Don't** add a fixed brand accent, SoundCloud's orange as a UI colour, or Yandex Music's signature yellow; a mood turn must never produce yellow.
 - **Don't** put borders around cards or tiles; `line` belongs only to the player bar's top edge and floating menus.
+- **Don't** put veil wells on the light; there they are smoke with a rim.
+- **Don't** hide a track's name until hover; the caption under a cover is always there.
 - **Don't** give flat panels drop shadows.
 - **Don't** set track titles, buttons or sentences in Unbounded, or use Manrope below 600.
 - **Don't** use stroked outline-only or square-cornered buttons; actions are filled pills and circles, or bare muted icons and text.
