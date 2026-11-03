@@ -1,7 +1,8 @@
 import { Play, Shuffle } from "lucide-react";
 import { useMemo, useRef } from "react";
 import type { Me, Playlist } from "@/api/types";
-import { type SectionId, useOpenView } from "@/features/library/nav";
+import { CoverWall, WallSkeleton } from "@/features/library/CoverWall";
+import { SECTION_NAMES, type SectionId, useOpenView } from "@/features/library/nav";
 import { playInOrder, playShuffled, trackText } from "@/features/library/play";
 import { usePlaylist } from "@/features/library/queries";
 import {
@@ -15,24 +16,13 @@ import {
   StageHeader,
   StageNote,
 } from "@/features/library/Stage";
-import { TrackList, TrackListSkeleton } from "@/features/library/TrackList";
 import { useListFilter } from "@/features/library/useListFilter";
 import { formatCount, formatLength, plural } from "@/ui/format";
 import { Mosaic } from "@/ui/Mosaic";
 
 const TRACKS = ["трек", "трека", "треков"] as const;
 
-export const SECTION_NAMES: Record<SectionId, string> = {
-  likes: "Лайки",
-  playlists: "Плейлисты",
-  albums: "Альбомы",
-  reposts: "Репосты",
-  followings: "Подписки",
-  stations: "Станции",
-  history: "История",
-};
-
-/** One playlist or album, opened: every track, in order, on its own cover's light. */
+/** One playlist or album, opened: every track as a wall of covers, on its own cover's light. */
 export function PlaylistView({
   me,
   playlist: known,
@@ -40,7 +30,7 @@ export function PlaylistView({
 }: {
   me: Me;
   playlist: Playlist;
-  from: SectionId | null;
+  from: SectionId;
 }) {
   const open = useOpenView();
   const full = usePlaylist(known.id);
@@ -68,14 +58,10 @@ export function PlaylistView({
       <StageHeader
         title={playlist.title}
         lead={lead}
-        {...(from
-          ? {
-              back: {
-                label: SECTION_NAMES[from],
-                onClick: () => open({ kind: "section", section: from }),
-              },
-            }
-          : {})}
+        back={{
+          label: SECTION_NAMES[from],
+          onClick: () => open({ kind: "section", section: from }),
+        }}
         aside={<Mosaic playlist={playlist} coverSize={500} className={asideCover} />}
       />
       <StageActions>
@@ -105,19 +91,20 @@ export function PlaylistView({
           found={foundLine(filtering, shown.length, tracks.length)}
         />
       </StageActions>
-      <div ref={start} />
+      <div ref={start} className="mt-5" />
       {full.isError ? (
         <StageNote error={full.error} onRetry={() => void full.refetch()} />
       ) : full.isPending ? (
-        <TrackListSkeleton rows={Math.min(Math.max(count, 3), 10)} />
+        <WallSkeleton count={Math.min(Math.max(count, 6), 24)} />
       ) : tracks.length === 0 ? (
         <StageNote text={`В «${playlist.title}» пока нет треков, которые SoundCloud отдаёт.`} />
       ) : shown.length === 0 ? (
         <NoMatch query={query} />
       ) : (
-        <TrackList
+        <CoverWall
           tracks={shown}
           label={playlist.title}
+          named={filtering}
           onPlay={(track) => playInOrder(shown, source, track)}
         />
       )}

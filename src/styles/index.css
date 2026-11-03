@@ -139,8 +139,16 @@
       --glow-2 1.6s ease,
       --glow-3 1.6s ease;
   }
+  /* Pointing at covers moves the light quicker: it answers the hand, not the music. */
+  .relight-quick {
+    transition:
+      --glow-1 0.6s ease,
+      --glow-2 0.6s ease,
+      --glow-3 0.6s ease;
+  }
   @media (prefers-reduced-motion: reduce) {
-    .relight {
+    .relight,
+    .relight-quick {
       transition: none;
     }
   }

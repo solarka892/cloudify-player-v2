@@ -3,7 +3,8 @@ import { Play, Radio } from "lucide-react";
 import { useMemo, useRef } from "react";
 import { artistStation } from "@/api/player";
 import type { Me, Track, User } from "@/api/types";
-import { type SectionId, useOpenView } from "@/features/library/nav";
+import { CoverWall, WallSkeleton } from "@/features/library/CoverWall";
+import { SECTION_NAMES, type SectionId, useOpenView } from "@/features/library/nav";
 import { playInOrder, trackText } from "@/features/library/play";
 import { useAllFollowings, useAllLikes, useTopTracks } from "@/features/library/queries";
 import {
@@ -17,16 +18,17 @@ import {
   StageNote,
 } from "@/features/library/Stage";
 import { PersonTile, StationTile, TileGrid, TileSkeleton } from "@/features/library/Tiles";
-import { TrackList, TrackListSkeleton } from "@/features/library/TrackList";
 import { useListFilter } from "@/features/library/useListFilter";
-import { SECTION_NAMES } from "@/features/library/views/PlaylistView";
+import { SectionTitle, SectionTop, useShuffleAllLikes } from "@/features/library/views/actions";
 import { usePlayer } from "@/features/player/store";
 import { Artwork } from "@/ui/Artwork";
 import { describeError } from "@/ui/errors";
 import { formatCount, plural } from "@/ui/format";
 
 const FOLLOWERS = ["подписчик", "подписчика", "подписчиков"] as const;
+const TRACKS = ["трек", "трека", "треков"] as const;
 const userText = (user: User) => `${user.username} ${user.fullName ?? ""}`;
+const artistText = (entry: { user: User }) => entry.user.username;
 
 function followersLine(user: User): string {
   const n = user.followersCount;
@@ -50,25 +52,21 @@ function useArtistRadio() {
 export function FollowingsView({ me }: { me: Me }) {
   const followings = useAllFollowings();
   const open = useOpenView();
+  const shuffle = useShuffleAllLikes(me);
   const start = useRef<HTMLDivElement>(null);
   const { query, onQuery, shown, filtering } = useListFilter(followings.items, userText, start);
   const total = followings.items.length;
-  const lead = followings.pending
-    ? "Загружаю подписки…"
-    : `Ты подписан на ${formatCount(total || (me.user.followingsCount ?? 0))}`;
 
   return (
     <>
-      <StageHeader title="Подписки" lead={lead} />
-      <StageActions>
-        <FilterField
-          value={query}
-          onChange={onQuery}
-          placeholder="Найти в подписках"
-          found={foundLine(filtering, shown.length, total)}
-          alone
-        />
-      </StageActions>
+      <SectionTop
+        me={me}
+        shuffle={shuffle}
+        query={query}
+        onQuery={onQuery}
+        placeholder="Найти в подписках"
+        found={foundLine(filtering, shown.length, total)}
+      />
       <div ref={start} />
       {followings.error && total === 0 ? (
         <StageNote error={followings.error} onRetry={followings.retry} />
@@ -109,10 +107,11 @@ function topArtists(tracks: readonly Track[], limit: number): { user: User; coun
     .slice(0, limit);
 }
 
-/** «Станции»: radio from the artists that fill your likes the most. */
-export function StationsView() {
+/** «Станции»: radio from the artists that fill your likes the most. Pressing one plays it. */
+export function StationsView({ me }: { me: Me }) {
   const likes = useAllLikes();
   const radio = useArtistRadio();
+  const shuffle = useShuffleAllLikes(me);
   const artists = useMemo(
     () =>
       topArtists(
@@ -121,26 +120,39 @@ export function StationsView() {
       ),
     [likes.items],
   );
-  const lead = likes.complete
-    ? "Радио по артистам, которых больше всего в твоих лайках. Нажми — и играет."
-    : "Собираю станции из твоих лайков…";
+  const start = useRef<HTMLDivElement>(null);
+  const { query, onQuery, shown, filtering } = useListFilter(artists, artistText, start);
 
   return (
     <>
-      <StageHeader title="Станции" lead={lead} />
+      <SectionTop
+        me={me}
+        shuffle={shuffle}
+        query={query}
+        onQuery={onQuery}
+        placeholder="Найти станцию"
+        found={foundLine(filtering, shown.length, artists.length)}
+      />
+      <div ref={start} />
+      <SectionTitle
+        id="stations-title"
+        title={likes.complete ? "Радио твоих артистов" : "Собираю станции из лайков…"}
+      />
       {likes.error && likes.items.length === 0 ? (
         <StageNote error={likes.error} onRetry={likes.retry} />
       ) : likes.pending ? (
         <TileSkeleton />
       ) : artists.length === 0 ? (
         <StageNote text="Станции появятся, когда в лайках будет хотя бы два трека одного артиста." />
+      ) : shown.length === 0 ? (
+        <NoMatch query={query} />
       ) : (
         <TileGrid label="Станции">
-          {artists.map(({ user, count }) => (
+          {shown.map(({ user, count }) => (
             <StationTile
               key={user.id}
               user={user}
-              line={`${formatCount(count)} ${plural(count, ["трек", "трека", "треков"])} в лайках`}
+              line={`${formatCount(count)} ${plural(count, TRACKS)} в лайках`}
               busy={radio.busyId === user.id}
               onPlay={() => radio.play(user)}
             />
@@ -151,8 +163,8 @@ export function StationsView() {
   );
 }
 
-/** Someone you follow, opened: their most played tracks and their radio. */
-export function ArtistView({ user, from }: { user: User; from: SectionId | null }) {
+/** Someone you follow, opened: their radio, and their most played tracks as covers. */
+export function ArtistView({ user, from }: { user: User; from: SectionId }) {
   const open = useOpenView();
   const top = useTopTracks(user.id);
   const radio = useArtistRadio();
@@ -163,7 +175,7 @@ export function ArtistView({ user, from }: { user: User; from: SectionId | null 
   const lead = [
     followersLine(user),
     user.trackCount != null
-      ? `${formatCount(user.trackCount)} ${plural(user.trackCount, ["трек", "трека", "треков"])}`
+      ? `${formatCount(user.trackCount)} ${plural(user.trackCount, TRACKS)}`
       : null,
   ]
     .filter(Boolean)
@@ -174,14 +186,10 @@ export function ArtistView({ user, from }: { user: User; from: SectionId | null 
       <StageHeader
         title={user.username}
         lead={lead || "Артист на SoundCloud"}
-        {...(from
-          ? {
-              back: {
-                label: SECTION_NAMES[from],
-                onClick: () => open({ kind: "section", section: from }),
-              },
-            }
-          : {})}
+        back={{
+          label: SECTION_NAMES[from],
+          onClick: () => open({ kind: "section", section: from }),
+        }}
         aside={
           <Artwork
             url={user.avatarUrl}
@@ -218,22 +226,21 @@ export function ArtistView({ user, from }: { user: User; from: SectionId | null 
           found={foundLine(filtering, shown.length, tracks.length)}
         />
       </StageActions>
-      <div ref={start} />
-      <h2 className="mb-3 font-bold font-display text-[19px] leading-none tracking-[-0.02em]">
-        Популярное
-      </h2>
+      <div ref={start} className="mt-5" />
+      <SectionTitle id="artist-top" title="Популярное" />
       {top.isError ? (
         <StageNote error={top.error} onRetry={() => void top.refetch()} />
       ) : top.isPending ? (
-        <TrackListSkeleton />
+        <WallSkeleton count={12} />
       ) : tracks.length === 0 ? (
         <StageNote text="У артиста пока нет треков, которые SoundCloud отдаёт." />
       ) : shown.length === 0 ? (
         <NoMatch query={query} />
       ) : (
-        <TrackList
+        <CoverWall
           tracks={shown}
           label={`Популярное: ${user.username}`}
+          named={filtering}
           onPlay={(track) => playInOrder(shown, source, track)}
         />
       )}

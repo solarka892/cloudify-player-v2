@@ -1,20 +1,18 @@
 import type { CSSProperties } from "react";
 import type { Me } from "@/api/types";
+import { usePointedCover } from "@/features/library/light";
 import { type LibraryView, useLibraryNav } from "@/features/library/nav";
-import { Rail } from "@/features/library/Rail";
 import { AlbumsView, PlaylistsView } from "@/features/library/views/CollectionViews";
-import { HistoryView } from "@/features/library/views/HistoryView";
-import { LikesView } from "@/features/library/views/LikesView";
 import { ArtistView, FollowingsView, StationsView } from "@/features/library/views/PeopleViews";
 import { PlaylistView } from "@/features/library/views/PlaylistView";
-import { RepostsView } from "@/features/library/views/RepostsView";
+import { HistoryView, LikesWallView, RepostsView } from "@/features/library/views/WallViews";
 import { useCoverColours } from "@/features/player/coverGlow";
 import { currentTrack, usePlayer } from "@/features/player/store";
 import { useLoudness } from "@/features/player/useLoudness";
 import { Ribbon } from "@/ui/Ribbon";
 
-/** The cover whose colours light the stage: the opened playlist's or person's; sections keep the room's. */
-function stageCover(view: LibraryView): string | null {
+/** The cover an opened playlist or person lends the light; sections keep the room's. */
+function openedCover(view: LibraryView): string | null {
   if (view.kind === "playlist") return view.playlist.artworkUrl ?? view.playlist.covers[0] ?? null;
   if (view.kind === "artist") return view.user.avatarUrl;
   return null;
@@ -22,11 +20,12 @@ function stageCover(view: LibraryView): string | null {
 
 /**
  * The light over the library. It swells with the playing track like the home
- * screen's, but takes the colours of whatever the stage has open, crossing
- * over to them in the same 1.6 s the whole app uses.
+ * screen's; its colours are the cover you point at on the wall, else the
+ * opened playlist's, else the playing cover's, crossing over as they change.
  */
-function StageLight({ cover }: { cover: string | null }) {
-  const colours = useCoverColours(cover);
+function LibraryLight({ opened }: { opened: string | null }) {
+  const pointed = usePointedCover((s) => s.cover);
+  const colours = useCoverColours(pointed ?? opened);
   const nowPlaying = usePlayer(currentTrack);
   const playing = usePlayer((s) => s.playing);
   const loudness = useLoudness(nowPlaying);
@@ -41,21 +40,21 @@ function StageLight({ cover }: { cover: string | null }) {
   return (
     <div
       aria-hidden="true"
-      className="grain relight pointer-events-none absolute inset-x-0 top-0 h-[480px] overflow-clip"
+      className={`grain pointer-events-none absolute inset-x-0 top-0 h-[480px] overflow-clip ${pointed ? "relight-quick" : "relight"}`}
       style={relit}
     >
       <Ribbon
         playing={playing && nowPlaying !== null}
-        energy={0.8}
+        energy={0.85}
         pace={0.75}
         loudness={loudness}
-        className="absolute inset-x-0 top-4 h-[420px] w-full opacity-90"
+        className="absolute inset-x-0 top-6 h-[420px] w-full"
       />
     </div>
   );
 }
 
-function Stage({ view, me }: { view: LibraryView; me: Me }) {
+function View({ view, me }: { view: LibraryView; me: Me }) {
   switch (view.kind) {
     case "playlist":
       return (
@@ -65,8 +64,10 @@ function Stage({ view, me }: { view: LibraryView; me: Me }) {
       return <ArtistView key={view.user.id} user={view.user} from={view.from} />;
     case "section":
       switch (view.section) {
+        case "all":
+          return <LikesWallView key="all" me={me} shelf />;
         case "likes":
-          return <LikesView me={me} />;
+          return <LikesWallView key="likes" me={me} shelf={false} />;
         case "playlists":
           return <PlaylistsView me={me} />;
         case "albums":
@@ -76,25 +77,30 @@ function Stage({ view, me }: { view: LibraryView; me: Me }) {
         case "followings":
           return <FollowingsView me={me} />;
         case "stations":
-          return <StationsView />;
+          return <StationsView me={me} />;
         case "history":
-          return <HistoryView />;
+          return <HistoryView me={me} />;
       }
   }
 }
 
-/** «Библиотека»: the rail with every section and playlist, and the stage with what is open. */
+/**
+ * «Библиотека»: one big word on the light, the white «Перемешать все» and the
+ * filter, the sections as chips, then your music as a wall of its covers.
+ */
 export function LibraryPage({ me }: { me: Me }) {
   const view = useLibraryNav((s) => s.view);
   return (
     // The ground behind the light is what its grain blends into; without it the grain shows as haze.
     <div className="relative isolate min-h-full bg-ground">
-      <StageLight cover={stageCover(view)} />
-      <div className="relative z-10 flex items-start gap-8 px-14 pb-12">
-        <Rail me={me} />
-        <div className="@container min-w-0 flex-1">
-          <Stage view={view} me={me} />
-        </div>
+      <LibraryLight opened={openedCover(view)} />
+      <div className="@container relative z-10 px-14 pb-12">
+        {view.kind === "section" && (
+          <h1 className="whitespace-nowrap pt-[clamp(88px,13vh,104px)] pb-6 font-display font-extrabold text-[length:min(108px,12.5cqi)] leading-[0.92] tracking-[-0.055em] [text-shadow:0_10px_50px_rgb(0_0_0/0.35)]">
+            Библиотека
+          </h1>
+        )}
+        <View view={view} me={me} />
       </div>
     </div>
   );

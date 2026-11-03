@@ -4,6 +4,7 @@ import type { Playlist, User } from "@/api/types";
 import { useScrollRoot } from "@/app/scrollRoot";
 
 export type SectionId =
+  | "all"
   | "likes"
   | "playlists"
   | "albums"
@@ -12,15 +13,26 @@ export type SectionId =
   | "stations"
   | "history";
 
+export const SECTION_NAMES: Record<SectionId, string> = {
+  all: "Библиотека",
+  likes: "Лайки",
+  playlists: "Плейлисты",
+  albums: "Альбомы",
+  reposts: "Репосты",
+  followings: "Подписки",
+  stations: "Станции",
+  history: "История",
+};
+
 /**
- * What the library's stage shows: a section, or one thing opened from it. An
- * opened thing carries what is already known about it, so its name and cover
- * are on stage before the rest arrives.
+ * What the library shows: one of its sections, or one thing opened from it.
+ * An opened thing carries what is already known about it, so its name and
+ * cover are there before the rest arrives.
  */
 export type LibraryView =
   | { kind: "section"; section: SectionId }
-  | { kind: "playlist"; playlist: Playlist; from: SectionId | null }
-  | { kind: "artist"; user: User; from: SectionId | null };
+  | { kind: "playlist"; playlist: Playlist; from: SectionId }
+  | { kind: "artist"; user: User; from: SectionId };
 
 interface LibraryNav {
   view: LibraryView;
@@ -29,11 +41,11 @@ interface LibraryNav {
 
 /** Kept outside the page, so the library is where you left it when you come back. */
 export const useLibraryNav = create<LibraryNav>()((set) => ({
-  view: { kind: "section", section: "likes" },
+  view: { kind: "section", section: "all" },
   open: (view) => set({ view }),
 }));
 
-/** Opens a view on the stage, from its top. */
+/** Opens a view, from its top. */
 export function useOpenView(): (view: LibraryView) => void {
   const scroller = useScrollRoot();
   return useCallback(
@@ -46,6 +58,6 @@ export function useOpenView(): (view: LibraryView) => void {
 }
 
 /** The section a view belongs to: its own, or the one it was opened from. */
-export function sectionOf(view: LibraryView): SectionId | null {
+export function sectionOf(view: LibraryView): SectionId {
   return view.kind === "section" ? view.section : view.from;
 }

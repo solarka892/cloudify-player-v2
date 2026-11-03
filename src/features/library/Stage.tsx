@@ -5,9 +5,9 @@ import { useScrollRoot } from "@/app/scrollRoot";
 import { describeError } from "@/ui/errors";
 import { formatCount } from "@/ui/format";
 
-// The stage: the right-hand side of the library, showing whatever is open.
-// A header with the opened name on the light, a row of actions that sticks
-// under the top bar, then the list or the tiles.
+// The library's parts that every section shares: the opened name on the
+// light, a row of actions that sticks under the top bar, the filter, and the
+// plain-words notes for empty and failed states.
 
 /** How wide `text` runs on one line in the title's face, at 100 px. */
 function measureTitle(text: string): number {
@@ -132,7 +132,7 @@ export function StageActions({ children }: { children: ReactNode }) {
     <>
       <div ref={sentinel} aria-hidden="true" className="h-px" />
       <div
-        className={`sticky top-[68px] z-20 -mr-14 mb-3 -ml-4 flex items-center gap-3 py-3 pr-14 pl-4 transition-[background-color,backdrop-filter] duration-200 ${stuck ? "bg-ground/80 backdrop-blur-xl" : ""}`}
+        className={`sticky top-[68px] z-20 -mx-14 mb-3 flex items-center gap-3 px-14 py-3 transition-[background-color,backdrop-filter] duration-200 ${stuck ? "bg-ground/80 backdrop-blur-xl" : ""}`}
       >
         {children}
         <JumpButton />
@@ -177,7 +177,7 @@ function JumpButton() {
       onClick={() =>
         scroller?.scrollTo({ top: way === "up" ? 0 : scroller.scrollHeight, behavior: "instant" })
       }
-      className="grid size-10 shrink-0 place-content-center rounded-full bg-white/[0.07] text-fg-muted transition-colors duration-150 hover:bg-white/10 hover:text-fg"
+      className="ml-auto grid size-10 shrink-0 place-content-center rounded-full bg-[rgb(10_10_12/0.62)] text-white/80 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.16)] transition-colors duration-150 hover:bg-[rgb(40_40_46/0.72)] hover:text-white"
     >
       <Arrow className="size-[18px]" aria-hidden="true" />
     </button>
@@ -205,15 +205,12 @@ export function FilterField({
   onChange,
   placeholder,
   found = null,
-  alone = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
   /** How much matched, said inside the field: «120 из 1 312». */
   found?: string | null;
-  /** The row's only control: it leads the row instead of waiting at its far end. */
-  alone?: boolean;
 }) {
   const input = useRef<HTMLInputElement>(null);
 
@@ -231,7 +228,9 @@ export function FilterField({
 
   return (
     <label
-      className={`flex h-10 min-w-[150px] shrink items-center gap-2.5 rounded-[20px] bg-white/[0.07] pr-1.5 pl-4 text-fg-muted transition-colors focus-within:bg-white/10 ${alone ? "w-[360px]" : "ml-auto w-[320px]"}`}
+      // Smoke, not the top bar's veil: the field sits on the light, and a white
+      // wash vanishes into its brightest band.
+      className={`flex h-10 min-w-[150px] shrink items-center gap-2.5 rounded-[20px] bg-[rgb(10_10_12/0.62)] pr-1.5 pl-4 text-white/70 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.16)] transition-colors focus-within:bg-[rgb(40_40_46/0.72)] w-[340px]`}
     >
       <Search className="size-[18px] shrink-0" aria-hidden="true" />
       <input
@@ -247,10 +246,10 @@ export function FilterField({
         }}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-full min-w-0 flex-1 bg-transparent font-semibold text-fg outline-none placeholder:text-fg-muted [&::-webkit-search-cancel-button]:hidden"
+        className="h-full min-w-0 flex-1 bg-transparent font-semibold text-fg outline-none placeholder:text-white/70 [&::-webkit-search-cancel-button]:hidden"
       />
       {found && (
-        <span className="shrink-0 whitespace-nowrap font-bold text-[12.5px] text-fg-faint tabular-nums">
+        <span className="shrink-0 whitespace-nowrap font-bold text-[12.5px] text-white/65 tabular-nums">
           {found}
         </span>
       )}
