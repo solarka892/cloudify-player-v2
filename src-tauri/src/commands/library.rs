@@ -78,6 +78,19 @@ pub async fn my_followings(
     Ok(client.user_followings(me, page.unwrap_or_default()).await?)
 }
 
+/// Likes a track. SoundCloud's bot filter may refuse it; that comes back as
+/// `bot-filtered`, never as success.
+#[tauri::command]
+pub async fn like_track(track_id: u64, state: State<'_, AppState>) -> CommandResult<()> {
+    Ok(state.client().await.like_track(track_id).await?)
+}
+
+/// Takes a like back. Refused the same way a like can be.
+#[tauri::command]
+pub async fn unlike_track(track_id: u64, state: State<'_, AppState>) -> CommandResult<()> {
+    Ok(state.client().await.unlike_track(track_id).await?)
+}
+
 /// What was played on SoundCloud, latest first.
 #[tauri::command]
 pub async fn play_history(

@@ -63,7 +63,7 @@ export function LikesWallView({ me }: { me: Me }) {
           <CoverWall
             tracks={shown}
             label="Лайки"
-            named={filtering}
+            source={{ kind: "likes" }}
             onPlay={(track) => playInOrder(shown, { kind: "likes" }, track)}
           />
         )}
@@ -116,7 +116,7 @@ export function HistoryView({ me }: { me: Me }) {
           <CoverWall
             tracks={shown}
             label="История"
-            named={filtering}
+            source={source}
             onPlay={(track) => playInOrder(shown, source, track)}
           />
         )}
@@ -180,7 +180,7 @@ export function RepostsView({ me }: { me: Me }) {
               <CoverWall
                 tracks={tracks}
                 label="Репосты: треки"
-                named={filtering}
+                source={source}
                 onPlay={(track) => playInOrder(tracks, source, track)}
               />
             </section>

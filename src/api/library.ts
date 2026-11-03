@@ -40,6 +40,16 @@ export function myFollowings(page?: PageRequest): Promise<Page<User>> {
   return call<Page<User>>("my_followings", { page: page ?? null });
 }
 
+/** Likes a track. May be refused by SoundCloud's bot filter (`bot-filtered`). */
+export function likeTrack(trackId: number): Promise<void> {
+  return call<void>("like_track", { trackId });
+}
+
+/** Takes a like back. May be refused the same way. */
+export function unlikeTrack(trackId: number): Promise<void> {
+  return call<void>("unlike_track", { trackId });
+}
+
 /** What was played on SoundCloud, latest first, each track once per page. */
 export function playHistory(page?: PageRequest): Promise<Page<PlayedTrack>> {
   return call<Page<PlayedTrack>>("play_history", { page: page ?? null });

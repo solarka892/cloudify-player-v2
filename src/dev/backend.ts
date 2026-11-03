@@ -354,6 +354,9 @@ export async function answer(
       );
     case "artist_station":
       return station;
+    case "like_track":
+    case "unlike_track":
+      return null;
     case "play_history":
       return page(
         [played, likes[5] as Track].map((t) => ({

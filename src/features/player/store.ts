@@ -36,6 +36,8 @@ interface PlayerState {
   muted: boolean;
   /** One honest line about what just happened; the player bar shows it for a while. */
   notice: string | null;
+  /** A way to take back what the notice reports («Вернуть»), when there is one. */
+  noticeAction: { label: string; run: () => void } | null;
   /** Bumped whenever the current track must be (re)loaded from `startAt`. */
   loadId: number;
   startAt: number;
@@ -53,7 +55,9 @@ interface PlayerState {
   toggleMute: () => void;
   /** Swaps everything after the current track (a mood changed). */
   replaceUpcoming: (tracks: Track[]) => void;
-  say: (notice: string | null) => void;
+  /** Puts a track right after the current one; with nothing playing, plays it. */
+  playNext: (track: Track, source: QueueSource) => void;
+  say: (notice: string | null, action?: { label: string; run: () => void }) => void;
   /** Reports from the audio engine. */
   report: (patch: Partial<Pick<PlayerState, "position" | "duration" | "buffering">>) => void;
   stop: () => void;
@@ -96,6 +100,7 @@ export const usePlayer = create<PlayerState>()((set, get) => ({
   volume: savedVolume(),
   muted: false,
   notice: null,
+  noticeAction: null,
   loadId: 0,
   seekId: 0,
   options: {},
@@ -202,7 +207,21 @@ export const usePlayer = create<PlayerState>()((set, get) => ({
     set({ queue: [...queue.slice(0, index + 1), ...tracks.filter((t) => t.id !== current.id)] });
   },
 
-  say: (notice) => set({ notice }),
+  playNext: (track, source) => {
+    const { queue, index } = get();
+    if (index < 0 || !queue[index]) {
+      get().playQueue([track], 0, source);
+      return;
+    }
+    const rest = queue.slice(index + 1).filter((t) => t.id !== track.id);
+    set({
+      queue: [...queue.slice(0, index + 1), track, ...rest],
+      notice: `Дальше: ${track.title}`,
+      noticeAction: null,
+    });
+  },
+
+  say: (notice, action) => set({ notice, noticeAction: action ?? null }),
 
   report: (patch) => set(patch),
 

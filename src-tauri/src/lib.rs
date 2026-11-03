@@ -47,6 +47,8 @@ pub fn run() {
             commands::library::my_liked_playlists,
             commands::library::my_reposts,
             commands::library::my_followings,
+            commands::library::like_track,
+            commands::library::unlike_track,
             commands::library::play_history,
             commands::library::playlist,
             commands::people::artist_top_tracks,

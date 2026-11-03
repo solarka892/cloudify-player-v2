@@ -53,6 +53,7 @@ export function PlayerBar() {
   const volume = usePlayer((s) => s.volume);
   const muted = usePlayer((s) => s.muted);
   const notice = usePlayer((s) => s.notice);
+  const noticeAction = usePlayer((s) => s.noticeAction);
   const hasNext = usePlayer((s) => s.index + 1 < s.queue.length || Boolean(s.options.refill));
   const { toggle, next, previous, seek, setVolume, toggleMute, say } = usePlayer.getState();
   const loudness = useLoudness(track);
@@ -87,7 +88,21 @@ export function PlayerBar() {
             className={`flex min-w-0 font-bold text-[13px] ${notice ? "text-fg" : "text-fg-muted"}`}
           >
             {notice ? (
-              <span className="truncate">{notice}</span>
+              <>
+                <span className="truncate">{notice}</span>
+                {noticeAction && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      noticeAction.run();
+                      say(null);
+                    }}
+                    className="ml-2 shrink-0 font-extrabold text-glow-1 underline-offset-2 hover:underline"
+                  >
+                    {noticeAction.label}
+                  </button>
+                )}
+              </>
             ) : track ? (
               <>
                 <span className="truncate">{track.user?.username}</span>

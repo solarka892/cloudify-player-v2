@@ -163,7 +163,7 @@ export function OverviewView({ me }: { me: Me }) {
                 <CoverWall
                   tracks={shown}
                   label="Найденные лайки"
-                  named
+                  source={{ kind: "likes" }}
                   onPlay={(track) => playInOrder(shown, { kind: "likes" }, track)}
                 />
               </section>
@@ -188,6 +188,7 @@ export function OverviewView({ me }: { me: Me }) {
               <CoverRow
                 tracks={likeTracks}
                 label="Последние лайки"
+                source={{ kind: "likes" }}
                 onPlay={(track) => playInOrder(likeTracks, { kind: "likes" }, track)}
               />
             )}
@@ -200,7 +201,7 @@ export function OverviewView({ me }: { me: Me }) {
               onOpen={() => openSection("playlists")}
             >
               {own.pending && liked.pending ? (
-                <RowSkeleton tall />
+                <RowSkeleton />
               ) : (
                 <TileRow items={playlists} label="Плейлисты" render={playlistTile} />
               )}
@@ -226,6 +227,7 @@ export function OverviewView({ me }: { me: Me }) {
               <CoverRow
                 tracks={repostTracks}
                 label="Последние репосты"
+                source={{ kind: "reposts" }}
                 onPlay={(track) => playInOrder(repostTracks, { kind: "reposts" }, track)}
               />
             </Shelf>
@@ -288,6 +290,7 @@ export function OverviewView({ me }: { me: Me }) {
               <CoverRow
                 tracks={recent}
                 label="Недавно играло"
+                source={{ kind: "history" }}
                 onPlay={(track: Track) => playInOrder(recent, { kind: "history" }, track)}
               />
             </Shelf>

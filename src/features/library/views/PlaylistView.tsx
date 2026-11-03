@@ -104,7 +104,7 @@ export function PlaylistView({
         <CoverWall
           tracks={shown}
           label={playlist.title}
-          named={filtering}
+          source={source}
           onPlay={(track) => playInOrder(shown, source, track)}
         />
       )}

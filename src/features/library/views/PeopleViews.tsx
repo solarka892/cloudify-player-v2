@@ -243,7 +243,7 @@ export function ArtistView({ user, from }: { user: User; from: SectionId }) {
         <CoverWall
           tracks={shown}
           label={`Популярное: ${user.username}`}
-          named={filtering}
+          source={source}
           onPlay={(track) => playInOrder(shown, source, track)}
         />
       )}

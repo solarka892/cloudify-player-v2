@@ -1,9 +1,10 @@
 import { ChevronRight } from "lucide-react";
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import type { Track } from "@/api/types";
-import { Cover } from "@/features/library/CoverWall";
+import { TrackTile } from "@/features/library/CoverWall";
 import { leavesGroup, usePointing } from "@/features/library/light";
-import { currentTrack, usePlayer } from "@/features/player/store";
+import { useLikedIds, useToggleLike } from "@/features/library/likes";
+import { currentTrack, type QueueSource, usePlayer } from "@/features/player/store";
 
 // «Всё» as shelves: each section shows exactly one row, as much as fits the
 // window, and its title opens the whole section.
@@ -65,39 +66,46 @@ export function Shelf({
   );
 }
 
-/** One row of covers, as many as fit; pointing at one lends the light its colours. */
+/** One row of track tiles, as many as fit; pointing at one lends the light its colours. */
 export function CoverRow({
   tracks,
   label,
+  source,
   onPlay,
 }: {
   tracks: readonly Track[];
   label: string;
+  source: QueueSource;
   onPlay: (track: Track) => void;
 }) {
-  const { row, count } = useRowFit(128, 10);
+  const { row, count } = useRowFit(168, 18);
   const nowId = usePlayer((s) => currentTrack(s)?.id ?? null);
   const playing = usePlayer((s) => s.playing);
   const pointAt = usePointing();
+  const likedIds = useLikedIds();
+  const toggleLike = useToggleLike();
   return (
     <ul
       ref={row}
       aria-label={label}
       onMouseLeave={() => pointAt(null)}
       onBlur={(event) => leavesGroup(event) && pointAt(null)}
-      className="grid gap-2.5"
+      className="grid gap-[18px]"
       style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))` }}
     >
       {tracks.slice(0, count).map((track) => {
         const isNow = track.id === nowId;
+        const liked = likedIds.has(track.id);
         return (
-          <li key={track.id} className="relative hover:z-10 focus-within:z-10">
-            <Cover
+          <li key={track.id} className="relative min-w-0 focus-within:z-10 hover:z-10">
+            <TrackTile
               track={track}
-              named={false}
               isNow={isNow}
               playing={isNow && playing}
+              liked={liked}
+              source={source}
               onPoint={() => pointAt(track.artworkUrl)}
+              onLike={() => toggleLike(track, liked)}
               onPlay={() => (isNow ? usePlayer.getState().toggle() : onPlay(track))}
             />
           </li>
@@ -133,12 +141,12 @@ export function TileRow<T>({
 }
 
 /** A row-high quiet strip while a shelf loads. */
-export function RowSkeleton({ tall = false }: { tall?: boolean }) {
+export function RowSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className={`grid gap-2.5 overflow-hidden ${tall ? "h-[232px] auto-rows-[232px]" : "h-[124px] auto-rows-[124px]"}`}
-      style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${tall ? 168 : 128}px, 1fr))` }}
+      className="grid h-[232px] auto-rows-[232px] gap-[18px] overflow-hidden"
+      style={{ gridTemplateColumns: "repeat(auto-fill, minmax(168px, 1fr))" }}
     >
       {["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"].map((key) => (
         <span key={key} className="rounded-xl bg-panel" />
