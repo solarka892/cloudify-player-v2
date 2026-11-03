@@ -351,11 +351,17 @@ export const usePlayer = create<PlayerState>()((set, get) => {
         get().say(`Вернул порядок ${orderOf(s.source)}`);
         return;
       }
-      const mixed = shuffleOn(s, s.heard);
-      set(mixed);
-      get().say(
-        `Перемешал всё, что ещё не играло: ${tracksWord(mixed.queue.length - mixed.index - 1)}`,
-      );
+      const left = s.queue.filter((e) => e.key !== now.key && !e.added && !s.heard.has(e.key));
+      if (left.length === 0) {
+        get().say(
+          s.queue.length <= 1
+            ? "Перемешивать нечего: в очереди один трек"
+            : "Перемешивать нечего: всё в очереди уже играло",
+        );
+        return;
+      }
+      set(shuffleOn(s, s.heard));
+      get().say(`Перемешал всё, что ещё не играло: ${tracksWord(left.length)}`);
     },
 
     cycleRepeat: () => {
