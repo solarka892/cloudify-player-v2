@@ -238,6 +238,26 @@
         "name": "text-on-light-lead",
         "value": "0 2px 16px rgb(0 0 0 / 0.4)",
         "purpose": "text-shadow for the lead line over the ribbon."
+      },
+      {
+        "name": "sheet-up",
+        "value": "0 -24px 60px -20px rgb(0 0 0 / 0.8)",
+        "purpose": "The key help sheet rising from the player bar's full width; the queue sheet uses floating-menu."
+      },
+      {
+        "name": "drag-ghost",
+        "value": "0 18px 40px -12px rgb(0 0 0 / 0.85), inset 0 0 0 1px rgb(255 255 255 / 0.16)",
+        "purpose": "The ghost of a queue row held by its grip, on panel-hover."
+      },
+      {
+        "name": "keycap-edge",
+        "value": "inset 0 -1px 0 rgb(255 255 255 / 0.06)",
+        "purpose": "Bottom edge of a keycap."
+      },
+      {
+        "name": "key-used",
+        "value": "inset 0 -2px 0 color-mix(in srgb, var(--glow-1) 70%, transparent)",
+        "purpose": "glow-1 underline of a drawn key that does something."
       }
     ],
     "motion": [
@@ -295,6 +315,31 @@
         "name": "notice-timeout",
         "value": "7000ms",
         "purpose": "A player notice (and its one action) steps aside."
+      },
+      {
+        "name": "ease-sheet",
+        "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Easing of the sheets over the player and of the queue's gap slide."
+      },
+      {
+        "name": "sheet-rise",
+        "value": "200ms ease-sheet, from opacity 0, translateY(10px) scale(0.97)",
+        "purpose": "The queue sheet rising out of the queue round; none under reduced motion."
+      },
+      {
+        "name": "sheet-up",
+        "value": "240ms ease-sheet, from opacity 0, translateY(24px)",
+        "purpose": "The key help rising out of the player bar; none under reduced motion."
+      },
+      {
+        "name": "gap-slide",
+        "value": "transform 160ms ease-sheet",
+        "purpose": "Queue rows sliding over by one row to open the gap for a dragged row."
+      },
+      {
+        "name": "key-press",
+        "value": "150ms; pressed state held 220ms",
+        "purpose": "A drawn key lighting, and dipping 1px at 96% when pressed."
       }
     ],
     "breakpoints": [
@@ -325,6 +370,11 @@
       {
         "name": "opened-face-hidden-below-container",
         "value": "768px"
+      },
+      {
+        "name": "player-compact",
+        "value": "1100px",
+        "purpose": "At and below: now-playing column 180px, volume slider 72px; key map in one column."
       }
     ]
   },
@@ -472,6 +522,38 @@
       "description": "Search's 56px row: the whole row plays; the thumbnail shows a play glyph and a heart and «…» appear on hover; wide in the full list with genre, plays and date.",
       "html": "<div class=\"ds-frow\"><span class=\"ds-frow-art\"><span><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M7 4.5v15l12-7.5z\"/></svg></span></span><span class=\"ds-frow-text\"><b>Легенда о богине гроз (slowed + reverb) [prod. by ...] — re-upload</b><span>pyrokinesis</span></span><span class=\"ds-frow-cell ds-frow-genre\">Russian rap</span><span class=\"ds-frow-cell ds-frow-num\">4 200 000</span><span class=\"ds-frow-cell ds-frow-num\">12 мар 2021</span><span class=\"ds-frow-acts\"><button type=\"button\" aria-label=\"В лайки\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"/></svg></button><button type=\"button\" aria-label=\"Ещё\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><circle cx=\"5\" cy=\"12\" r=\"1.6\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\"/><circle cx=\"19\" cy=\"12\" r=\"1.6\"/></svg></button></span><span class=\"ds-frow-cell ds-frow-time\">3:41</span></div>",
       "css": ".ds-frow { display: flex; align-items: center; gap: 12px; width: 760px; height: 56px; padding: 0 10px; border-radius: 12px; color: var(--color-fg, #f4f4f6); font-family: \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background-color 150ms; } .ds-frow:hover, .ds-frow:focus-within { background: rgb(255 255 255 / 0.05); } .ds-frow-art { position: relative; flex: none; width: 44px; height: 44px; border-radius: 9px; background: var(--color-panel-hover, #18181c); } .ds-frow-art > span { position: absolute; inset: 0; display: grid; place-content: center; border-radius: 9px; background: rgb(0 0 0 / 0.45); color: #fff; opacity: 0; transition: opacity 150ms; } .ds-frow:hover .ds-frow-art > span, .ds-frow:focus-within .ds-frow-art > span { opacity: 1; } .ds-frow-text { flex: 1; min-width: 0; } .ds-frow-text b { display: block; font-weight: 800; font-size: 14.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-frow-text span { display: block; margin-top: 2px; font-weight: 700; font-size: 13px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-frow-cell { flex: none; font-weight: 700; font-size: 12.5px; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-frow-genre { width: 150px; } .ds-frow-num { width: 98px; text-align: right; } .ds-frow-time { width: 44px; text-align: right; } .ds-frow-acts { display: flex; gap: 2px; opacity: 0; transition: opacity 150ms; } .ds-frow:hover .ds-frow-acts, .ds-frow:focus-within .ds-frow-acts { opacity: 1; } .ds-frow-acts button { display: grid; place-content: center; width: 32px; height: 32px; border: none; border-radius: 9999px; background: transparent; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-frow-acts button:hover { background: rgb(255 255 255 / 0.08); color: var(--color-fg, #f4f4f6); } .ds-frow-acts button:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Mode Round",
+      "kind": "button",
+      "refersTo": "player-mode-on",
+      "description": "Shuffle / repeat beside the transport: a muted 32px icon round; on, glow-1 with a 4px dot under it.",
+      "html": "<div class=\"ds-modes\"><button class=\"ds-mode\" aria-pressed=\"false\" aria-label=\"Перемешать (S)\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m18 14 4 4-4 4\"/><path d=\"m18 2 4 4-4 4\"/><path d=\"M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-7.6a4 4 0 0 1 3.3-1.7H22\"/><path d=\"M2 6h1.972a4 4 0 0 1 3.6 2.2\"/><path d=\"M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45\"/></svg></button><button class=\"ds-mode on\" aria-pressed=\"true\" aria-label=\"Вернуть порядок (S)\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m18 14 4 4-4 4\"/><path d=\"m18 2 4 4-4 4\"/><path d=\"M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-7.6a4 4 0 0 1 3.3-1.7H22\"/><path d=\"M2 6h1.972a4 4 0 0 1 3.6 2.2\"/><path d=\"M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45\"/></svg></button></div>",
+      "css": ".ds-modes { display: flex; gap: 6px; padding: 16px; background: var(--color-dock, #0c0c0f); } .ds-mode { position: relative; display: grid; place-content: center; width: 32px; height: 32px; border: none; border-radius: 9999px; background: none; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); cursor: pointer; transition: color 150ms; } .ds-mode:hover { color: var(--color-fg, #f4f4f6); } .ds-mode.on, .ds-mode.on:hover { color: var(--glow-1, #ff9d6b); } .ds-mode.on::after { content: ''; position: absolute; bottom: -1px; left: 50%; width: 4px; height: 4px; transform: translateX(-50%); border-radius: 9999px; background: var(--glow-1, #ff9d6b); } .ds-mode:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Queue Sheet",
+      "kind": "card",
+      "refersTo": "sheet-queue",
+      "description": "«Дальше» over the player: floating-menu material at 22px corners, filter-pill tabs, 56px rows with grip and ×, the end note and the clear pill.",
+      "html": "<section class=\"ds-queue\" role=\"dialog\" aria-label=\"Очередь\"><div class=\"ds-q-tabs\"><button class=\"ds-q-tab on\" aria-pressed=\"true\">Дальше <small>1 561</small></button><button class=\"ds-q-tab\" aria-pressed=\"false\">Уже играло <small>12</small></button></div><h3 class=\"ds-q-head\">Дальше из лайков</h3><div class=\"ds-q-row\"><span class=\"ds-q-grip\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"9\" cy=\"5\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"19\" r=\"1\"/><circle cx=\"15\" cy=\"5\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"19\" r=\"1\"/></svg></span><span class=\"ds-q-art\"></span><span class=\"ds-q-text\"><b>Night Drive</b><span>Artist</span></span><span class=\"ds-q-time\">3:42</span><button class=\"ds-q-x\" aria-label=\"Убрать из очереди\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/></svg></button></div><p class=\"ds-q-end\">Потом тишина. R включает повтор, чтобы очередь шла по кругу.</p><footer class=\"ds-q-foot\"><span>Впереди 1 561 трек · 96 ч</span><button class=\"ds-q-clear\">Очистить дальше</button></footer></section>",
+      "css": ".ds-queue { width: 430px; padding: 16px 6px 12px; border: 1px solid var(--color-line, rgb(255 255 255 / 0.08)); border-radius: 22px; background: var(--color-panel, #121215); box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.8); color: var(--color-fg, #f4f4f6); font-family: \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-q-tabs { display: flex; gap: 6px; padding: 0 10px 8px; } .ds-q-tab { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: none; border-radius: 9999px; background: rgb(255 255 255 / 0.06); color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font: 700 13px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: color 150ms; } .ds-q-tab:hover { color: var(--color-fg, #f4f4f6); } .ds-q-tab.on { background: #fff; color: var(--color-ink, #0b0b0d); } .ds-q-tab small { font-size: 12px; opacity: 0.6; font-variant-numeric: tabular-nums; } .ds-q-head { margin: 0; height: 34px; display: flex; align-items: flex-end; padding: 0 12px 6px; font: 700 12.5px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); } .ds-q-row { display: grid; grid-template-columns: 16px 44px minmax(0,1fr) auto auto; align-items: center; gap: 10px; height: 56px; padding: 0 8px 0 4px; border-radius: 12px; transition: background-color 150ms; } .ds-q-row:hover { background: rgb(255 255 255 / 0.05); } .ds-q-grip, .ds-q-x { opacity: 0; transition: opacity 150ms; } .ds-q-row:hover .ds-q-grip, .ds-q-row:hover .ds-q-x { opacity: 1; } .ds-q-grip { display: grid; place-content: center; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); cursor: grab; } .ds-q-art { width: 44px; height: 44px; border-radius: 9px; background: linear-gradient(135deg, var(--glow-2, #ff4fa3), var(--glow-3, #6b7bff)); } .ds-q-text { min-width: 0; } .ds-q-text b { display: block; font: 800 14.5px/1.25 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-q-text span { font: 600 13px/1.4 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-q-time { font: 700 12.5px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); font-variant-numeric: tabular-nums; } .ds-q-x { display: grid; place-content: center; width: 32px; height: 32px; border: none; border-radius: 9999px; background: none; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); cursor: pointer; } .ds-q-x:hover { background: rgb(255 255 255 / 0.08); color: var(--color-fg, #f4f4f6); } .ds-q-end { margin: 0; padding: 14px 12px 0; font: 700 12.5px/1.5 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); } .ds-q-foot { display: flex; align-items: center; gap: 10px; padding: 8px 10px 0; font: 700 12.5px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); } .ds-q-foot span { flex: 1; } .ds-q-clear { height: 32px; padding: 0 14px; border: none; border-radius: 9999px; background: rgb(255 255 255 / 0.1); color: var(--color-fg, #f4f4f6); font: 700 13.5px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background-color 150ms; } .ds-q-clear:hover { background: rgb(255 255 255 / 0.16); } .ds-queue button:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Key Help Keys",
+      "kind": "custom",
+      "refersTo": "key-drawn-lit",
+      "description": "Drawn keys of the key help: used keys white 10% with a glow-1 underline, the pointed key filled glow-1, dead keys dimmed.",
+      "html": "<div class=\"ds-kb\" aria-hidden=\"true\"><span class=\"ds-k dead\">W</span><span class=\"ds-k used\">S</span><span class=\"ds-k used\">R</span><span class=\"ds-k lit\">Q</span><span class=\"ds-k dead\">E</span></div>",
+      "css": ".ds-kb { display: flex; gap: 4px; padding: 22px 32px; background: var(--color-panel, #121215); border-radius: 22px 22px 0 0; } .ds-k { display: grid; place-content: center; width: 34px; height: 34px; border-radius: 7px; font: 700 11.5px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; transition: background-color 150ms, color 150ms, transform 150ms; } .ds-k.dead { background: rgb(255 255 255 / 0.035); color: rgb(255 255 255 / 0.2); } .ds-k.used { background: rgb(255 255 255 / 0.1); color: var(--color-fg, #f4f4f6); box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--glow-1, #ff9d6b) 70%, transparent); cursor: pointer; } .ds-k.used:hover, .ds-k.lit { background: var(--glow-1, #ff9d6b); color: var(--color-ink, #0b0b0d); box-shadow: none; } .ds-k.used:active { transform: translateY(1px) scale(0.96); }"
+    },
+    {
+      "name": "Keycap",
+      "kind": "chip",
+      "refersTo": "keycap",
+      "description": "A key name as a veil cap with a faint bottom edge; 26px, or 22px small in menus and the key map.",
+      "html": "<span class=\"ds-caps\"><kbd class=\"ds-cap\">Shift</kbd><kbd class=\"ds-cap\">→</kbd></span> <span class=\"ds-caps\"><kbd class=\"ds-cap sm\">⌘</kbd><kbd class=\"ds-cap sm\">K</kbd></span>",
+      "css": ".ds-caps { display: inline-flex; gap: 4px; align-items: center; } .ds-cap { display: inline-grid; place-content: center; height: 26px; min-width: 26px; padding: 0 7px; border-radius: 7px; background: var(--color-veil, rgb(255 255 255 / 0.07)); color: var(--color-fg, #f4f4f6); font: 800 12px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; white-space: nowrap; box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.06); } .ds-cap.sm { height: 22px; min-width: 22px; padding: 0 6px; font-size: 11px; }"
     }
   ],
   "narrative": {
@@ -566,6 +648,21 @@
         "name": "The Cheap Light Rule",
         "body": "The ribbon redraws at about 30 fps while playing and 15 fps while paused, paints into a canvas a quarter of its drawn size, stops when it is off screen or the window is hidden, and does not animate at all under reduced motion. Mood changes ease in over roughly half a second.",
         "section": "elevation"
+      },
+      {
+        "name": "The Honest Queue Rule",
+        "body": "The queue never claims more than happened. The played-before tab is «Уже играло» only when every track above the playing one really played; when some were only passed over (a jump forward, a list started from its middle) it is «Выше в списке». The end of the list says how the queue will really end, with the key that changes it.",
+        "section": "components"
+      },
+      {
+        "name": "The Quiet Keys Rule",
+        "body": "The window's single keys (space, arrows, digits, letters) stay silent while typing in a field, leave a focused control the keys it handles itself (a slider's arrows, a keyboard-focused button's space, a queue row's arrows), and never take Cmd or Ctrl shortcuts; the only ones the app uses are ⌘K / Ctrl+K and ⌘F / Ctrl+F, handled by the search and the filter. Held down, only seek and volume repeat. Esc closes the key help first, then the queue, and leaves an open menu its own Escape.",
+        "section": "components"
+      },
+      {
+        "name": "The Physical Keys Rule",
+        "body": "Hotkeys are read by the key's place on the keyboard, not the letter it types, so Q, S, R and M work the same in the Russian layout; the help draws them in Latin.",
+        "section": "components"
       }
     ],
     "dos": [
@@ -580,18 +677,21 @@
       "**Do** let a page's own light take the colours of what is pointed at or opened, and give it back when the pointer leaves.",
       "**Do** window any list that can run into thousands, and keep the actions row in reach while it scrolls.",
       "**Do** lead a search with its answer: the artist it names, by the strict test of The Answer First Rule, else the query and its tracks; show found tracks as rows, so a long title can be read.",
-      "**Do** offer only filter choices the results hold, with their counts."
+      "**Do** offer only filter choices the results hold, with their counts.",
+      "**Do** read hotkeys by physical key and keep them quiet while typing; name each control's key in its title.",
+      "**Do** say what really happened and what will happen: «Уже играло» only for what played, and how the queue ends where it ends."
     ],
     "donts": [
       "**Don't** add a fixed brand accent, SoundCloud's orange as a UI colour, or Yandex Music's signature yellow; a mood turn must never produce yellow.",
-      "**Don't** put borders around cards or tiles; `line` belongs only to the player bar's top edge, floating menus and the rule under a list's column heads.",
+      "**Don't** put borders around cards or tiles; `line` belongs only to the player bar's top edge, floating menus, the sheets over the player and the rule under a list's column heads.",
       "**Don't** put veil wells on the light; there they are smoke with a rim.",
       "**Don't** hide a track's name until hover; the caption under a cover is always there.",
       "**Don't** give flat panels drop shadows.",
       "**Don't** set track titles, buttons or sentences in Unbounded, or use Manrope below 600.",
       "**Don't** use stroked outline-only or square-cornered buttons; actions are filled pills and circles, or bare muted icons and text.",
       "**Don't** let colour transitions jump or the light run at full frame rate while idle.",
-      "**Don't** add eyebrow labels or kickers above titles; a section is named by its title alone."
+      "**Don't** add eyebrow labels or kickers above titles; a section is named by its title alone.",
+      "**Don't** take a Cmd or Ctrl shortcut for a hotkey, or let a single-key hotkey fire while someone types."
     ]
   }
 }
