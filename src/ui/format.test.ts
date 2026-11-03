@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { artworkUrl } from "@/ui/artworkUrl";
-import { formatCount, formatSeconds, plural, relativeDay } from "@/ui/format";
+import {
+  formatCount,
+  formatLength,
+  formatSeconds,
+  plural,
+  relativeDay,
+  shortDate,
+} from "@/ui/format";
 
 describe("format", () => {
   it("writes lengths like a player", () => {
@@ -58,5 +65,20 @@ describe("artworkUrl", () => {
     ]) {
       expect(artworkUrl(url, 300)).toBe(url);
     }
+  });
+
+  it("says how long a whole list plays", () => {
+    expect(formatLength(45 * 60_000)).toBe("45 мин");
+    expect(formatLength(2 * 3_600_000)).toBe("2 ч");
+    expect(formatLength(87 * 3_600_000 + 12 * 60_000)).toBe("87 ч 12 мин");
+  });
+
+  it("dates a list row briefly, with the year only when it differs", () => {
+    const now = new Date(2026, 10, 3, 12);
+    expect(shortDate(new Date(2026, 10, 3, 9).toISOString(), now)).toBe("сегодня");
+    expect(shortDate(new Date(2026, 10, 1, 9).toISOString(), now)).toBe("2 дня назад");
+    expect(shortDate(new Date(2026, 9, 12, 9).toISOString(), now)).toBe("12 окт");
+    expect(shortDate(new Date(2019, 4, 9, 9).toISOString(), now)).toBe("9 мая 2019");
+    expect(shortDate("not a date", now)).toBe("");
   });
 });

@@ -1,6 +1,5 @@
 import { Pause, Play, SkipForward, ThumbsDown } from "lucide-react";
 import type { Me } from "@/api/types";
-import { Ribbon } from "@/features/home/Ribbon";
 import { currentTrack, usePlayer } from "@/features/player/store";
 import { useLoudness } from "@/features/player/useLoudness";
 import { MOODS, moodById } from "@/features/selection/moods";
@@ -8,6 +7,7 @@ import { useSelection } from "@/features/selection/useSelection";
 import { Artwork } from "@/ui/Artwork";
 import { describeError } from "@/ui/errors";
 import { formatCount } from "@/ui/format";
+import { Ribbon } from "@/ui/Ribbon";
 
 const roundButton =
   "grid size-[54px] shrink-0 place-content-center rounded-full bg-[rgb(10_10_12/0.62)] shadow-[inset_0_0_0_1px_rgb(255_255_255/0.16)] transition-colors duration-150 hover:bg-[rgb(40_40_46/0.72)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[rgb(10_10_12/0.62)]";

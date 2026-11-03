@@ -2,10 +2,10 @@ import { KeyRound, LoaderCircle, LogIn } from "lucide-react";
 import { type FormEvent, type ReactNode, useState } from "react";
 import { ApiError } from "@/api/invoke";
 import { roomForTrafficLights } from "@/app/chrome";
-import { Ribbon } from "@/features/home/Ribbon";
 import { useSignInWithToken, useSignInWithWindow } from "@/features/session/useSession";
 import { describeError } from "@/ui/errors";
 import { Logo } from "@/ui/Mark";
+import { Ribbon } from "@/ui/Ribbon";
 
 const DISCLAIMER = "Неофициальный клиент. Не связан с SoundCloud. Используй на свой страх и риск.";
 

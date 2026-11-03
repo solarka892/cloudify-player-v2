@@ -7,7 +7,19 @@
 // `?signed-out` shows the sign-in screen, `?offline` the unreachable one.
 
 import { ApiError } from "@/api/invoke";
-import type { Me, Page, Playlist, SessionState, Stream, Track, User, Waveform } from "@/api/types";
+import type {
+  LikedTrack,
+  Me,
+  Page,
+  PageRequest,
+  Playlist,
+  Repost,
+  SessionState,
+  Stream,
+  Track,
+  User,
+  Waveform,
+} from "@/api/types";
 
 const art = (key: string, ext = "jpg") => `https://i1.sndcdn.com/artworks-${key}-large.${ext}`;
 
@@ -134,7 +146,27 @@ const played = track(
   },
 );
 
+// The stand-in artists have no pictures of their own: lend them a cover each.
+for (const liked of likes) {
+  if (liked.user && !liked.user.avatarUrl) liked.user.avatarUrl = liked.artworkUrl;
+}
+
 const radio = user(20, "Станция SoundCloud");
+
+/**
+ * A big library, the size of the author's: the stand-in likes over and over
+ * under new ids, liked a day apart going back years. Enough to feel paging,
+ * the windowed list and the filter the way a real account does.
+ */
+const LIBRARY_SIZE = 1312;
+const allLikes: LikedTrack[] = Array.from({ length: LIBRARY_SIZE }, (_, i) => {
+  const base = likes[i % likes.length] as Track;
+  const copy = i < likes.length ? base : { ...base, id: base.id * 10 + i, urn: `${base.urn}-${i}` };
+  return {
+    likedAt: new Date(Date.UTC(2026, 10, 3) - i * 86_400_000 * 1.3).toISOString(),
+    track: copy,
+  };
+});
 const station: Track[] = [
   track(799094587, "Похожий трек 1", radio, "3:48", "2NtS3vNB8BrD-0", { genre: "Electronic" }),
   track(2194656115, "Похожий трек 2", radio, "3:12", "qxQGZJ1fRxnQ6Qui-8MIgjg", {
@@ -187,12 +219,45 @@ const playlists: Playlist[] = [
   ]),
 ];
 
+const playlistsLiked: Playlist[] = [
+  {
+    ...playlist(3, "Ночной эфир", 112, [
+      "000152760858-gios79",
+      "2NtS3vNB8BrD-0",
+      "qxQGZJ1fRxnQ6Qui-8MIgjg",
+      "fIyU231zLp5SUYfA-y4f7Sw",
+    ]),
+    user: artists.kateNv,
+  },
+  {
+    ...playlist(4, "Этажи", 9, ["zqBLxK2rN5bMyQOA-0SXiXA", "f2ywWgsyWsuVlQR4-Pf6iqQ"]),
+    user: artists.depo,
+    isAlbum: true,
+    createdAt: "2021-09-17T00:00:00Z",
+  },
+  {
+    ...playlist(5, "In Rainbows", 10, ["mh2YnflSFifI-0"]),
+    user: artists.radiohead,
+    isAlbum: true,
+    createdAt: "2007-10-10T00:00:00Z",
+  },
+];
+
 const me: Me = {
   user: user(1, "solarka", "https://i1.sndcdn.com/avatars-iQdloPteC4sCvuuB-1thxeg-large.jpg"),
   plan: "free",
 };
 
 const page = <T>(items: T[]): Page<T> => ({ items, next: null });
+
+/** Pages `items` like SoundCloud does, with an opaque cursor for the next page. */
+function paged<T>(name: string, items: T[], request: unknown): Page<T> {
+  const asked = (request ?? {}) as PageRequest;
+  const from = asked.cursor ? Number(asked.cursor.split(":")[1]) : 0;
+  const size = Math.min(asked.limit ?? 200, 200);
+  const to = from + size;
+  return { items: items.slice(from, to), next: to < items.length ? `${name}:${to}` : null };
+}
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
 function waveformFor(url: string): Waveform {
@@ -235,7 +300,7 @@ function silence(seconds: number): string {
   return URL.createObjectURL(new Blob([bytes], { type: "audio/wav" }));
 }
 
-const everything = [...likes, played, ...station];
+const everything = [...allLikes.map((like) => like.track), played, ...station];
 
 export async function answer(
   command: string,
@@ -259,7 +324,36 @@ export async function answer(
     case "sign_out":
       return null;
     case "my_likes":
-      return page(likes.map((t) => ({ likedAt: null, track: t })));
+      return paged("likes", allLikes, args.page);
+    case "my_albums":
+      return page<Playlist>([]);
+    case "my_liked_playlists":
+      return page(playlistsLiked.map((p) => ({ likedAt: null, playlist: p })));
+    case "my_reposts": {
+      const reposts: Repost[] = [
+        { repostedAt: null, caption: null, item: { kind: "track", ...(likes[6] as Track) } },
+        { repostedAt: null, caption: null, item: { kind: "track", ...(likes[1] as Track) } },
+        {
+          repostedAt: null,
+          caption: null,
+          item: { kind: "playlist", ...(playlistsLiked[0] as Playlist) },
+        },
+      ];
+      return page(reposts);
+    }
+    case "my_followings":
+      return page(
+        Object.values(artists).map((a) => ({ ...a, followersCount: 1000 + a.id * 7919 })),
+      );
+    case "artist_top_tracks":
+      return page(
+        likes
+          .filter((t) => t.user?.id === args.userId)
+          .concat(station)
+          .slice(0, 12),
+      );
+    case "artist_station":
+      return station;
     case "play_history":
       return page(
         [played, likes[5] as Track].map((t) => ({
@@ -270,7 +364,7 @@ export async function answer(
     case "my_playlists":
       return page(playlists);
     case "playlist": {
-      const found = playlists.find((p) => p.id === args.id);
+      const found = [...playlists, ...playlistsLiked].find((p) => p.id === args.id);
       if (!found) throw new ApiError("not-found", "dev: no such playlist");
       return { ...found, tracks: [...station, ...likes].slice(0, 8) };
     }

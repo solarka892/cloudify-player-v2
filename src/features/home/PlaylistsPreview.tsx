@@ -6,27 +6,11 @@ import { SectionHeader, SectionProblem } from "@/features/home/SectionHeader";
 import { usePlaylists } from "@/features/library/queries";
 import { usePlayer } from "@/features/player/store";
 import { canPlay } from "@/features/selection/buildQueue";
-import { Artwork } from "@/ui/Artwork";
 import { describeError } from "@/ui/errors";
 import { formatCount, plural } from "@/ui/format";
+import { Mosaic } from "@/ui/Mosaic";
 
 const SHOWN = 2;
-
-function Mosaic({ playlist }: { playlist: Playlist }) {
-  const covers = playlist.covers.length >= 4 ? playlist.covers.slice(0, 4) : null;
-  if (!covers) {
-    return (
-      <Artwork url={playlist.artworkUrl} size={300} className="aspect-square w-full rounded-xl" />
-    );
-  }
-  return (
-    <span className="grid aspect-square grid-cols-2 overflow-hidden rounded-xl">
-      {covers.map((url) => (
-        <Artwork key={url} url={url} size={300} className="size-full" />
-      ))}
-    </span>
-  );
-}
 
 /** «Плейлисты»: your own, as mosaics of their first covers; a click plays it from the top. */
 export function PlaylistsPreview({
@@ -83,7 +67,7 @@ export function PlaylistsPreview({
                 aria-busy={busy}
                 className="min-w-0 rounded-[18px] bg-panel p-2.5 text-left transition-colors duration-150 hover:bg-panel-hover aria-busy:opacity-60"
               >
-                <Mosaic playlist={item} />
+                <Mosaic playlist={item} className="w-full rounded-xl" />
                 <b className="mt-2 block truncate font-extrabold text-[14px]">{item.title}</b>
                 <span className="font-bold text-[12.5px] text-fg-faint">
                   {item.trackCount} {plural(item.trackCount, ["трек", "трека", "треков"])}

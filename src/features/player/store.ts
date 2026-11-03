@@ -6,8 +6,11 @@ import { loadResumePoint } from "@/features/player/resume";
 export type QueueSource =
   | { kind: "selection" }
   | { kind: "likes" }
-  | { kind: "playlist"; title: string }
-  | { kind: "history" };
+  | { kind: "playlist"; title: string; id?: number }
+  | { kind: "history" }
+  | { kind: "reposts" }
+  | { kind: "artist"; title: string }
+  | { kind: "station"; title: string };
 
 export type SkipReason = "skip" | "dislike" | "ended" | "unavailable";
 

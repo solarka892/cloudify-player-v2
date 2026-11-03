@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 
-// The light behind «Подборка»: three soft bands in the cover's colours whose
-// swell follows the playing track's waveform.
+// The light behind a screen's big word («Подборка», what the library has open,
+// sign-in): three soft bands in the cover's colours whose swell follows the
+// playing track's waveform.
 //
 // Drawn small and shown big: the bands are painted, already blurred, into a
 // canvas a quarter of the size of their 1440×440 drawing space, and the browser
@@ -71,7 +72,6 @@ export function Ribbon({ playing, energy, pace, loudness, className = "" }: Ribb
     const node = canvas.current;
     const ctx = node?.getContext("2d");
     if (!node || !ctx) return;
-    const root = document.documentElement;
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
     let phase = 0;
     // Mood changes ease in rather than jump.
@@ -84,7 +84,8 @@ export function Ribbon({ playing, energy, pace, loudness, className = "" }: Ribb
 
     const draw = () => {
       // The glow colours cross-fade in CSS; reading them here follows the fade.
-      const style = getComputedStyle(root);
+      // They are read where the light sits, so a wrapper can relight it locally.
+      const style = getComputedStyle(node);
       const glow = [1, 2, 3].map((n) => style.getPropertyValue(`--glow-${n}`).trim() || "#ff9d6b");
       const { loudness: wave } = live.current;
       ctx.setTransform(1, 0, 0, 1, 0, 0);

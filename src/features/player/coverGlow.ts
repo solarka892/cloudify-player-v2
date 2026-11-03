@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   awayFromYellow,
   type Hsl,
@@ -31,6 +31,30 @@ function paletteOf(url: string): Promise<[Hsl, Hsl, Hsl]> {
     palettes.set(url, palette);
   }
   return palette;
+}
+
+/**
+ * The three glow colours of one cover as CSS, for a light of its own (the
+ * library's stage); `null` without a cover or until it has been read.
+ */
+export function useCoverColours(artwork: string | null): readonly [string, string, string] | null {
+  const [colours, setColours] = useState<readonly [string, string, string] | null>(null);
+  useEffect(() => {
+    if (!artwork) return;
+    let current = true;
+    paletteOf(artwork).then(
+      ([a, b, c]) => {
+        if (current) setColours([hslCss(a), hslCss(b), hslCss(c)]);
+      },
+      () => {},
+    );
+    return () => {
+      current = false;
+    };
+  }, [artwork]);
+  // From one cover to the next the old colours stay until the new ones are read,
+  // so the light fades straight across instead of detouring through the default.
+  return artwork ? colours : null;
 }
 
 /**

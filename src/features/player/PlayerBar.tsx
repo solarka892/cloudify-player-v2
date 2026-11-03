@@ -28,6 +28,12 @@ function from(source: QueueSource | null): string {
       return "из лайков";
     case "playlist":
       return `из «${source.title}»`;
+    case "reposts":
+      return "из репостов";
+    case "artist":
+      return `популярное · ${source.title}`;
+    case "station":
+      return `радио · ${source.title}`;
     default:
       return "";
   }

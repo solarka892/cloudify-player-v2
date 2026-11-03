@@ -7,17 +7,10 @@ import { canPlay } from "@/features/selection/buildQueue";
 import { Artwork } from "@/ui/Artwork";
 import { describeError } from "@/ui/errors";
 import { formatCount, formatDuration } from "@/ui/format";
+import { stateBadge } from "@/ui/trackState";
 
 const SHOWN = 5;
 const SKELETON = ["a", "b", "c", "d", "e"];
-
-/** Why a track won't play in full, said before anyone presses play. */
-function badge(track: Track): string | null {
-  if (track.access.policy === "block") return "не в твоём регионе";
-  if (!track.access.playable) return "не играет здесь";
-  if (track.access.preview) return "Go+ · 30 с";
-  return null;
-}
 
 /** «Лайки»: the latest five, each ready to play with the rest of the likes after it. */
 export function LikesPreview({
@@ -66,7 +59,7 @@ export function LikesPreview({
       ) : (
         <ul className="mt-3">
           {tracks.slice(0, SHOWN).map((track) => {
-            const note = badge(track);
+            const note = stateBadge(track);
             const off = !canPlay(track);
             const isNow = track.id === nowId;
             return (

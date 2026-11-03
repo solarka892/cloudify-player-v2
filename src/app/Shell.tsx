@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { Me } from "@/api/types";
+import { ScrollRoot } from "@/app/scrollRoot";
 import { type Tab, TopBar } from "@/app/TopBar";
 import { HomePage } from "@/features/home/HomePage";
+import { LibraryPage } from "@/features/library/LibraryPage";
+import { type SectionId, useLibraryNav } from "@/features/library/nav";
+import { useLikesInBackground } from "@/features/library/play";
 import { ComingSoon } from "@/features/placeholder/ComingSoon";
 import { useCoverGlow } from "@/features/player/coverGlow";
 import { startAudioEngine } from "@/features/player/engine";
@@ -32,13 +36,18 @@ export function Shell({ me }: { me: Me }) {
   const [tab, setTab] = useState<Tab>("home");
   const [scrolled, setScrolled] = useState(false);
   const page = useRef<HTMLElement>(null);
+  const [scroller, setScroller] = useState<HTMLElement | null>(null);
   const sessionExpired = useSessionExpired();
+
+  useEffect(() => setScroller(page.current), []);
 
   useEffect(
     () => startAudioEngine({ onSessionExpired: () => void sessionExpired() }),
     [sessionExpired],
   );
   useSpaceToPlay();
+  // Every like, loading from the start: the library and its shuffle need all of them.
+  useLikesInBackground();
 
   // The light takes its colours from what plays, or from what the selection would play.
   const selection = useSelection();
@@ -55,6 +64,10 @@ export function Shell({ me }: { me: Me }) {
     // A section always opens at its top.
     page.current?.scrollTo({ top: 0 });
   };
+  const openLibrary = (section: SectionId) => {
+    useLibraryNav.getState().open({ kind: "section", section });
+    open("library");
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -65,11 +78,15 @@ export function Shell({ me }: { me: Me }) {
           onScroll={(event) => setScrolled(event.currentTarget.scrollTop > 8)}
           className="h-full overflow-y-auto overscroll-contain"
         >
-          {tab === "home" ? (
-            <HomePage me={me} onOpenLibrary={() => open("library")} />
-          ) : (
-            <ComingSoon page={tab} />
-          )}
+          <ScrollRoot value={scroller}>
+            {tab === "home" ? (
+              <HomePage me={me} onOpenLibrary={openLibrary} />
+            ) : tab === "library" ? (
+              <LibraryPage me={me} />
+            ) : (
+              <ComingSoon page={tab} />
+            )}
+          </ScrollRoot>
         </main>
       </div>
       <PlayerBar />
