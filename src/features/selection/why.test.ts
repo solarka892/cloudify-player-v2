@@ -45,10 +45,17 @@ describe("the «почему» line", () => {
       { kind: "artist", name: "pyrokinesis", finished: 12, plays: 14 },
       { kind: "finished", times: 5, of: 6 },
     ];
-    expect(whyParts(facts, NOW)).toEqual(["Из твоих лайков", "дослушал 5 из 6"]);
+    // Where it came from says little here, so what you did goes first: a narrow line keeps it.
+    expect(whyParts(facts, NOW)).toEqual(["Дослушал 5 из 6", "из твоих лайков"]);
     expect(whyLine([{ kind: "liked" }, { kind: "finished", times: 3, of: 3 }], NOW)).toBe(
-      "Из твоих лайков · дослушал все 3",
+      "Дослушал все 3 · из твоих лайков",
     );
+    expect(
+      whyLine(
+        [{ kind: "liked" }, { kind: "artist", name: "pyrokinesis", finished: 12, plays: 14 }],
+        NOW,
+      ),
+    ).toBe("pyrokinesis: дослушиваешь 12 из 14 · из твоих лайков");
   });
 
   it("says a favourite has been missed, and since when", () => {
@@ -57,7 +64,7 @@ describe("the «почему» line", () => {
       { kind: "finished", times: 4, of: 4 },
       { kind: "missed", at: at(7, 20, 12) },
     ];
-    expect(whyLine(facts, NOW)).toBe("Из твоих лайков · давно не слышал — последний раз в августе");
+    expect(whyLine(facts, NOW)).toBe("Давно не слышал — последний раз в августе · из твоих лайков");
   });
 
   it("reads the diary's windows and a press of «больше такого»", () => {

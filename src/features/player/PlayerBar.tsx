@@ -110,13 +110,16 @@ export function PlayerBar() {
           <b className="block truncate font-extrabold text-[15px]">
             {track ? track.title : "Ничего не играет"}
           </b>
+          {/* In a narrow window a notice keeps its words: its «Вернуть» moves to the line below. */}
           <span
             role="status"
-            className={`flex min-w-0 font-bold text-[13px] ${notice ? "text-fg" : "text-fg-muted"}`}
+            className={`flex min-w-0 font-bold text-[13px] max-[1100px]:flex-wrap ${notice ? "text-fg" : "text-fg-muted"}`}
           >
             {notice ? (
               <>
-                <span className="truncate">{notice}</span>
+                <span className="truncate max-[1100px]:basis-full" title={notice}>
+                  {notice}
+                </span>
                 {noticeAction && (
                   <button
                     type="button"
@@ -124,7 +127,7 @@ export function PlayerBar() {
                       noticeAction.run();
                       say(null);
                     }}
-                    className="ml-2 shrink-0 font-extrabold text-glow-1 underline-offset-2 hover:underline"
+                    className="ml-2 shrink-0 font-extrabold text-glow-1 underline-offset-2 hover:underline max-[1100px]:ml-0"
                   >
                     {noticeAction.label}
                   </button>
@@ -153,7 +156,7 @@ export function PlayerBar() {
               <span className="truncate">Включи подборку или трек из лайков</span>
             )}
           </span>
-          {track && why && (
+          {track && why && !notice && (
             <span
               title={why}
               className="block truncate font-bold text-[12.5px] text-fg-faint leading-tight"

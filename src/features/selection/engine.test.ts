@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 import type { Track } from "@/api/types";
 import {
   DEFAULT_SETTINGS,
+  explainer,
   MIN_MOOD_TRACKS,
   type Pool,
   type SelectionInput,
   type SelectionSettings,
   type SourceId,
   select,
+  songOf,
   tracksOf,
 } from "@/features/selection/engine";
 import { isCalm, isUpbeat, type MoodId } from "@/features/selection/moods";
@@ -744,4 +746,73 @@ it("a mood that finds too little says so instead of playing something else", () 
   );
   expect(result.picks.length).toBeLessThan(MIN_MOOD_TRACKS);
   expect(result.picks).toEqual([]);
+});
+
+// --- one song once -------------------------------------------------------------------------
+
+describe("a song plays once, whoever uploaded it", () => {
+  const titled = (id: number, title: string, artist: number) => ({
+    ...track(id, { artist }),
+    title,
+  });
+
+  it("knows a version and a re-upload for the same song", () => {
+    const own = titled(1, "Положение", 15);
+    const same = [
+      titled(2, "Положение (slowed)", 15),
+      titled(3, "Положение [HQ]", 15),
+      { ...titled(4, "a15 - Положение (live)", 31) },
+      titled(5, "Положение — radio edit", 15),
+    ];
+    for (const other of same) expect(songOf(other)).toBe(songOf(own));
+    expect(songOf(titled(6, "Кинолента", 15))).not.toBe(songOf(own));
+    // Another artist's song with the same name is another song.
+    expect(songOf(titled(7, "Положение", 99))).not.toBe(songOf(own));
+  });
+
+  it("does not call a re-upload of a song you liked new", () => {
+    const likes = [titled(1, "Положение", 15), ...range(10, 20, (id) => ({ artist: id }))];
+    const station = [
+      titled(101, "a15 - Положение (slowed)", 31),
+      ...range(102, 110, () => ({ artist: 40 })),
+    ];
+    const queue = tracksOf(
+      select(
+        learnedInput([], { likes, taste: null, pools: [{ source: "stations", tracks: station }] }),
+      ),
+    );
+    expect(ids(queue)).not.toContain(101);
+    expect(ids(queue)).toContain(102);
+  });
+
+  it("keeps the queue to one of each, and away from what just played", () => {
+    const likes = [
+      titled(1, "Положение", 15),
+      titled(2, "Положение (slowed)", 15),
+      titled(3, "a15 - Положение (sped up)", 31),
+      ...range(10, 30, (id) => ({ artist: id })),
+    ];
+    for (const taste of [null, learn(background(40), NOW)]) {
+      const queue = tracksOf(select(learnedInput([], { likes, taste, pools: [] })));
+      const songs = queue.map(songOf);
+      expect(new Set(songs).size).toBe(songs.length);
+      expect(queue.filter((t) => t.id <= 3)).toHaveLength(1);
+      const after = tracksOf(
+        select(learnedInput([], { likes, taste, pools: [], before: [titled(9, "Положение", 15)] })),
+      );
+      expect(after.filter((t) => t.id <= 3)).toHaveLength(0);
+    }
+  });
+});
+
+describe("reasons follow the diary as it is now", () => {
+  it("an erased diary turns the reasons back to the rules", () => {
+    const rows = [...background(40), ...plays(5, 9, 2, OUTCOME.finished)];
+    const input = learnedInput(rows);
+    const nine = select(input).picks.find((p) => p.track.id === 9);
+    expect(nine?.facts).toContainEqual({ kind: "finished", times: 5, of: 5 });
+    if (!nine) throw new Error("track 9 should be picked");
+    const now = explainer({ ...input, taste: learn([], NOW) })(nine);
+    expect(now).toEqual([{ kind: "liked" }, { kind: "rules" }]);
+  });
 });

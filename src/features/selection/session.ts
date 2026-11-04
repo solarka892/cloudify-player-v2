@@ -5,6 +5,7 @@ import { queryClient } from "@/app/queryClient";
 import { noteMore, takeBackRejected } from "@/features/diary/record";
 import { type QueueOptions, usePlayer } from "@/features/player/store";
 import {
+  explainer,
   NOVELTY_STEPS,
   type Pick,
   type Pool,
@@ -70,7 +71,25 @@ export const useSelectionSession = create<SessionState>()(() => ({
 
 /** The shell's latest reading of the library and the diary. */
 export function provide(base: BaseInput) {
+  const before = useSelectionSession.getState().base;
   useSelectionSession.setState({ base });
+  // The diary changed (a play written, a play forgotten, everything erased): the reasons say so.
+  if (before && before.taste !== base.taste) refreshFacts();
+}
+
+/** Works out again why each queued track is there, from the diary as it is now. */
+function refreshFacts() {
+  const s = useSelectionSession.getState();
+  if (!s.base || s.picks.size === 0) return;
+  const explain = explainer({
+    ...s.base,
+    pools: [...morePools(s.extra), ...s.base.pools],
+    steers: s.steers,
+    now: Date.now(),
+  });
+  const picks = new Map<number, Pick>();
+  for (const [id, pick] of s.picks) picks.set(id, { ...pick, facts: explain(pick) });
+  useSelectionSession.setState({ picks });
 }
 
 const playingSelection = () => {
@@ -142,8 +161,10 @@ function options(): QueueOptions {
       useSelectionSession.setState({ seed });
       const before = usePlayer.getState().queue.map((entry) => entry.track);
       let selection = build({ seed, exclude, before });
-      // Everything has had a turn: start the round again rather than stop.
-      if (selection && selection.picks.length === 0) selection = build({ seed, before });
+      // Everything has had a turn: start the round again rather than stop, keeping only
+      // the last few songs and artists apart.
+      if (selection && selection.picks.length === 0)
+        selection = build({ seed, before: before.slice(-20) });
       if (!selection) return [];
       remember(selection, false);
       return tracksOf(selection);

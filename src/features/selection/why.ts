@@ -164,26 +164,47 @@ const DID_ORDER: readonly Fact["kind"][] = [
   "rules",
 ];
 
+/** What you did, said about the track itself: worth more than a plain «из твоих лайков». */
+const TELLING: ReadonlySet<Fact["kind"]> = new Set(["missed", "again", "finished", "artist"]);
+
+const upper = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+const lower = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
+
 /**
- * The line's parts, most telling first: where it came from, then what you
- * did with it (or with its artist). At most two; empty when nothing is known.
+ * The line's parts, most telling first: where it came from, then what you did
+ * with it (or with its artist) — or the other way round when where it came
+ * from says little («из твоих лайков») and what you did says more, so a narrow
+ * line keeps the part about you. At most two; empty when nothing is known.
  */
 export function whyParts(facts: readonly Fact[], now: number): string[] {
   let from: string | null = null;
+  let fromFact: Fact | null = null;
   for (const fact of facts) {
     from = whereFrom(fact, now);
-    if (from) break;
+    if (from) {
+      fromFact = fact;
+      break;
+    }
   }
   let did: string | null = null;
+  let didFact: Fact | null = null;
   for (const kind of DID_ORDER) {
     const fact = facts.find((f) => f.kind === kind);
     if (fact) {
       did = whatYouDid(fact, now);
+      didFact = fact;
       break;
     }
   }
   // «Похож на … — ты дослушал его вчера» already says it was heard out.
   if (did === "ты дослушал его" && from?.includes("дослушал")) did = null;
+  const plain =
+    fromFact !== null &&
+    (fromFact.kind === "liked" || (fromFact.kind === "history" && fromFact.at === null));
+  if (from && did && didFact && plain && TELLING.has(didFact.kind)) {
+    // An artist's name keeps its own case.
+    return [didFact.kind === "artist" ? did : upper(did), lower(from)];
+  }
   return [from, did].filter((part): part is string => part !== null);
 }
 

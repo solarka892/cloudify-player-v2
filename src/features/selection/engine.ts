@@ -255,6 +255,8 @@ export function select(input: SelectionInput): Selection {
     !exclude.has(track.id);
 
   const likedIds = new Set(input.likes.map((track) => track.id));
+  // A re-upload of a song you liked, or just played, is not new to you, whoever uploaded it.
+  const heardSongs = new Set([...input.likes, ...input.history.slice(0, RECENT)].map(songOf));
   const recent = new Set(input.history.slice(0, RECENT).map((track) => track.id));
   if (taste) {
     for (const [id, e] of taste.tracks) if (now - e.lastAt < RECENT_MS) recent.add(id);
@@ -319,6 +321,7 @@ export function select(input: SelectionInput): Selection {
     (track) =>
       usable(track) &&
       !likedIds.has(track.id) &&
+      !heardSongs.has(songOf(track)) &&
       !recent.has(track.id) &&
       !familiar.has(track.id) &&
       !known(evidence(track.id)),
@@ -406,6 +409,9 @@ export function select(input: SelectionInput): Selection {
   const only = novelty === 0 ? "familiar" : novelty === NOVELTY_STEPS ? "new" : null;
   const gap = cold ? 0 : SPREAD;
   const used = new Set<number>();
+  // One song plays once, whoever uploaded it: «… (slowed)» or «artist - …» is the same song.
+  const songs = new Set((input.before ?? []).map(songOf));
+  const taken = (c: Candidate) => used.has(c.track.id) || songs.has(songOf(c.track));
   const cursor = new Map<SourceId, number>();
   const credit = new Map<SourceId, number>();
   const lastArtists: (number | null)[] = (input.before ?? []).slice(-SPREAD).map(artistOf);
@@ -413,7 +419,7 @@ export function select(input: SelectionInput): Selection {
   const firstFree = (source: SourceId): number => {
     const list = lists.get(source) ?? [];
     let at = cursor.get(source) ?? 0;
-    while (at < list.length && used.has((list[at] as Candidate).track.id)) at += 1;
+    while (at < list.length && taken(list[at] as Candidate)) at += 1;
     cursor.set(source, at);
     return at;
   };
@@ -448,7 +454,7 @@ export function select(input: SelectionInput): Selection {
       const start = firstFree(source);
       for (let at = start; at < Math.min(list.length, start + LOOK); at++) {
         const c = list[at] as Candidate;
-        if (used.has(c.track.id)) continue;
+        if (taken(c)) continue;
         const artist = artistOf(c.track);
         if (artist === null || !avoid.has(artist)) return c;
       }
@@ -468,6 +474,7 @@ export function select(input: SelectionInput): Selection {
     if (!c && only === null) c = takeFrom(want === "familiar" ? "new" : "familiar");
     if (!c) break;
     used.add(c.track.id);
+    songs.add(songOf(c.track));
     chosen.push(c);
     if (SIDE[c.source] === "familiar") familiarCount += 1;
     lastArtists.push(artistOf(c.track));
@@ -477,43 +484,76 @@ export function select(input: SelectionInput): Selection {
     return { picks: [], places, learned, sources: counts };
   }
 
-  const likedArtists = new Set(input.likes.map(artistOf).filter((a) => a !== null));
+  const explain = explainer({ ...input, taste, steers, now });
+  return {
+    picks: chosen.map((c) => ({
+      track: c.track,
+      source: c.source,
+      seed: c.seed,
+      facts: explain(c),
+    })),
+    places,
+    learned,
+    sources: counts,
+  };
+}
+
+/** What facts are worked out from: the same as a build's. */
+export interface Explaining {
+  likes: readonly Track[];
+  pools: readonly Pool[];
+  /** `null` (or empty): nothing learned yet, the rules speak. */
+  taste: Taste | null;
+  steers?: readonly Steer[] | undefined;
+  now?: number | undefined;
+}
+
+/**
+ * The facts behind picks, worked out from the diary as it is now: a pick's
+ * «почему» never quotes a diary that has since changed or been erased.
+ */
+export function explainer(context: Explaining): (pick: Omit<Pick, "facts">) => Fact[] {
+  const taste = context.taste && context.taste.plays > 0 ? context.taste : null;
+  const steers = context.steers ?? [];
+  const now = context.now ?? Date.now();
+  const likedArtists = new Set(context.likes.map(artistOf).filter((a) => a !== null));
   // Last winter's and a year ago's counts, for tracks picked from another source too.
   const heardThen = new Map<number, Fact>();
-  for (const pool of input.pools) {
+  for (const pool of context.pools) {
     if ((pool.source !== "winter" && pool.source !== "yearAgo") || !pool.heard) continue;
     for (const [id, times] of pool.heard) {
       if (!heardThen.has(id)) heardThen.set(id, { kind: pool.source, times });
     }
   }
-  const factsOf = (c: Candidate): Fact[] => {
+  return ({ track, source, seed }) => {
     const facts: Fact[] = [];
-    const { track } = c;
     const artist = artistOf(track);
+    // Brought by a «больше такого» — on another track: the one pressed on is not «like itself».
     const asked = steers.find(
       (steer) =>
         steer.kind === "more" &&
+        steer.track.id !== track.id &&
         ((artist !== null && artist === artistOf(steer.track)) ||
-          (c.seed !== null && c.seed.track.id === steer.track.id)),
+          (seed !== null && seed.track.id === steer.track.id)),
     );
     if (asked) facts.push({ kind: "more", track: asked.track });
-    const own = evidence(track.id);
-    switch (c.source) {
+    const own = taste?.tracks.get(track.id);
+    switch (source) {
       case "likes":
         facts.push({ kind: "liked" });
         break;
       case "stations":
-        if (c.seed) facts.push({ kind: "station", seed: c.seed });
+        if (seed) facts.push({ kind: "station", seed });
         break;
       case "related":
-        if (c.seed) facts.push({ kind: "related", seed: c.seed });
+        if (seed) facts.push({ kind: "related", seed });
         break;
       case "history":
         facts.push({ kind: "history", at: own?.lastFinishedAt ?? own?.lastAt ?? null });
         break;
       case "winter":
       case "yearAgo":
-        facts.push(heardThen.get(track.id) ?? { kind: c.source, times: 1 });
+        facts.push(heardThen.get(track.id) ?? { kind: source, times: 1 });
         break;
     }
     if (own) {
@@ -523,7 +563,7 @@ export function select(input: SelectionInput): Selection {
       if (heardOut >= 2 && now - own.lastAt > MISSED_DAYS * DAY_MS)
         facts.push({ kind: "missed", at: own.lastAt });
     }
-    const theirs = artistEvidence(track);
+    const theirs = artist === null ? undefined : taste?.artists.get(artist);
     if (theirs && theirs.finished + theirs.again >= 3 && affinity(theirs, ARTIST_PRIOR) > 0.3) {
       facts.push({
         kind: "artist",
@@ -533,25 +573,74 @@ export function select(input: SelectionInput): Selection {
       });
     }
     const then = heardThen.get(track.id);
-    if (then && c.source !== "winter" && c.source !== "yearAgo") facts.push(then);
-    if (SIDE[c.source] === "new" && artist !== null && !likedArtists.has(artist) && !theirs) {
+    if (then && source !== "winter" && source !== "yearAgo") facts.push(then);
+    if (SIDE[source] === "new" && artist !== null && !likedArtists.has(artist) && !theirs) {
       facts.push({ kind: "stranger" });
     }
     if (!taste) facts.push({ kind: "rules" });
     return facts;
   };
+}
 
-  return {
-    picks: chosen.map((c) => ({
-      track: c.track,
-      source: c.source,
-      seed: c.seed,
-      facts: factsOf(c),
-    })),
-    places,
-    learned,
-    sources: counts,
-  };
+/** Words a title carries for its version, not for the song: «(slowed)», «— radio edit», «[HQ]». */
+const VERSION_WORDS = new Set([
+  "radio",
+  "edit",
+  "extended",
+  "mix",
+  "remix",
+  "live",
+  "slowed",
+  "reverb",
+  "sped",
+  "speed",
+  "up",
+  "instrumental",
+  "acoustic",
+  "version",
+  "remaster",
+  "remastered",
+  "cover",
+  "hq",
+  "hd",
+  "nightcore",
+  "8d",
+  "lyrics",
+  "official",
+  "audio",
+  "video",
+  "премьера",
+  "ремикс",
+  "кавер",
+]);
+const wordsOf = (text: string) =>
+  text
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean);
+
+/**
+ * A song, whoever uploaded it and in whichever version: «Скриптонит - Положение
+ * (live)» from an archive and Скриптонит's own «Положение» are one song. The
+ * artist from a «name - title» title, else the uploader; the title without
+ * what is in brackets and without the words for a version.
+ */
+export function songOf(track: Track): string {
+  const bare = track.title.replace(/[([{][^)\]}]*[)\]}]/g, " ");
+  const parts = bare.split(/\s+[-–—]\s+/);
+  let artist = track.user?.username ?? "";
+  let title = bare;
+  if (parts.length >= 2) {
+    const after = parts.slice(1).join(" ");
+    // «Положение — radio edit»: the part after the dash is a version, not the title.
+    if (wordsOf(after).every((word) => VERSION_WORDS.has(word))) title = parts[0] ?? bare;
+    else {
+      artist = parts[0] ?? artist;
+      title = after;
+    }
+  }
+  const name = wordsOf(title).filter((word) => !VERSION_WORDS.has(word));
+  return `${wordsOf(artist).join(" ")}|${(name.length > 0 ? name : wordsOf(title)).join(" ")}`;
 }
 
 /** Just the tracks, for the places that only need what plays. */
