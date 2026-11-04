@@ -89,6 +89,8 @@ interface PlayerState extends QueueOrder {
   muted: boolean;
   /** One honest line about what just happened; the player bar shows it for a while. */
   notice: string | null;
+  /** The notice in a few words, for a narrow window; the notice itself when it has none. */
+  noticeShort: string | null;
   /** A way to take back what the notice reports («Вернуть»), when there is one. */
   noticeAction: { label: string; run: () => void } | null;
   /** Bumped whenever the current track must be (re)loaded from `startAt`. */
@@ -124,7 +126,7 @@ interface PlayerState extends QueueOrder {
   extendSource: (tracks: Track[]) => void;
   /** Puts a track right after the current one; with nothing playing, plays it. */
   playNext: (track: Track, source: QueueSource) => void;
-  say: (notice: string | null, action?: { label: string; run: () => void }) => void;
+  say: (notice: string | null, action?: { label: string; run: () => void }, short?: string) => void;
   /** Reports from the audio engine. */
   report: (patch: Partial<Pick<PlayerState, "position" | "duration" | "buffering">>) => void;
   stop: () => void;
@@ -249,6 +251,7 @@ export const usePlayer = create<PlayerState>()((set, get) => {
     volume: savedVolume(),
     muted: false,
     notice: null,
+    noticeShort: null,
     noticeAction: null,
     loadId: 0,
     seekId: 0,
@@ -270,6 +273,7 @@ export const usePlayer = create<PlayerState>()((set, get) => {
         duration: now.track.durationMs / 1000,
         startAt,
         notice: null,
+        noticeShort: null,
         noticeAction: null,
         loadId: s.loadId + 1,
       }));
@@ -314,7 +318,9 @@ export const usePlayer = create<PlayerState>()((set, get) => {
         playing: false,
         position: 0,
         startAt: 0,
-        ...(reason === "ended" ? { notice: "Очередь доиграла", noticeAction: null } : {}),
+        ...(reason === "ended"
+          ? { notice: "Очередь доиграла", noticeAction: null, noticeShort: null }
+          : {}),
       });
     },
 
@@ -462,7 +468,8 @@ export const usePlayer = create<PlayerState>()((set, get) => {
       get().say(`Дальше: ${track.title}`);
     },
 
-    say: (notice, action) => set({ notice, noticeAction: action ?? null }),
+    say: (notice, action, short) =>
+      set({ notice, noticeAction: action ?? null, noticeShort: short ?? null }),
 
     report: (patch) => set(patch),
 
@@ -481,6 +488,7 @@ export const usePlayer = create<PlayerState>()((set, get) => {
         duration: 0,
         startAt: 0,
         notice: null,
+        noticeShort: null,
         noticeAction: null,
         loadId: s.loadId + 1,
       }));

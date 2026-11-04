@@ -4,6 +4,8 @@ import type { Fact } from "@/features/selection/engine";
 import { when, whyLine, whyParts } from "@/features/selection/why";
 
 // Local clock times, so the words do not depend on the machine's time zone.
+// Figures are held together with no-break spaces; `nb` writes them readably here.
+const nb = (text: string) => text.replace(/~/g, "\u00a0");
 const NOW = new Date(2026, 10, 4, 16, 30).getTime(); // Wednesday 4 November 2026, 16:30
 const at = (month: number, day: number, hour: number, year = 2026) =>
   new Date(year, month, day, hour).getTime();
@@ -46,16 +48,16 @@ describe("the «почему» line", () => {
       { kind: "finished", times: 5, of: 6 },
     ];
     // Where it came from says little here, so what you did goes first: a narrow line keeps it.
-    expect(whyParts(facts, NOW)).toEqual(["Дослушал 5 из 6", "из твоих лайков"]);
+    expect(whyParts(facts, NOW)).toEqual([nb("Дослушал 5~из~6"), "из твоих лайков"]);
     expect(whyLine([{ kind: "liked" }, { kind: "finished", times: 3, of: 3 }], NOW)).toBe(
-      "Дослушал все 3 · из твоих лайков",
+      nb("Дослушал все~3 · из твоих лайков"),
     );
     expect(
       whyLine(
         [{ kind: "liked" }, { kind: "artist", name: "pyrokinesis", finished: 12, plays: 14 }],
         NOW,
       ),
-    ).toBe("pyrokinesis: дослушиваешь 12 из 14 · из твоих лайков");
+    ).toBe(nb("pyrokinesis: дослушиваешь 12~из~14 · из твоих лайков"));
   });
 
   it("says a favourite has been missed, and since when", () => {
@@ -68,7 +70,9 @@ describe("the «почему» line", () => {
   });
 
   it("reads the diary's windows and a press of «больше такого»", () => {
-    expect(whyLine([{ kind: "winter", times: 4 }], NOW)).toBe("Прошлой зимой ты слушал его 4 раза");
+    expect(whyLine([{ kind: "winter", times: 4 }], NOW)).toBe(
+      nb("Прошлой зимой ты слушал его 4~раза"),
+    );
     expect(whyLine([{ kind: "yearAgo", times: 1 }], NOW)).toBe(
       "Эту неделю год назад ты слушал то же",
     );

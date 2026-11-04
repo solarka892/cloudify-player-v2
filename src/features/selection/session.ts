@@ -174,10 +174,13 @@ function options(): QueueOptions {
         steer({ kind: "less", track, from: fromOf(track), at: Date.now() });
         rememberSkip(track.id);
         useSelectionSession.setState((s) => ({ skips: s.skips + 1 }));
-        usePlayer.getState().say(`«${track.title}» — больше не предложу, и похожего меньше`, {
-          label: "Вернуть",
-          run: () => takeBackNotThis(track),
-        });
+        usePlayer
+          .getState()
+          .say(
+            `«${track.title}» — больше не предложу, и похожего меньше`,
+            { label: "Вернуть", run: () => takeBackNotThis(track) },
+            "Не то — убрал",
+          );
       } else if (reason === "skip" && position < EARLY_SKIP_SECONDS) {
         steer({ kind: "skip", track, from: fromOf(track), at: Date.now() });
         rememberSkip(track.id);
@@ -231,10 +234,11 @@ export function moreLikeThis() {
   steer({ kind: "more", track, from: fromOf(track), at: Date.now() });
   noteMore(track.id, true);
   rebuild();
-  player.say(`Дальше — больше похожего на «${track.title}»`, {
-    label: "Вернуть",
-    run: () => takeBackMore(track),
-  });
+  player.say(
+    `Дальше — больше похожего на «${track.title}»`,
+    { label: "Вернуть", run: () => takeBackMore(track) },
+    "Больше такого",
+  );
   // Its own radio and related tracks join as soon as SoundCloud answers.
   void fetchMore(track).then((pools) => {
     const now = useSelectionSession.getState();

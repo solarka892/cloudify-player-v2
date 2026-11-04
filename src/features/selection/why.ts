@@ -82,7 +82,10 @@ function inMonth(at: number, now: number): string {
     : `${month} ${then.getFullYear()}`;
 }
 
-const times = (n: number) => `${n} ${plural(n, ["раз", "раза", "раз"])}`;
+/** A no-break space: «7 из 11» is never split across lines or cut in the middle. */
+const NB = "\u00a0";
+const times = (n: number) => `${n}${NB}${plural(n, ["раз", "раза", "раз"])}`;
+const outOf = (n: number, of: number) => `${n}${NB}из${NB}${of}`;
 
 function grownFrom(seed: Seed, now: number, related: boolean): string {
   const title = `«${seed.track.title}»`;
@@ -137,14 +140,14 @@ function whatYouDid(fact: Fact, now: number): string | null {
       return fact.times === fact.of
         ? fact.of === 1
           ? "ты дослушал его"
-          : `дослушал все ${fact.of}`
-        : `дослушал ${fact.times} из ${fact.of}`;
+          : `дослушал все${NB}${fact.of}`
+        : `дослушал ${outOf(fact.times, fact.of)}`;
     case "again":
       return `ставил на повтор ${times(fact.times)}`;
     case "missed":
       return `давно не слышал — последний раз ${inMonth(fact.at, now)}`;
     case "artist":
-      return `${fact.name}: дослушиваешь ${fact.finished} из ${fact.plays}`;
+      return `${fact.name}: дослушиваешь ${outOf(fact.finished, fact.plays)}`;
     case "stranger":
       return "новый для тебя артист";
     case "rules":

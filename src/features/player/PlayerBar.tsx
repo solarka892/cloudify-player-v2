@@ -56,6 +56,7 @@ export function PlayerBar() {
   const muted = usePlayer((s) => s.muted);
   const notice = usePlayer((s) => s.notice);
   const noticeAction = usePlayer((s) => s.noticeAction);
+  const noticeShort = usePlayer((s) => s.noticeShort);
   const canNext = usePlayer(hasNext);
   const shuffled = usePlayer((s) => s.original !== null);
   const repeat = usePlayer((s) => s.repeat);
@@ -117,8 +118,18 @@ export function PlayerBar() {
           >
             {notice ? (
               <>
-                <span className="truncate max-[1100px]:basis-full" title={notice}>
-                  {notice}
+                <span
+                  className="truncate max-[1100px]:line-clamp-2 max-[1100px]:basis-full max-[1100px]:whitespace-normal max-[1100px]:leading-tight"
+                  title={notice}
+                >
+                  {noticeShort ? (
+                    <>
+                      <span className="max-[1100px]:hidden">{notice}</span>
+                      <span className="hidden max-[1100px]:inline">{noticeShort}</span>
+                    </>
+                  ) : (
+                    notice
+                  )}
                 </span>
                 {noticeAction && (
                   <button
@@ -159,7 +170,7 @@ export function PlayerBar() {
           {track && why && !notice && (
             <span
               title={why}
-              className="block truncate font-bold text-[12.5px] text-fg-faint leading-tight"
+              className="block truncate font-bold text-[12.5px] text-fg-faint leading-tight max-[1100px]:line-clamp-2 max-[1100px]:whitespace-normal"
             >
               {why}
             </span>
