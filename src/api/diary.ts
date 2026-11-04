@@ -1,5 +1,6 @@
 import { call } from "@/api/invoke";
 import type {
+  DaySummary,
   DiaryCity,
   DiaryPage,
   DiarySettings,
@@ -42,9 +43,21 @@ export function diaryLiked(id: number, liked: boolean): Promise<void> {
   return call<void>("diary_liked", { id, liked });
 }
 
-/** Plays, newest first; `before` is the `next` of the page before. */
-export function diaryPlays(before: string | null = null, limit?: number): Promise<DiaryPage> {
-  return call<DiaryPage>("diary_plays", { before, limit: limit ?? null });
+/**
+ * Plays, newest first; `before` is the `next` of the page before. With `find`,
+ * only plays of tracks whose title or artist holds those words, in any case.
+ */
+export function diaryPlays(
+  before: string | null = null,
+  limit?: number,
+  find?: string,
+): Promise<DiaryPage> {
+  return call<DiaryPage>("diary_plays", { before, limit: limit ?? null, find: find || null });
+}
+
+/** The latest days that have plays, newest first: how much was played on each. */
+export function diaryDays(limit = 31): Promise<DaySummary[]> {
+  return call<DaySummary[]>("diary_days", { limit });
 }
 
 /** How long plays are kept, the place the sun is worked out for, how much is kept. */

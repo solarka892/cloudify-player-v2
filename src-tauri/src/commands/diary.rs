@@ -1,7 +1,7 @@
 //! The listening diary: the player writes plays, the «Дневник» screen reads
 //! them. Everything stays in a file on this computer. Twins: `src/api/diary.ts`.
 
-use diary::{City, Diary, Heard, NewPlay, Now, Outcome, Page, Settings, Source};
+use diary::{City, DaySummary, Diary, Heard, NewPlay, Now, Outcome, Page, Settings, Source};
 use serde::Deserialize;
 use soundcloud::Track;
 use tauri::State;
@@ -87,15 +87,28 @@ pub async fn diary_liked(id: i64, liked: bool, diary: State<'_, DiaryState>) -> 
     diary.with(move |diary| diary.set_liked(id, liked)).await
 }
 
-/// Plays, newest first; `before` is the `next` of the page before.
+/// Plays, newest first; `before` is the `next` of the page before. With
+/// `find`, only the plays of tracks whose title or artist holds those words.
 #[tauri::command]
 pub async fn diary_plays(
     before: Option<String>,
     limit: Option<u32>,
+    find: Option<String>,
     diary: State<'_, DiaryState>,
 ) -> CommandResult<Page> {
     diary
-        .with(move |diary| diary.plays(before.as_deref(), limit.unwrap_or(PAGE)))
+        .with(move |diary| diary.find(before.as_deref(), limit.unwrap_or(PAGE), find.as_deref()))
+        .await
+}
+
+/// The latest days with plays, newest first: how much was played on each.
+#[tauri::command]
+pub async fn diary_days(
+    limit: Option<u32>,
+    diary: State<'_, DiaryState>,
+) -> CommandResult<Vec<DaySummary>> {
+    diary
+        .with(move |diary| diary.days(limit.unwrap_or(31)))
         .await
 }
 

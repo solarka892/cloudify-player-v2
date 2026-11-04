@@ -19,6 +19,8 @@ export function from(source: QueueSource | null): string {
       return `радио · ${source.title}`;
     case "search":
       return `из поиска «${source.title}»`;
+    case "diary":
+      return `из дневника · ${source.title}`;
     default:
       return "";
   }
@@ -39,6 +41,8 @@ export function fromTitle(source: QueueSource | null): string {
       return "Из истории";
     case "resume":
       return "С прошлого раза";
+    case "diary":
+      return `Из дневника · ${source.title}`;
     case "artist":
       return `Популярное · ${source.title}`;
     case "station":
@@ -69,6 +73,8 @@ export function aheadFrom(source: QueueSource | null): string {
       return `Дальше по радио · ${source.title}`;
     case "search":
       return `Дальше из поиска «${source.title}»`;
+    case "diary":
+      return `Дальше из дневника · ${source.title}`;
     default:
       return "Дальше";
   }

@@ -31,7 +31,9 @@ export type QueueSource =
   | { kind: "station"; title: string }
   | { kind: "search"; title: string }
   /** The track the app picked up where it stopped last time. */
-  | { kind: "resume" };
+  | { kind: "resume" }
+  /** A night or an evening played again from the diary. */
+  | { kind: "diary"; title: string };
 
 export type SkipReason = "skip" | "dislike" | "ended" | "unavailable";
 
@@ -169,6 +171,8 @@ function orderOf(source: QueueSource | null): string {
       return "радио";
     case "search":
       return "поиска";
+    case "diary":
+      return "дневника";
     default:
       return "списка";
   }

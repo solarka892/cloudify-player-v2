@@ -21,6 +21,6 @@ mod zones;
 pub use error::{Error, Result};
 pub use setting::{City, Now, PartOfDay, Place, PlaceFrom, Season, Setting, Weekday, ZoneCity};
 pub use store::{
-    Diary, Heard, MAX_PAGE, NewPlay, Outcome, Page, Play, Settings, Source, SourceKind,
+    DaySummary, Diary, Heard, MAX_PAGE, NewPlay, Outcome, Page, Play, Settings, Source, SourceKind,
 };
-pub use sun::{altitude, day_length};
+pub use sun::{altitude, day_length, sunrise_sunset};

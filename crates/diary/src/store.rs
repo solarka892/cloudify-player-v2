@@ -75,6 +75,8 @@ pub enum SourceKind {
     Search,
     /// The track the app picked up where it stopped last time.
     Resume,
+    /// Played again from the diary itself (an evening, a night).
+    Diary,
     /// A kind this version does not know (written by a newer one).
     #[serde(other)]
     Other,
@@ -92,6 +94,7 @@ impl SourceKind {
             Self::Station => "station",
             Self::Search => "search",
             Self::Resume => "resume",
+            Self::Diary => "diary",
             Self::Other => "other",
         }
     }
@@ -203,6 +206,16 @@ pub struct Page {
     pub items: Vec<Play>,
     /// Pass back as `before` for older plays; `None` at the first play ever.
     pub next: Option<String>,
+}
+
+/// One day of listening, as the strip of days shows it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DaySummary {
+    /// The local date, `2026-11-04`.
+    pub day: String,
+    pub plays: u64,
+    pub heard_ms: u64,
 }
 
 /// What the diary keeps and where it thinks the person is.
@@ -337,10 +350,21 @@ impl Diary {
     /// Plays, newest first: up to `limit` from before the `before` cursor of
     /// an earlier page, or from the latest.
     pub fn plays(&self, before: Option<&str>, limit: u32) -> Result<Page> {
+        self.find(before, limit, None)
+    }
+
+    /// Like [`Diary::plays`], only the plays of tracks whose title or artist
+    /// holds `words` (any case, any alphabet); every play for `None` or blanks.
+    pub fn find(&self, before: Option<&str>, limit: u32, words: Option<&str>) -> Result<Page> {
         let limit = limit.clamp(1, MAX_PAGE);
         let (at, id) = match before {
             Some(cursor) => parse_cursor(cursor)?,
             None => (i64::MAX, i64::MAX),
+        };
+        // SQLite folds only Latin case, so the matching tracks are picked here.
+        let only = match words.map(str::trim).filter(|words| !words.is_empty()) {
+            Some(words) => Some(serde_json::to_string(&self.tracks_matching(words)?)?),
+            None => None,
         };
         let mut statement = self.db.prepare_cached(
             "SELECT p.id, t.json, p.started_at, p.utc_offset, p.ended_at, p.outcome, p.from_ms,
@@ -348,11 +372,12 @@ impl Diary {
                     p.source_title, p.source_id, p.added, p.setting
              FROM plays p JOIN tracks t ON t.urn = p.track
              WHERE (p.started_at, p.id) < (?1, ?2)
+               AND (?4 IS NULL OR p.track IN (SELECT value FROM json_each(?4)))
              ORDER BY p.started_at DESC, p.id DESC
              LIMIT ?3",
         )?;
         let mut items = statement
-            .query_map(params![at, id, i64::from(limit) + 1], play_of_row)?
+            .query_map(params![at, id, i64::from(limit) + 1, only], play_of_row)?
             .collect::<rusqlite::Result<Vec<_>>>()?;
         let next = if items.len() > limit as usize {
             items.truncate(limit as usize);
@@ -363,6 +388,47 @@ impl Diary {
             None
         };
         Ok(Page { items, next })
+    }
+
+    /// The kept tracks whose title or artist holds `words`, by their urns.
+    fn tracks_matching(&self, words: &str) -> Result<Vec<String>> {
+        let words = words.to_lowercase();
+        let mut statement = self.db.prepare_cached("SELECT urn, json FROM tracks")?;
+        let rows = statement.query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+        })?;
+        let mut found = Vec::new();
+        for row in rows {
+            let (urn, json) = row?;
+            let track: Value = serde_json::from_str(&json).unwrap_or_default();
+            let said = |value: &Value| value.as_str().map(str::to_lowercase).unwrap_or_default();
+            if said(&track["title"]).contains(&words)
+                || said(&track["user"]["username"]).contains(&words)
+            {
+                found.push(urn);
+            }
+        }
+        Ok(found)
+    }
+
+    /// The latest `limit` days that have plays, newest first: how many plays
+    /// and how much was heard on each, by the clock where they were played.
+    pub fn days(&self, limit: u32) -> Result<Vec<DaySummary>> {
+        let mut statement = self.db.prepare_cached(
+            "SELECT strftime('%Y-%m-%d', started_at / 1000 + utc_offset * 60, 'unixepoch') AS day,
+                    COUNT(*), SUM(listened_ms)
+             FROM plays GROUP BY day ORDER BY day DESC LIMIT ?1",
+        )?;
+        let days = statement
+            .query_map([limit.clamp(1, 3_660)], |row| {
+                Ok(DaySummary {
+                    day: row.get(0)?,
+                    plays: unsigned(row.get(1)?),
+                    heard_ms: unsigned(row.get(2)?),
+                })
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+        Ok(days)
     }
 
     /// What the diary keeps, and the place it works the sun out for.
@@ -889,6 +955,75 @@ mod tests {
         drop(diary);
         assert!(matches!(Diary::open(&path), Err(Error::Newer(99))));
         std::fs::remove_dir_all(folder).unwrap();
+    }
+
+    #[test]
+    fn finding_reads_titles_and_artists_in_any_case() {
+        let mut diary = Diary::open_in_memory().unwrap();
+        let mut play = track(1, "Кинолента");
+        play.track["user"] = json!({ "username": "Баста" });
+        diary.start(&play, &evening(0)).unwrap();
+        let mut other = track(2, "Apricots");
+        other.track["user"] = json!({ "username": "Bicep" });
+        diary.start(&other, &evening(1)).unwrap();
+        diary.start(&track(1, "Кинолента"), &evening(2)).unwrap();
+
+        let found = |words: &str| {
+            diary
+                .find(None, 50, Some(words))
+                .unwrap()
+                .items
+                .iter()
+                .map(|p| p.id)
+                .collect::<Vec<_>>()
+        };
+        // Cyrillic in another case, and an artist's name, both find their plays.
+        assert_eq!(found("КИНО"), [3, 1]);
+        assert_eq!(found("bicep"), [2]);
+        assert_eq!(found("нет такого"), Vec::<i64>::new());
+        assert_eq!(found("  ").len(), 3, "blank words find everything");
+        // Finding pages like the plain list does.
+        let first = diary.find(None, 1, Some("кино")).unwrap();
+        let rest = diary.find(first.next.as_deref(), 5, Some("кино")).unwrap();
+        assert_eq!(
+            (first.items[0].id, rest.items[0].id, rest.next),
+            (3, 1, None)
+        );
+    }
+
+    #[test]
+    fn days_are_counted_by_the_clock_they_were_played_on() {
+        let mut diary = Diary::open_in_memory().unwrap();
+        let id = diary.start(&track(1, "t"), &evening(0)).unwrap();
+        diary
+            .end(
+                id,
+                Outcome::Finished,
+                heard(200_000, 200_000),
+                evening(4).utc_ms,
+            )
+            .unwrap();
+        // 23:30 in Moscow is still the 4th, though it is the 4th's 20:30 in UTC…
+        diary.start(&track(2, "t"), &evening(4 * 60 + 30)).unwrap();
+        // …and half past midnight is the 5th.
+        diary.start(&track(3, "t"), &evening(5 * 60 + 30)).unwrap();
+        let days = diary.days(10).unwrap();
+        assert_eq!(
+            days,
+            [
+                DaySummary {
+                    day: "2026-11-05".into(),
+                    plays: 1,
+                    heard_ms: 0
+                },
+                DaySummary {
+                    day: "2026-11-04".into(),
+                    plays: 2,
+                    heard_ms: 200_000
+                },
+            ]
+        );
+        assert_eq!(diary.days(1).unwrap().len(), 1);
     }
 
     #[test]

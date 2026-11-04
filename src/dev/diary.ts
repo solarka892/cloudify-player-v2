@@ -6,6 +6,7 @@
 
 import { ApiError } from "@/api/invoke";
 import type {
+  DaySummary,
   DiaryCity,
   DiaryPage,
   DiarySettings,
@@ -67,6 +68,8 @@ function settingAt(utc: number, lat = city?.lat ?? 55.8): PlaySetting {
             : "autumn",
     daylight,
     sun,
+    rise: Math.round((noon - daylight / 2) * 60),
+    set: Math.round((noon + daylight / 2) * 60),
     lat: Math.round(lat * 10) / 10,
     place: city ? "city" : "zone",
     weather: null,
@@ -159,10 +162,9 @@ function prune(now = Date.now()) {
   return before - plays.length;
 }
 
+/** As Rust does: a play that is gone (erased, forgotten) takes no more writes, quietly. */
 function find(id: unknown): Stored {
-  const play = plays.find((p) => p.id === id);
-  if (!play) throw new ApiError("storage", `dev diary: no play ${String(id)}`);
-  return play;
+  return plays.find((p) => p.id === id) ?? ({} as Stored);
 }
 
 /** The diary's commands; `undefined` for any other command. */
@@ -232,7 +234,15 @@ export function answerDiary(
       find(args.id).liked = Boolean(args.liked);
       return null;
     case "diary_plays": {
-      const sorted = [...plays].sort((a, b) => b.startedAt - a.startedAt || b.id - a.id);
+      const words = typeof args.find === "string" ? args.find.trim().toLowerCase() : "";
+      const sorted = [...plays]
+        .filter(
+          (p) =>
+            !words ||
+            p.track.title.toLowerCase().includes(words) ||
+            (p.track.user?.username ?? "").toLowerCase().includes(words),
+        )
+        .sort((a, b) => b.startedAt - a.startedAt || b.id - a.id);
       const before = typeof args.before === "string" ? args.before.split(":").map(Number) : null;
       const from = before
         ? sorted.filter(
@@ -249,6 +259,18 @@ export function answerDiary(
         next: from.length > limit && last ? `${last.startedAt}:${last.id}` : null,
       };
       return page;
+    }
+    case "diary_days": {
+      const days = new Map<string, DaySummary>();
+      for (const p of plays) {
+        const day = new Date(p.startedAt + p.utcOffset * 60_000).toISOString().slice(0, 10);
+        const summary = days.get(day) ?? { day, plays: 0, heardMs: 0 };
+        summary.plays += 1;
+        summary.heardMs += p.listenedMs;
+        days.set(day, summary);
+      }
+      const limit = typeof args.limit === "number" ? args.limit : 31;
+      return [...days.values()].sort((a, b) => (a.day < b.day ? 1 : -1)).slice(0, limit);
     }
     case "diary_settings": {
       const settings: DiarySettings = {

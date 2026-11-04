@@ -25,6 +25,13 @@ fn days_since_j2000(at: DateTime<Utc>) -> f64 {
 
 /// The sun's declination and right ascension, in radians, `n` days after J2000.
 fn position(n: f64) -> (f64, f64) {
+    let (declination, right_ascension, _) = position_and_noon(n);
+    (declination, right_ascension)
+}
+
+/// The declination and right ascension (radians), and how many minutes the
+/// sun's noon runs ahead of the clock's (the equation of time).
+fn position_and_noon(n: f64) -> (f64, f64, f64) {
     let mean_longitude = (280.460 + 0.985_647_4 * n).rem_euclid(360.0);
     let anomaly = (357.528 + 0.985_600_3 * n).rem_euclid(360.0).to_radians();
     let longitude =
@@ -32,7 +39,9 @@ fn position(n: f64) -> (f64, f64) {
     let obliquity = (23.439 - 0.000_000_4 * n).to_radians();
     let declination = (obliquity.sin() * longitude.sin()).asin();
     let right_ascension = (obliquity.cos() * longitude.sin()).atan2(longitude.cos());
-    (declination, right_ascension)
+    // Mean minus true longitude along the equator, folded into ±180°, four minutes a degree.
+    let ahead = (mean_longitude - right_ascension.to_degrees() + 540.0).rem_euclid(360.0) - 180.0;
+    (declination, right_ascension, ahead * 4.0)
 }
 
 /// Hours from sunrise to sunset on `date` at `latitude` (degrees, north
@@ -55,6 +64,21 @@ pub fn day_length(latitude: f64, longitude: Option<f64>, date: NaiveDate) -> f64
     } else {
         2.0 * cos_hour.acos().to_degrees() / 15.0
     }
+}
+
+/// Sunrise and sunset on `date` at a place, in hours after midnight UTC (they
+/// may run past 24 or below 0 far from Greenwich); `None` through a polar day
+/// or night, when the sun does not cross the horizon.
+pub fn sunrise_sunset(latitude: f64, longitude: f64, date: NaiveDate) -> Option<(f64, f64)> {
+    let length = day_length(latitude, Some(longitude), date);
+    if length <= 0.0 || length >= 24.0 {
+        return None;
+    }
+    let midnight = date.and_time(NaiveTime::MIN).and_utc();
+    let guess = 12.0 - longitude / 15.0;
+    let (_, _, ahead) = position_and_noon(days_since_j2000(midnight) + guess / 24.0);
+    let noon = guess - ahead / 60.0;
+    Some((noon - length / 2.0, noon + length / 2.0))
 }
 
 /// How high the sun's centre stands above the horizon at `at`, in degrees:
@@ -149,6 +173,53 @@ mod tests {
         // The poles themselves, and a latitude past them, do not break the sums.
         assert_eq!(day_length(90.0, None, date("2026-06-21")), 24.0);
         assert_eq!(day_length(-95.0, None, date("2026-06-21")), 0.0);
+    }
+
+    #[test]
+    fn the_sun_rises_and_sets_when_the_almanac_says() {
+        // (place, day, latitude, longitude, the clock's offset, sunrise, sunset) from USNO.
+        let almanac = [
+            ("Moscow", "2026-11-04", 55.75, 37.62, 3.0, "07:42", "16:44"),
+            ("Moscow", "2026-12-21", 55.75, 37.62, 3.0, "08:57", "15:58"),
+            ("Moscow", "2026-06-21", 55.75, 37.62, 3.0, "03:45", "21:18"),
+            (
+                "Novosibirsk",
+                "2026-01-15",
+                55.03,
+                82.92,
+                7.0,
+                "09:44",
+                "17:31",
+            ),
+            (
+                "Sydney",
+                "2026-12-21",
+                -33.87,
+                151.21,
+                11.0,
+                "05:41",
+                "20:05",
+            ),
+        ];
+        let minutes = |text: &str| {
+            let (h, m) = text.split_once(':').unwrap();
+            h.parse::<f64>().unwrap() * 60.0 + m.parse::<f64>().unwrap()
+        };
+        for (place, day, lat, lon, offset, rise, set) in almanac {
+            let (up, down) = sunrise_sunset(lat, lon, date(day)).unwrap();
+            let local = |hours: f64| ((hours + offset) * 60.0).rem_euclid(1440.0);
+            assert!(
+                (local(up) - minutes(rise)).abs() <= MINUTES,
+                "{place} {day}: rose {:.1}, almanac {rise}",
+                local(up) / 60.0
+            );
+            assert!(
+                (local(down) - minutes(set)).abs() <= MINUTES,
+                "{place} {day}: set {:.1}, almanac {set}",
+                local(down) / 60.0
+            );
+        }
+        assert_eq!(sunrise_sunset(68.97, 33.08, date("2026-12-21")), None);
     }
 
     #[test]

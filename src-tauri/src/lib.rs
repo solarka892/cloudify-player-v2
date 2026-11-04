@@ -78,6 +78,7 @@ pub fn run() {
             commands::diary::diary_end,
             commands::diary::diary_liked,
             commands::diary::diary_plays,
+            commands::diary::diary_days,
             commands::diary::diary_settings,
             commands::diary::diary_keep,
             commands::diary::diary_city,

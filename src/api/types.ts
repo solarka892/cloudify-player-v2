@@ -239,6 +239,7 @@ export interface PlaySource {
     | "station"
     | "search"
     | "resume"
+    | "diary"
     | "other";
   /** A playlist's title, the search query, the artist. */
   title: string | null;
@@ -269,6 +270,9 @@ export interface PlaySetting {
   daylight: number | null;
   /** The sun's height in whole degrees: below 0 after sunset, below −6 dark. */
   sun: number | null;
+  /** Sunrise and sunset that day on the local clock, in minutes after midnight. */
+  rise: number | null;
+  set: number | null;
   /** The latitude those were worked out for. */
   lat: number | null;
   /** A city the person named, or their time zone's. */
@@ -308,6 +312,14 @@ export interface Play {
 export interface DiaryPage {
   items: Play[];
   next: string | null;
+}
+
+/** One day of listening, by the clock it was played on. */
+export interface DaySummary {
+  /** `2026-11-04`. */
+  day: string;
+  plays: number;
+  heardMs: number;
 }
 
 /** How far a play got. */

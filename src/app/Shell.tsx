@@ -3,6 +3,7 @@ import type { Me } from "@/api/types";
 import { queryClient } from "@/app/queryClient";
 import { ScrollRoot } from "@/app/scrollRoot";
 import { type Tab, TopBar } from "@/app/TopBar";
+import { DiaryPage } from "@/features/diary/DiaryPage";
 import { startDiaryRecorder } from "@/features/diary/record";
 import { HomePage } from "@/features/home/HomePage";
 import { WallSkeleton } from "@/features/library/CoverWall";
@@ -15,7 +16,6 @@ import {
   useLibraryNav,
 } from "@/features/library/nav";
 import { useLikesInBackground } from "@/features/library/play";
-import { ComingSoon } from "@/features/placeholder/ComingSoon";
 import { useCoverGlow } from "@/features/player/coverGlow";
 import { startAudioEngine } from "@/features/player/engine";
 import { useHotkeys } from "@/features/player/hotkeys";
@@ -137,7 +137,7 @@ export function Shell({ me }: { me: Me }) {
                 ) : tab === "library" ? (
                   <LibraryPage me={me} />
                 ) : (
-                  <ComingSoon page={tab} />
+                  <DiaryPage />
                 )}
               </Part>
             </ScrollRoot>

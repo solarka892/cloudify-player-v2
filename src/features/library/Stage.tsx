@@ -148,7 +148,14 @@ export function StageHeader({
  * top bar, grown the same frosted backing, so play, shuffle and the filter are
  * never more than a glance away in a list of thousands.
  */
-export function StageActions({ children }: { children: ReactNode }) {
+export function StageActions({
+  children,
+  jump = true,
+}: {
+  children: ReactNode;
+  /** The round that jumps to the far end of a long list; a page with its own way around leaves it out. */
+  jump?: boolean;
+}) {
   const scroller = useScrollRoot();
   const sentinel = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
@@ -174,7 +181,7 @@ export function StageActions({ children }: { children: ReactNode }) {
         className={`sticky top-[68px] z-20 -mx-14 mb-3 flex items-center gap-3 px-14 py-3 transition-[background-color,backdrop-filter] duration-200 ${stuck ? "bg-ground/80 backdrop-blur-xl" : ""}`}
       >
         {children}
-        <JumpButton />
+        {jump && <JumpButton />}
       </div>
     </>
   );

@@ -234,6 +234,10 @@ pub struct Setting {
     pub daylight: Option<f64>,
     /// The sun's height in whole degrees: below 0 after sunset, below −6 dark.
     pub sun: Option<i32>,
+    /// Sunrise and sunset that day on the local clock, in minutes after
+    /// midnight; `null` through a polar day or night.
+    pub rise: Option<u32>,
+    pub set: Option<u32>,
     /// The latitude those were worked out for, to a tenth of a degree.
     pub lat: Option<f64>,
     /// Whether that latitude is the person's own city or their time zone's.
@@ -260,6 +264,15 @@ impl Setting {
             setting.daylight = Some(tenth(daylight));
             // A whole degree is all a sky needs; `as` cannot overflow at ±90.
             setting.sun = Some(sun::altitude(place.lat, place.lon, now.utc()).round() as i32);
+            if let Some((up, down)) = sun::sunrise_sunset(place.lat, place.lon, local.date()) {
+                let clock = |hours: f64| {
+                    // Minutes in a day: always 0..1440 after `rem_euclid`, so `as` is exact.
+                    ((hours * 60.0).round() as i64 + i64::from(now.offset_min)).rem_euclid(1440)
+                        as u32
+                };
+                setting.rise = Some(clock(up));
+                setting.set = Some(clock(down));
+            }
             setting.lat = Some(tenth(place.lat));
             setting.place = Some(place.from);
         }
@@ -358,6 +371,10 @@ mod tests {
         assert_eq!(setting.daylight, Some(9.0));
         // Sunset was at 16:44: by half past seven it is fully dark.
         assert!(setting.sun.unwrap() < -18, "{:?}", setting.sun);
+        // The almanac's 07:42 and 16:44, give or take a minute for the zone's city.
+        let near = |got: Option<u32>, want: u32| got.is_some_and(|got| got.abs_diff(want) <= 2);
+        assert!(near(setting.rise, 7 * 60 + 42), "{:?}", setting.rise);
+        assert!(near(setting.set, 16 * 60 + 44), "{:?}", setting.set);
         assert_eq!(setting.place, Some(PlaceFrom::Zone));
         // A late morning has the sun up.
         let morning = Setting::at(&moscow(11, 0), Place::resolve(None, Some("Europe/Moscow")));
@@ -388,7 +405,7 @@ mod tests {
             bare,
             json!({
                 "tod": "night", "dow": "wed", "season": "autumn",
-                "daylight": null, "sun": null, "lat": null, "place": null,
+                "daylight": null, "sun": null, "rise": null, "set": null, "lat": null, "place": null,
                 "weather": null, "activity": null, "mood": null,
             })
         );

@@ -45,11 +45,22 @@ interface Pen {
 
 let pen: Pen | null = null;
 let chain: Promise<void> = Promise.resolve();
+const written = new Set<() => void>();
+
+/** Hears every time the diary has written something down (the screen reads it again). */
+export function onDiaryWritten(listener: () => void): () => void {
+  written.add(listener);
+  return () => {
+    written.delete(listener);
+  };
+}
 
 /** Runs `job` after everything told before it. */
-function later(job: () => Promise<unknown>) {
+function later(job: () => Promise<unknown>, tell = true) {
   chain = chain.then(job).then(
-    () => undefined,
+    () => {
+      if (tell) for (const listener of written) listener();
+    },
     (error: unknown) => {
       actionFailed(
         "diary",
@@ -78,6 +89,7 @@ export function sourceOf(source: QueueSource | null): PlaySource {
     case "artist":
     case "station":
     case "search":
+    case "diary":
       return { kind: source.kind, title: source.title, id: null };
     default:
       return { kind: source.kind, title: null, id: null };
@@ -164,7 +176,7 @@ export function startDiaryRecorder(clock: () => number = Date.now): () => void {
     const heard = heardOf(p);
     later(async () => {
       if (p.id !== null) await diaryProgress(p.id, heard);
-    });
+    }, false);
   };
 
   const close = (p: Pen, outcome: PlayOutcome) => {
