@@ -156,3 +156,61 @@ pub async fn diary_forget(id: i64, diary: State<'_, DiaryState>) -> CommandResul
 pub async fn diary_clear(diary: State<'_, DiaryState>) -> CommandResult<()> {
     diary.with(Diary::clear).await
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use diary::SourceKind;
+    use serde_json::json;
+
+    /// A track the way the frontend holds it (Rust's own camelCase JSON) and sends it back.
+    fn track() -> serde_json::Value {
+        json!({
+            "id": 935029318, "urn": "soundcloud:tracks:935029318", "title": "Положение",
+            "permalinkUrl": null, "artworkUrl": null, "durationMs": 282000, "fullDurationMs": 282000,
+            "user": {
+                "id": 15, "urn": "soundcloud:users:15", "username": "Скриптонит", "fullName": null,
+                "permalinkUrl": null, "avatarUrl": null, "bannerUrl": null, "description": null,
+                "city": null, "countryCode": null, "followersCount": null, "followingsCount": null,
+                "trackCount": null, "playlistCount": null, "likesCount": null, "verified": false
+            },
+            "genre": "Hip-hop", "tags": [], "description": "a long text", "createdAt": null,
+            "playbackCount": null, "likesCount": null, "repostsCount": null, "commentCount": null,
+            "waveformUrl": null,
+            "access": {
+                "policy": "allow", "monetization": "not-applicable", "goPlus": false,
+                "preview": false, "playable": true
+            },
+            "downloadable": false, "license": null, "labelName": null, "purchaseUrl": null,
+            "purchaseTitle": null, "private": false
+        })
+    }
+
+    #[test]
+    fn a_play_from_the_frontend_reads_as_sent() {
+        let play: StartPlay = serde_json::from_value(json!({
+            "track": track(),
+            "source": { "kind": "diary", "title": "вечер 3 ноября", "id": null },
+            "added": true,
+            "fromMs": 120000
+        }))
+        .unwrap();
+        assert_eq!(play.track.urn, "soundcloud:tracks:935029318");
+        assert_eq!(play.source.kind, SourceKind::Diary);
+        assert_eq!((play.added, play.from_ms), (true, 120_000));
+        // What the pen sends when nothing was added by hand and it starts at the top.
+        let plain: StartPlay = serde_json::from_value(json!({
+            "track": track(),
+            "source": { "kind": "resume", "title": null, "id": null },
+            "added": false,
+            "fromMs": 0
+        }))
+        .unwrap();
+        assert_eq!(plain.source.kind, SourceKind::Resume);
+        let heard: Heard =
+            serde_json::from_value(json!({ "positionMs": 12000, "listenedMs": 11000 })).unwrap();
+        assert_eq!((heard.position_ms, heard.listened_ms), (12_000, 11_000));
+        let outcome: Outcome = serde_json::from_value(json!("rejected")).unwrap();
+        assert_eq!(outcome, Outcome::Rejected);
+    }
+}
