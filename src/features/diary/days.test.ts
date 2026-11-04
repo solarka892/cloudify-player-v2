@@ -109,6 +109,9 @@ describe("days of the diary", () => {
     expect(night?.span).toBe("00:22–03:40");
     expect([night?.plays.length, night?.finished, night?.heardMs]).toEqual([2, 0, 43_000]);
     expect(days[1]?.parts.map((p) => p.sky)).toEqual(["dark", "dusk", null]);
+    // Plays inside one minute are one clock, not «07:10–07:10».
+    const short = groupDays([play("2026-11-03T07:10", { endedAt: null, listenedMs: 20_000 })]);
+    expect(short[0]?.parts[0]?.span).toBe("07:10");
     expect([days[1]?.count, days[1]?.rise, days[1]?.set]).toEqual([4, 462, 1004]);
   });
 

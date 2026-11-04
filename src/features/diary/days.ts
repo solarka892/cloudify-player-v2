@@ -217,7 +217,11 @@ export function groupDays(plays: readonly Play[]): DayGroup[] {
   for (const group of parts.values()) {
     const newest = group.plays[0];
     const oldest = group.plays.at(-1);
-    if (newest && oldest) group.span = `${clockOf(oldest)}–${endClockOf(newest)}`;
+    if (newest && oldest) {
+      const from = clockOf(oldest);
+      const to = endClockOf(newest);
+      group.span = from === to ? from : `${from}–${to}`;
+    }
     const skies = new Map<Sky, number>();
     for (const play of group.plays) {
       const sky = skyOf(play.setting.sun);

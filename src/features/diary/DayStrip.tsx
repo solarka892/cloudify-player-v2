@@ -3,10 +3,13 @@ import type { DaySummary } from "@/api/types";
 import { dayDate, dayNumber, daysUpTo, dayWord, isMonday, isWeekend } from "@/features/diary/days";
 import { formatLength } from "@/ui/format";
 
-/** One day's column: its width with the gap after it. */
+/** A day's column with the gap after it, at its widest and its narrowest. */
 const COLUMN = 30;
+const NARROW_COLUMN = 20;
+const GAP = 4;
 const MOST_DAYS = 31;
-const FEWEST_DAYS = 7;
+/** Three weeks: the strip narrows its columns before it shows fewer days. */
+const WEEKS_DAYS = 21;
 /** The tallest bar. */
 const BAR = 30;
 
@@ -27,15 +30,21 @@ export function DayStrip({
   onPick: (day: string) => void;
 }) {
   const box = useRef<HTMLDivElement>(null);
-  const [count, setCount] = useState(22);
+  const [fit, setFit] = useState({ count: 22, column: COLUMN });
 
   useEffect(() => {
     const node = box.current;
     if (!node) return;
     const measure = () => {
-      // A week's divider takes a little room too.
+      // The weeks' dividers take a little room too.
       const room = node.clientWidth - 12;
-      setCount(Math.max(FEWEST_DAYS, Math.min(MOST_DAYS, Math.floor(room / COLUMN))));
+      const next =
+        room >= WEEKS_DAYS * COLUMN
+          ? { count: Math.min(MOST_DAYS, Math.floor(room / COLUMN)), column: COLUMN }
+          : room >= WEEKS_DAYS * NARROW_COLUMN
+            ? { count: WEEKS_DAYS, column: Math.floor(room / WEEKS_DAYS) }
+            : { count: Math.max(1, Math.floor(room / NARROW_COLUMN)), column: NARROW_COLUMN };
+      setFit((old) => (old.count === next.count && old.column === next.column ? old : next));
     };
     measure();
     const resize = new ResizeObserver(measure);
@@ -44,7 +53,7 @@ export function DayStrip({
   }, []);
 
   const heard = useMemo(() => new Map(days.map((day) => [day.day, day])), [days]);
-  const keys = daysUpTo(today, count);
+  const keys = daysUpTo(today, fit.count);
   const most = Math.max(1, ...keys.map((key) => heard.get(key)?.heardMs ?? 0));
 
   return (
@@ -74,7 +83,8 @@ export function DayStrip({
               aria-label={said}
               aria-current={lit ? "date" : undefined}
               title={said}
-              className={`group/day grid h-[52px] w-[26px] shrink-0 grid-rows-[1fr_auto] justify-items-center gap-1 rounded-lg pt-0.5 font-bold text-[10.5px] tabular-nums leading-none transition-colors disabled:cursor-default ${lit ? "text-fg" : isWeekend(key) ? "text-fg-muted" : "text-fg-faint"} enabled:hover:text-fg`}
+              style={{ width: fit.column - GAP }}
+              className={`group/day grid h-[52px] shrink-0 grid-rows-[1fr_auto] justify-items-center gap-1 rounded-lg pt-0.5 pb-1 font-bold text-[10.5px] tabular-nums leading-none transition-colors disabled:cursor-default ${lit ? "bg-white/[0.08] text-glow-1" : isWeekend(key) ? "text-fg-muted" : "text-fg-faint"} enabled:hover:text-fg`}
             >
               <i
                 aria-hidden="true"

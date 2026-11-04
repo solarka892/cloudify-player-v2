@@ -164,12 +164,12 @@ function DaySection({
       id={`day-${day.key}`}
       data-day={day.key}
       aria-labelledby={heading}
-      className="mt-9 scroll-mt-[156px] first-of-type:mt-6"
+      className="mt-9 scroll-mt-[156px] first-of-type:mt-6 [@media(max-height:700px)]:first-of-type:mt-4"
     >
       <header className="flex flex-wrap items-baseline gap-x-4 gap-y-1.5 px-2.5 pb-3">
         <h2
           id={heading}
-          className="font-bold font-display text-[22px] leading-none tracking-[-0.02em]"
+          className="font-bold font-display text-[19px] leading-none tracking-[-0.02em]"
         >
           {dayWord(day.key, today)}
           <span className="text-fg-muted">, {dayDate(day.key, today)}</span>
@@ -381,10 +381,11 @@ export function DiaryPage() {
     <div className="relative isolate min-h-full bg-ground">
       <PageLight cover={null} />
       <div className="@container relative z-10 px-14 pb-16">
-        <h1 className="whitespace-nowrap pt-[clamp(88px,13vh,104px)] font-display font-extrabold text-[length:min(108px,12.5cqi)] leading-[0.92] tracking-[-0.055em] [text-shadow:0_10px_50px_rgb(0_0_0/0.35)]">
+        {/* On a short window the word gives way by height too, and the lead steps aside, so plays show in the first view. */}
+        <h1 className="whitespace-nowrap pt-[clamp(80px,13vh,104px)] font-display font-extrabold text-[length:min(108px,12.5cqi,15vh)] leading-[0.92] tracking-[-0.055em] [text-shadow:0_10px_50px_rgb(0_0_0/0.35)]">
           Дневник
         </h1>
-        <p className="mt-[18px] max-w-[60ch] text-pretty text-[17px] text-white/80 leading-[1.45] [text-shadow:0_2px_16px_rgb(0_0_0/0.4)]">
+        <p className="mt-[18px] max-w-[60ch] text-pretty [@media(max-height:700px)]:hidden text-[17px] text-white/80 leading-[1.45] [text-shadow:0_2px_16px_rgb(0_0_0/0.4)]">
           Что играло в Cloudify — по дням и частям суток, и чем закончился каждый трек. Нажми на
           строчку — заиграет оттуда.
         </p>
