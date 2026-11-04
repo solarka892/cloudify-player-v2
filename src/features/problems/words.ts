@@ -171,7 +171,8 @@ export function partOf(key: QueryKey): Part | null {
   }
   if (head === "playlist") return { name: "Плейлист", form: "m" };
   if (head === "artist") return { name: "Популярное артиста", form: "n" };
-  if (head === "station") return { name: "Подборка", form: "f" };
+  // Without them the selection still plays from the likes; only the new finds are missing.
+  if (head === "station") return { name: "Похожие треки для подборки", form: "pl" };
   if (head === "search") {
     if (second === "suggest" || second === "hits") return null;
     switch (third) {
