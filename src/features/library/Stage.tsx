@@ -1,8 +1,6 @@
 import { ArrowDown, ArrowUp, ChevronLeft, Search, X } from "lucide-react";
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { isRetryable } from "@/api/invoke";
 import { useScrollRoot } from "@/app/scrollRoot";
-import { describeError } from "@/ui/errors";
 import { formatCount } from "@/ui/format";
 
 // The library's parts that every section shares: the opened name on the
@@ -312,32 +310,13 @@ export function FilterField({
 }
 
 /**
- * Why the stage is empty or could not load, in plain words; «Ещё раз» only
- * when it can help. With both, `text` says what happened and the error why.
+ * Why the stage is empty, in plain words. A stage SoundCloud did not fill is
+ * not empty: it keeps its shape (`Held`), and «Что не так» says why.
  */
-export function StageNote({
-  text,
-  error,
-  onRetry,
-}: {
-  text?: string;
-  error?: unknown;
-  onRetry?: () => void;
-}) {
-  const failed = error !== undefined && error !== null;
-  const retry = failed && onRetry && isRetryable(error) ? onRetry : null;
+export function StageNote({ text }: { text: string }) {
   return (
     <div className="mt-2 max-w-[560px] rounded-[18px] bg-panel p-4 text-[13.5px] text-fg-muted">
-      <p>{[text, failed ? describeError(error) : null].filter(Boolean).join(" ")}</p>
-      {retry && (
-        <button
-          type="button"
-          onClick={retry}
-          className="mt-3 h-8 rounded-full bg-white/10 px-3.5 font-bold text-fg transition-colors hover:bg-white/15"
-        >
-          Ещё раз
-        </button>
-      )}
+      <p>{text}</p>
     </div>
   );
 }

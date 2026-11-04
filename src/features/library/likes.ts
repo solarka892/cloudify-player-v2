@@ -4,7 +4,8 @@ import { likeTrack, unlikeTrack } from "@/api/library";
 import type { LikedTrack, Page, Track } from "@/api/types";
 import { useAllLikes } from "@/features/library/queries";
 import { usePlayer } from "@/features/player/store";
-import { describeError } from "@/ui/errors";
+import { actionFailed } from "@/features/problems/watch";
+import { likeWords } from "@/features/problems/words";
 
 const ALL_LIKES = ["library", "likes", "all"] as const;
 
@@ -35,8 +36,8 @@ function withFirst(data: LikePages, track: Track): LikePages {
 
 /**
  * Likes or unlikes a track. The heart and the lists change at once; if
- * SoundCloud refuses (its bot filter can), everything goes back and the player
- * says why, so a like never looks done when it is not.
+ * SoundCloud refuses (its bot filter can), everything goes back and «Что не
+ * так» says why, so a like never looks done when it is not.
  */
 export function useToggleLike() {
   const client = useQueryClient();
@@ -52,9 +53,9 @@ export function useToggleLike() {
         );
       return { before };
     },
-    onError: (error, _vars, context) => {
+    onError: (error, { track, liked }, context) => {
       if (context?.before) client.setQueryData(ALL_LIKES, context.before);
-      usePlayer.getState().say(describeError(error));
+      actionFailed(`like:${track.id}`, likeWords(track.title, !liked, error), error);
     },
     onSuccess: (_data, { track, liked }) => {
       if (liked) {

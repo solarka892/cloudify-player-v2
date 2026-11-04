@@ -4,6 +4,7 @@ import type { Me, Plan } from "@/api/types";
 import { roomForTrafficLights } from "@/app/chrome";
 import { Keys } from "@/features/player/KeysHelp";
 import { usePanels } from "@/features/player/panels";
+import { StatusButton } from "@/features/problems/StatusButton";
 import { SearchField } from "@/features/search/SearchField";
 import { useSignOut } from "@/features/session/useSession";
 import { Artwork } from "@/ui/Artwork";
@@ -137,6 +138,7 @@ export function TopBar({
         ))}
       </nav>
       <SearchField />
+      <StatusButton />
       <AccountMenu me={me} />
     </header>
   );

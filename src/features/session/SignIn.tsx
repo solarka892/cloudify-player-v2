@@ -9,10 +9,13 @@ import { Ribbon } from "@/ui/Ribbon";
 
 const DISCLAIMER = "Неофициальный клиент. Не связан с SoundCloud. Используй на свой страх и риск.";
 
-/** A full-window screen in the home's world: the light, one big word, one action. */
-export function Stage({ children }: { children: ReactNode }) {
+/**
+ * A full-window screen in the home's world: the light, one big word, one action.
+ * With `dark`, the light is grey: there is no network, or no sign-in.
+ */
+export function Stage({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
   return (
-    <div className="flex h-full flex-col">
+    <div data-light={dark ? "out" : undefined} className="flex h-full flex-col">
       <header
         data-tauri-drag-region
         className={`flex h-[68px] shrink-0 items-center pr-7 ${roomForTrafficLights ? "pl-[94px]" : "pl-7"}`}
@@ -44,21 +47,57 @@ function tokenProblem(error: unknown): string {
   return describeError(error);
 }
 
-export function SignIn({ expired }: { expired: boolean }) {
-  const viaWindow = useSignInWithWindow();
+/** The fallback way in: a token copied from soundcloud.com by hand. */
+export function TokenForm({ className }: { className: string }) {
   const viaToken = useSignInWithToken();
-  const [tokenOpen, setTokenOpen] = useState(false);
   const [token, setToken] = useState("");
-  const waiting = viaWindow.isPending;
-  const closedWithoutSignIn = viaWindow.isSuccess && viaWindow.data === null;
 
-  const submitToken = (event: FormEvent) => {
+  const submit = (event: FormEvent) => {
     event.preventDefault();
     if (token.trim()) viaToken.mutate(token);
   };
 
   return (
-    <Stage>
+    <form onSubmit={submit} className={className}>
+      <label htmlFor="token" className="block font-bold text-[13.5px]">
+        Ключ входа <span className="text-fg-faint">(cookie oauth_token)</span>
+      </label>
+      <div className="mt-2.5 flex gap-2">
+        <input
+          id="token"
+          type="password"
+          value={token}
+          onChange={(event) => setToken(event.target.value)}
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="2-123456-…"
+          className="h-11 min-w-0 flex-1 rounded-xl bg-white/[0.07] px-3.5 font-semibold text-fg outline-none placeholder:text-fg-faint focus-visible:outline-2 focus-visible:outline-glow-1"
+        />
+        <button
+          type="submit"
+          disabled={viaToken.isPending || !token.trim()}
+          className="h-11 rounded-xl bg-white px-4 font-extrabold text-ink transition-opacity disabled:opacity-50"
+        >
+          {viaToken.isPending ? "Проверяю…" : "Войти"}
+        </button>
+      </div>
+      <p className="mt-2.5 text-[12.5px] text-fg-muted leading-relaxed">
+        {viaToken.isError
+          ? tokenProblem(viaToken.error)
+          : "На soundcloud.com, где ты уже вошёл: инструменты разработчика → Application (Хранилище) → Cookies → soundcloud.com → значение oauth_token."}
+      </p>
+    </form>
+  );
+}
+
+export function SignIn({ expired }: { expired: boolean }) {
+  const viaWindow = useSignInWithWindow();
+  const [tokenOpen, setTokenOpen] = useState(false);
+  const waiting = viaWindow.isPending;
+  const closedWithoutSignIn = viaWindow.isSuccess && viaWindow.data === null;
+
+  return (
+    <Stage dark={expired}>
       <h1 className="whitespace-nowrap font-display font-extrabold text-[length:min(132px,15cqi)] leading-[0.92] tracking-[-0.055em] [text-shadow:0_10px_50px_rgb(0_0_0/0.35)]">
         Cloudify
       </h1>
@@ -105,37 +144,7 @@ export function SignIn({ expired }: { expired: boolean }) {
               ? "Окно закрылось до входа. Можно попробовать ещё раз."
               : ""}
       </p>
-      {tokenOpen && (
-        <form onSubmit={submitToken} className="mt-2 max-w-[560px] rounded-[22px] bg-panel/95 p-4">
-          <label htmlFor="token" className="block font-bold text-[13.5px]">
-            Ключ входа <span className="text-fg-faint">(cookie oauth_token)</span>
-          </label>
-          <div className="mt-2.5 flex gap-2">
-            <input
-              id="token"
-              type="password"
-              value={token}
-              onChange={(event) => setToken(event.target.value)}
-              autoComplete="off"
-              spellCheck={false}
-              placeholder="2-123456-…"
-              className="h-11 min-w-0 flex-1 rounded-xl bg-white/[0.07] px-3.5 font-semibold text-fg outline-none placeholder:text-fg-faint focus-visible:outline-2 focus-visible:outline-glow-1"
-            />
-            <button
-              type="submit"
-              disabled={viaToken.isPending || !token.trim()}
-              className="h-11 rounded-xl bg-white px-4 font-extrabold text-ink transition-opacity disabled:opacity-50"
-            >
-              {viaToken.isPending ? "Проверяю…" : "Войти"}
-            </button>
-          </div>
-          <p className="mt-2.5 text-[12.5px] text-fg-muted leading-relaxed">
-            {viaToken.isError
-              ? tokenProblem(viaToken.error)
-              : "На soundcloud.com, где ты уже вошёл: инструменты разработчика → Application (Хранилище) → Cookies → soundcloud.com → значение oauth_token."}
-          </p>
-        </form>
-      )}
+      {tokenOpen && <TokenForm className="mt-2 max-w-[560px] rounded-[22px] bg-panel/95 p-4" />}
       <p className="mt-6 max-w-[60ch] text-[12.5px] text-fg-faint leading-relaxed">
         Пароль вводится на сайте SoundCloud — приложение его не видит. Cloudify хранит только ключ
         входа, в связке ключей системы, и отправляет его только в SoundCloud.

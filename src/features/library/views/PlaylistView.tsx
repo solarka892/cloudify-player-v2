@@ -17,6 +17,7 @@ import {
   StageNote,
 } from "@/features/library/Stage";
 import { useListFilter } from "@/features/library/useListFilter";
+import { Held } from "@/features/problems/Held";
 import { formatCount, formatLength, plural } from "@/ui/format";
 import { Mosaic } from "@/ui/Mosaic";
 
@@ -107,7 +108,10 @@ export function PlaylistView({
       </StageActions>
       <div ref={start} className="mt-5" />
       {full.isError ? (
-        <StageNote error={full.error} onRetry={() => void full.refetch()} />
+        <Held
+          error={full.error}
+          frames={<WallSkeleton count={Math.min(Math.max(count, 6), 24)} />}
+        />
       ) : full.isPending ? (
         <WallSkeleton count={Math.min(Math.max(count, 6), 24)} />
       ) : tracks.length === 0 ? (

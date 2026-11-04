@@ -4,14 +4,12 @@ import { stream as resolveStream } from "@/api/player";
 import type { Stream, Track } from "@/api/types";
 import { saveResumePoint } from "@/features/player/resume";
 import { currentTrack, usePlayer } from "@/features/player/store";
+import { useProblems } from "@/features/problems/store";
+import { requestFailed, requestSucceeded } from "@/features/problems/watch";
+import { actionWords } from "@/features/problems/words";
 import { artworkUrl } from "@/ui/artworkUrl";
 
 type State = ReturnType<typeof usePlayer.getState>;
-
-interface EngineHooks {
-  /** SoundCloud stopped accepting the session mid-play. */
-  onSessionExpired?: () => void;
-}
 
 /** Five unplayable tracks in a row is a pattern, not bad luck: stop instead of racing through the queue. */
 const MAX_FAILURES_IN_A_ROW = 5;
@@ -25,7 +23,7 @@ const MAX_FAILURES_IN_A_ROW = 5;
  *
  * Returns the function that stops it.
  */
-export function startAudioEngine(hooks: EngineHooks = {}): () => void {
+export function startAudioEngine(): () => void {
   const audio = new Audio();
   audio.preload = "auto";
   let hls: Hls | null = null;
@@ -84,15 +82,25 @@ export function startAudioEngine(hooks: EngineHooks = {}): () => void {
     const { kind } = ApiError.from(error);
     loadedKey = null;
     s.report({ buffering: false });
+    // No network and no sign-in are the whole window's news: the status button and the light say them.
+    requestFailed(error);
     if (kind === "network") {
       s.setPlaying(false);
-      s.say("Нет связи с SoundCloud — пауза. Включи снова, когда интернет вернётся.");
+      if (track) {
+        useProblems.getState().add({
+          id: "stream",
+          kind: "action",
+          title: "Трек не загрузился",
+          text: `Нет сети, и «${track.title}» не загрузился, поэтому плеер на паузе. Включи снова, когда интернет вернётся.`,
+          short: "Трек не загрузился",
+          error: ApiError.from(error),
+          cause: error,
+        });
+      }
       return;
     }
     if (kind === "unauthorized") {
       s.setPlaying(false);
-      s.say("Вход устарел — войди заново.");
-      hooks.onSessionExpired?.();
       return;
     }
     failures += 1;
@@ -100,6 +108,18 @@ export function startAudioEngine(hooks: EngineHooks = {}): () => void {
       failures = 0;
       s.setPlaying(false);
       s.say("Несколько треков подряд здесь не играют — остановился.");
+      // Five in a row is a pattern: maybe SoundCloud changed how it hands out sound.
+      useProblems.getState().add({
+        id: "streams",
+        kind: "action",
+        ...actionWords(
+          "Треки подряд не играют",
+          "Пять треков подряд не заиграли, поэтому плеер остановился.",
+          error,
+        ),
+        error: ApiError.from(error),
+        cause: error,
+      });
       return;
     }
     s.say(track ? `«${track.title}» здесь не играет — включаю следующий` : null);
@@ -147,6 +167,7 @@ export function startAudioEngine(hooks: EngineHooks = {}): () => void {
     state().report({ buffering: true, position: startAt });
     try {
       const source = await resolveStream(track.id);
+      requestSucceeded();
       if (token !== loadToken) return;
       await attach(source);
       if (token !== loadToken) return;

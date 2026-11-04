@@ -30,20 +30,11 @@ export function SectionHeader({ id, title, count, onAll }: SectionHeaderProps) {
   );
 }
 
-/** A section that could not load: why, and «Ещё раз» only when asking again can help. */
-export function SectionProblem({ text, onRetry }: { text: string; onRetry?: () => void }) {
+/** A section with nothing in it yet, and why. (One that could not load keeps its shape: `Held`.) */
+export function SectionProblem({ text }: { text: string }) {
   return (
     <div className="mt-[18px] rounded-[18px] bg-panel p-4 text-[13.5px] text-fg-muted">
       <p>{text}</p>
-      {onRetry && (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-3 h-8 rounded-full bg-white/10 px-3.5 font-bold text-fg transition-colors hover:bg-white/15"
-        >
-          Ещё раз
-        </button>
-      )}
     </div>
   );
 }

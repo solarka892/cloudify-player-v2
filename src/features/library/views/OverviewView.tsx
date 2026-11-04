@@ -21,6 +21,7 @@ import { useListFilter } from "@/features/library/useListFilter";
 import { SectionTitle, SectionTop } from "@/features/library/views/actions";
 import { PlaylistGrid, tileLine, usePlayPlaylist } from "@/features/library/views/CollectionViews";
 import { topArtists, useArtistRadio } from "@/features/library/views/PeopleViews";
+import { Held } from "@/features/problems/Held";
 import { formatCount, plural } from "@/ui/format";
 
 const TRACKS = ["трек", "трека", "треков"] as const;
@@ -60,6 +61,12 @@ export function OverviewView({ me }: { me: Me }) {
   const repostTracks = useMemo(() => reposts.items.filter(isTrack), [reposts.items]);
   const recent = useMemo(() => plays.items.map((play) => play.track), [plays.items]);
   const stations = useMemo(() => topArtists(likeTracks, 24), [likeTracks]);
+  // A shelf SoundCloud did not fill keeps its place, as quiet frames: nothing jumps.
+  const failedPlaylists = playlists.length === 0 ? (own.error ?? liked.error) : null;
+  const failedAlbums = albumList.length === 0 ? (albums.error ?? liked.error) : null;
+  const failedReposts = repostTracks.length === 0 ? reposts.error : null;
+  const failedFollowings = followings.items.length === 0 ? followings.error : null;
+  const failedHistory = recent.length === 0 ? plays.error : null;
 
   const start = useRef<HTMLDivElement>(null);
   const { query, onQuery, shown, filtering } = useListFilter(likeTracks, trackText, start);
@@ -179,7 +186,7 @@ export function OverviewView({ me }: { me: Me }) {
             onOpen={() => openSection("likes")}
           >
             {likes.error && likeTracks.length === 0 ? (
-              <StageNote error={likes.error} onRetry={likes.retry} />
+              <Held error={likes.error} frames={<RowSkeleton />} />
             ) : likes.pending ? (
               <RowSkeleton />
             ) : likeTracks.length === 0 ? (
@@ -193,69 +200,90 @@ export function OverviewView({ me }: { me: Me }) {
               />
             )}
           </Shelf>
-          {(own.pending || liked.pending || playlists.length > 0) && (
+          {(own.pending || liked.pending || playlists.length > 0 || failedPlaylists) && (
             <Shelf
               id="shelf-playlists"
               title="Плейлисты"
               count={count("playlists")}
               onOpen={() => openSection("playlists")}
             >
-              {own.pending && liked.pending ? (
+              {failedPlaylists ? (
+                <Held error={failedPlaylists} frames={<RowSkeleton />} />
+              ) : own.pending && liked.pending ? (
                 <RowSkeleton />
               ) : (
                 <TileRow items={playlists} label="Плейлисты" render={playlistTile} />
               )}
+              {/* The liked ones came, your own did not: the row says the rest is missing. */}
+              {!failedPlaylists && own.error && own.items.length === 0 ? (
+                <Held error={own.error} rest />
+              ) : null}
             </Shelf>
           )}
-          {albumList.length > 0 && (
+          {(albumList.length > 0 || failedAlbums) && (
             <Shelf
               id="shelf-albums"
               title="Альбомы"
               count={count("albums")}
               onOpen={() => openSection("albums")}
             >
-              <TileRow items={albumList} label="Альбомы" render={playlistTile} />
+              {failedAlbums ? (
+                <Held error={failedAlbums} frames={<RowSkeleton />} />
+              ) : (
+                <TileRow items={albumList} label="Альбомы" render={playlistTile} />
+              )}
+              {!failedAlbums && albums.error && albums.items.length === 0 ? (
+                <Held error={albums.error} rest />
+              ) : null}
             </Shelf>
           )}
-          {repostTracks.length > 0 && (
+          {(repostTracks.length > 0 || failedReposts) && (
             <Shelf
               id="shelf-reposts"
               title="Репосты"
               count={count("reposts")}
               onOpen={() => openSection("reposts")}
             >
-              <CoverRow
-                tracks={repostTracks}
-                label="Последние репосты"
-                source={{ kind: "reposts" }}
-                onPlay={(track) => playInOrder(repostTracks, { kind: "reposts" }, track)}
-              />
+              {failedReposts ? (
+                <Held error={failedReposts} frames={<RowSkeleton />} />
+              ) : (
+                <CoverRow
+                  tracks={repostTracks}
+                  label="Последние репосты"
+                  source={{ kind: "reposts" }}
+                  onPlay={(track) => playInOrder(repostTracks, { kind: "reposts" }, track)}
+                />
+              )}
             </Shelf>
           )}
-          {followings.items.length > 0 && (
+          {(followings.items.length > 0 || failedFollowings) && (
             <Shelf
               id="shelf-followings"
               title="Подписки"
               count={count("followings")}
               onOpen={() => openSection("followings")}
             >
-              <TileRow
-                items={followings.items}
-                label="Подписки"
-                min={150}
-                render={(user) => (
-                  <PersonTile
-                    key={user.id}
-                    user={user}
-                    line={
-                      user.followersCount != null
-                        ? `${formatCount(user.followersCount)} ${plural(user.followersCount, FOLLOWERS)}`
-                        : ""
-                    }
-                    onOpen={() => open({ kind: "artist", user, from: "all" })}
-                  />
-                )}
-              />
+              {failedFollowings ? (
+                <Held error={failedFollowings} frames={<RowSkeleton />} />
+              ) : (
+                <TileRow
+                  items={followings.items}
+                  label="Подписки"
+                  min={150}
+                  render={(user) => (
+                    <PersonTile
+                      key={user.id}
+                      user={user}
+                      line={
+                        user.followersCount != null
+                          ? `${formatCount(user.followersCount)} ${plural(user.followersCount, FOLLOWERS)}`
+                          : ""
+                      }
+                      onOpen={() => open({ kind: "artist", user, from: "all" })}
+                    />
+                  )}
+                />
+              )}
             </Shelf>
           )}
           {stations.length > 0 && (
@@ -280,19 +308,24 @@ export function OverviewView({ me }: { me: Me }) {
               />
             </Shelf>
           )}
-          {recent.length > 0 && (
+          {(recent.length > 0 || failedHistory) && (
             <Shelf
               id="shelf-history"
               title="История"
+              one
               count={null}
               onOpen={() => openSection("history")}
             >
-              <CoverRow
-                tracks={recent}
-                label="Недавно играло"
-                source={{ kind: "history" }}
-                onPlay={(track: Track) => playInOrder(recent, { kind: "history" }, track)}
-              />
+              {failedHistory ? (
+                <Held error={failedHistory} frames={<RowSkeleton />} />
+              ) : (
+                <CoverRow
+                  tracks={recent}
+                  label="Недавно играло"
+                  source={{ kind: "history" }}
+                  onPlay={(track: Track) => playInOrder(recent, { kind: "history" }, track)}
+                />
+              )}
             </Shelf>
           )}
         </>

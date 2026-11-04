@@ -6,14 +6,17 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "@/app/App";
 import { queryClient } from "@/app/queryClient";
+import { WholeApp } from "@/features/problems/Part";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("index.html is missing #root");
 
 createRoot(root).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <WholeApp>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </WholeApp>
   </StrictMode>,
 );

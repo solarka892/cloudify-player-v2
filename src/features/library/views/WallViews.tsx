@@ -7,6 +7,7 @@ import { foundLine, NoMatch, StageNote } from "@/features/library/Stage";
 import { useListFilter } from "@/features/library/useListFilter";
 import { SectionTitle, SectionTop } from "@/features/library/views/actions";
 import { PlaylistGrid } from "@/features/library/views/CollectionViews";
+import { Held } from "@/features/problems/Held";
 import { formatCount } from "@/ui/format";
 
 /** «Лайки»: every like as a wall of covers. «Перемешать все» really means all of them. */
@@ -52,7 +53,7 @@ export function LikesWallView({ me }: { me: Me }) {
           }
         />
         {likes.error && total === 0 ? (
-          <StageNote error={likes.error} onRetry={likes.retry} />
+          <Held error={likes.error} frames={<WallSkeleton />} />
         ) : likes.pending ? (
           <WallSkeleton />
         ) : total === 0 ? (
@@ -67,13 +68,7 @@ export function LikesWallView({ me }: { me: Me }) {
             onPlay={(track) => playInOrder(shown, { kind: "likes" }, track)}
           />
         )}
-        {likes.error && total > 0 ? (
-          <StageNote
-            text={`Загрузились не все лайки, только ${formatCount(total)}.`}
-            error={likes.error}
-            onRetry={likes.retry}
-          />
-        ) : null}
+        {likes.error && total > 0 ? <Held error={likes.error} rest /> : null}
       </section>
     </>
   );
@@ -105,7 +100,7 @@ export function HistoryView({ me }: { me: Me }) {
       <section aria-labelledby="history-wall">
         <SectionTitle id="history-wall" title="Недавно играло" />
         {plays.error && tracks.length === 0 ? (
-          <StageNote error={plays.error} onRetry={plays.retry} />
+          <Held error={plays.error} frames={<WallSkeleton />} />
         ) : plays.pending ? (
           <WallSkeleton />
         ) : tracks.length === 0 ? (
@@ -165,7 +160,7 @@ export function RepostsView({ me }: { me: Me }) {
       />
       <div ref={start} />
       {reposts.error && total === 0 ? (
-        <StageNote error={reposts.error} onRetry={reposts.retry} />
+        <Held error={reposts.error} frames={<WallSkeleton />} />
       ) : reposts.pending ? (
         <WallSkeleton />
       ) : total === 0 ? (

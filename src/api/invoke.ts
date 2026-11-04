@@ -7,6 +7,8 @@ export class ApiError extends Error {
   readonly kind: ErrorKind;
   readonly status: number | null;
   readonly retryAfterSecs: number | null;
+  /** The command that was refused, for «Подробнее»; set by `call`. */
+  command: string | null = null;
 
   constructor(
     kind: ErrorKind,
@@ -55,7 +57,9 @@ export async function call<T>(command: string, args?: Record<string, unknown>): 
     }
     throw new ApiError("app", "Cloudify only works inside its own window");
   } catch (error) {
-    throw ApiError.from(error);
+    const refused = ApiError.from(error);
+    refused.command ??= command;
+    throw refused;
   }
 }
 

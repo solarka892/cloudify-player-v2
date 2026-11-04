@@ -9,8 +9,9 @@ import { foundLine, NoMatch, StageNote } from "@/features/library/Stage";
 import { PlaylistTile, TileGrid, TileSkeleton } from "@/features/library/Tiles";
 import { useListFilter } from "@/features/library/useListFilter";
 import { SectionTop, useShuffleAllLikes } from "@/features/library/views/actions";
-import { usePlayer } from "@/features/player/store";
-import { describeError } from "@/ui/errors";
+import { Held } from "@/features/problems/Held";
+import { actionFailed } from "@/features/problems/watch";
+import { actionWords } from "@/features/problems/words";
 import { formatCount, plural } from "@/ui/format";
 
 const TRACKS = ["трек", "трека", "треков"] as const;
@@ -28,7 +29,12 @@ export function usePlayPlaylist() {
       }),
     onSuccess: (full) =>
       playInOrder(full.tracks ?? [], { kind: "playlist", title: full.title, id: full.id }),
-    onError: (error) => usePlayer.getState().say(describeError(error)),
+    onError: (error, item) =>
+      actionFailed(
+        "play-playlist",
+        actionWords("Плейлист не включился", `«${item.title}» не загрузился.`, error),
+        error,
+      ),
   });
   return {
     play: (item: Playlist) => play.mutate(item),
@@ -84,7 +90,6 @@ function CollectionView({
   items,
   pending,
   error,
-  retry,
 }: {
   me: Me;
   section: SectionId;
@@ -94,7 +99,6 @@ function CollectionView({
   items: Playlist[];
   pending: boolean;
   error: unknown;
-  retry: () => void;
 }) {
   const shuffle = useShuffleAllLikes(me);
   const start = useRef<HTMLDivElement>(null);
@@ -112,7 +116,7 @@ function CollectionView({
       />
       <div ref={start} />
       {error && items.length === 0 ? (
-        <StageNote error={error} onRetry={retry} />
+        <Held error={error} frames={<TileSkeleton />} />
       ) : pending ? (
         <TileSkeleton />
       ) : items.length === 0 ? (
@@ -122,9 +126,7 @@ function CollectionView({
       ) : (
         <PlaylistGrid items={shown} me={me} from={section} label={title} />
       )}
-      {error && items.length > 0 ? (
-        <StageNote text="Загрузилось не всё." error={error} onRetry={retry} />
-      ) : null}
+      {error && items.length > 0 ? <Held error={error} rest /> : null}
     </>
   );
 }
@@ -145,10 +147,6 @@ export function PlaylistsView({ me }: { me: Me }) {
       items={items}
       pending={own.pending || liked.pending}
       error={own.error ?? liked.error}
-      retry={() => {
-        if (own.error) own.retry();
-        if (liked.error) liked.retry();
-      }}
     />
   );
 }
@@ -169,10 +167,6 @@ export function AlbumsView({ me }: { me: Me }) {
       items={items}
       pending={own.pending || liked.pending}
       error={own.error ?? liked.error}
-      retry={() => {
-        if (own.error) own.retry();
-        if (liked.error) liked.retry();
-      }}
     />
   );
 }

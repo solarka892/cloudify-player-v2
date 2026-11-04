@@ -5,6 +5,7 @@ import { TrackTile } from "@/features/library/CoverWall";
 import { leavesGroup, usePointing } from "@/features/library/light";
 import { useLikedIds, useToggleLike } from "@/features/library/likes";
 import { currentTrack, type QueueSource, usePlayer } from "@/features/player/store";
+import { Part } from "@/features/problems/Part";
 
 // «Всё» as shelves: each section shows exactly one row, as much as fits the
 // window, and its title opens the whole section.
@@ -31,12 +32,15 @@ export function Shelf({
   title,
   count,
   onOpen,
+  one = false,
   children,
 }: {
   id: string;
   title: string;
   count: string | null;
   onOpen: () => void;
+  /** The title names one thing («История»), so «сломалась», not «сломались». */
+  one?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -61,7 +65,10 @@ export function Shelf({
           />
         </button>
       </h2>
-      {children}
+      {/* A shelf that breaks is only that shelf: the others keep working. */}
+      <Part name={{ name: title, form: one ? "f" : "pl" }} frames={<RowSkeleton />}>
+        {children}
+      </Part>
     </section>
   );
 }

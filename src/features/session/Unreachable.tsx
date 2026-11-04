@@ -6,7 +6,7 @@ import { describeError } from "@/ui/errors";
 export function Unreachable({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   const offline = ApiError.from(error).kind === "network";
   return (
-    <Stage>
+    <Stage dark={offline}>
       <h1 className="whitespace-nowrap font-display font-extrabold text-[length:min(132px,15cqi)] leading-[0.92] tracking-[-0.055em] [text-shadow:0_10px_50px_rgb(0_0_0/0.35)]">
         {offline ? "Нет связи" : "Минутку"}
       </h1>
