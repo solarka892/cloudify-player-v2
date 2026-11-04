@@ -26,9 +26,9 @@ import { currentTrack, hasNext, usePlayer } from "@/features/player/store";
 import { useLoudness } from "@/features/player/useLoudness";
 import { VolumeSlider } from "@/features/player/VolumeSlider";
 import { WaveformSeek } from "@/features/player/WaveformSeek";
-import { moreLikeThis, notThis } from "@/features/selection/session";
+import { moreLikeThis, notThis, useSelectionSession } from "@/features/selection/session";
 import { usePickOf } from "@/features/selection/useSelection";
-import { whyParts } from "@/features/selection/why";
+import { whyLine } from "@/features/selection/why";
 import { Artwork } from "@/ui/Artwork";
 import { formatSeconds } from "@/ui/format";
 
@@ -64,6 +64,10 @@ export function PlayerBar() {
   const deskOpen = usePanels((s) => s.desk);
   const fromSelection = source?.kind === "selection";
   const pick = usePickOf(fromSelection ? (track?.id ?? null) : null);
+  // «Больше такого» already pressed on this track: the round stays lit, like a mode that is on.
+  const asked = useSelectionSession((s) =>
+    track ? s.steers.some((press) => press.kind === "more" && press.track.id === track.id) : false,
+  );
   const { toggle, next, previous, seek, setVolume, toggleMute, toggleShuffle, cycleRepeat, say } =
     usePlayer.getState();
   const loudness = useLoudness(track);
@@ -81,7 +85,9 @@ export function PlayerBar() {
   const shownVolume = muted ? 0 : volume;
   const VolumeIcon = shownVolume === 0 ? VolumeX : shownVolume < 0.5 ? Volume1 : Volume2;
   // While the selection plays, the line under the title says why this track, not just where from.
-  const fromLabel = (pick && whyParts(pick.facts, Date.now())[0]) || from(source);
+  // While the selection plays, a third line says why this track; where it came from is in it.
+  const why = pick ? whyLine(pick.facts, Date.now()) : "";
+  const fromLabel = why ? "" : from(source);
   const shuffleName = endless
     ? "Подборка и так вперемешку"
     : shuffled
@@ -147,6 +153,14 @@ export function PlayerBar() {
               <span className="truncate">Включи подборку или трек из лайков</span>
             )}
           </span>
+          {track && why && (
+            <span
+              title={why}
+              className="block truncate font-bold text-[12.5px] text-fg-faint leading-tight"
+            >
+              {why}
+            </span>
+          )}
         </div>
       </div>
 
@@ -159,7 +173,7 @@ export function PlayerBar() {
             aria-pressed={shuffled}
             aria-label={shuffleName}
             title={shuffleName}
-            className={`${iconButton} ${shuffled ? modeOn : ""}`}
+            className={`${iconButton} ${shuffled ? modeOn : ""} ${endless ? "max-[1100px]:hidden" : ""}`}
           >
             <Shuffle className="size-[18px]" aria-hidden="true" />
           </button>
@@ -226,7 +240,9 @@ export function PlayerBar() {
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-2.5">
+      {/* In a narrow window the waveform keeps its room: the gaps tighten, and the lyrics
+          button that does not work yet steps out while the selection's presses are here. */}
+      <div className="flex items-center justify-end gap-2.5 max-[1100px]:gap-1.5">
         {fromSelection && track && (
           <>
             <button
@@ -242,12 +258,16 @@ export function PlayerBar() {
               type="button"
               onClick={moreLikeThis}
               aria-label="Больше такого"
-              title="Больше такого — похожее пойдёт раньше"
-              className={iconButton}
+              aria-pressed={asked}
+              title={asked ? "Уже ищу больше такого" : "Больше такого — похожее пойдёт раньше"}
+              className={`${iconButton} ${asked ? modeOn : ""}`}
             >
               <ThumbsUp className="size-5" aria-hidden="true" />
             </button>
-            <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-white/[0.12]" />
+            <span
+              aria-hidden="true"
+              className="mx-0.5 h-5 w-px bg-white/[0.12] max-[1100px]:hidden"
+            />
           </>
         )}
         <button
@@ -267,7 +287,7 @@ export function PlayerBar() {
           disabled
           aria-label="Текст песни — скоро"
           title="Текст песни — скоро"
-          className={iconButton}
+          className={`${iconButton} ${fromSelection ? "max-[1100px]:hidden" : ""}`}
         >
           <MicVocal className="size-5" aria-hidden="true" />
         </button>

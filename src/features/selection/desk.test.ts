@@ -55,7 +55,7 @@ describe("sources on the desk", () => {
     expect(line("likes")).toBe(`${formatCount(1312)} треков · недавно игравшие — в конце`);
     expect(line("stations")).toBe("По «Положение» — его ты включал последним");
     expect(line("history")).toBe(
-      "Пусто: история придёт, когда дневник узнает, что из неё ты дослушиваешь",
+      "Пусто: история SoundCloud придёт, когда дневник узнает, что из неё ты дослушиваешь",
     );
     expect(line("related")).toBe("Пусто: появятся, когда дослушаешь первый трек");
     expect(line("winter")).toBe("Пусто: появится в марте 2027 — после первой зимы с дневником");
@@ -81,7 +81,9 @@ describe("sources on the desk", () => {
       now: NOW,
     });
     const line = (id: SourceId) => rows.find((r) => r.id === id)?.line;
-    expect(line("history")).toBe("7 треков, которые ты обычно дослушиваешь");
+    expect(line("history")).toBe(
+      "7 треков из истории SoundCloud и дневника, которые ты дослушиваешь",
+    );
     expect(line("stations")).toBe("По «Альма-матер», «Кинолента» — их ты дослушал недавно");
     expect(line("winter")).toBe("12 треков, которые ты дослушивал прошлой зимой");
     expect(line("yearAgo")).toBe("Пусто: в эту неделю год назад ты здесь ничего не дослушал");

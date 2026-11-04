@@ -156,20 +156,6 @@ for (const liked of likes) {
 
 const radio = user(20, "Станция SoundCloud");
 
-/**
- * A big library, the size of the author's: the stand-in likes over and over
- * under new ids, liked a day apart going back years. Enough to feel paging,
- * the windowed list and the filter the way a real account does.
- */
-const LIBRARY_SIZE = 1312;
-const allLikes: LikedTrack[] = Array.from({ length: LIBRARY_SIZE }, (_, i) => {
-  const base = likes[i % likes.length] as Track;
-  const copy = i < likes.length ? base : { ...base, id: base.id * 10 + i, urn: `${base.urn}-${i}` };
-  return {
-    likedAt: new Date(Date.UTC(2026, 10, 3) - i * 86_400_000 * 1.3).toISOString(),
-    track: copy,
-  };
-});
 const station: Track[] = [
   track(799094587, "Похожий трек 1", radio, "3:48", "2NtS3vNB8BrD-0", { genre: "Electronic" }),
   track(2194656115, "Похожий трек 2", radio, "3:12", "qxQGZJ1fRxnQ6Qui-8MIgjg", {
@@ -362,6 +348,38 @@ const searchTracks: Track[] = [...likes, played, ...station, ...houseMixes].flat
     };
   }),
 );
+/**
+ * A big library, the size of the author's: the stand-in likes over and over
+ * under new ids, liked a day apart going back years — as versions and
+ * re-uploads, the way a real SoundCloud library repeats a song («… (slowed)»,
+ * «artist - title [HQ]»), so lists and the selection's strip read as different
+ * tracks. Enough to feel paging, the windowed list and the filter the way a
+ * real account does.
+ */
+const LIBRARY_SIZE = 1312;
+const allLikes: LikedTrack[] = Array.from({ length: LIBRARY_SIZE }, (_, i) => {
+  const base = likes[i % likes.length] as Track;
+  const round = Math.floor(i / likes.length);
+  const version = VERSIONS[round % VERSIONS.length] ?? "";
+  const reupload = round > 0 && round % 3 === 1;
+  const copy =
+    i < likes.length
+      ? base
+      : {
+          ...base,
+          id: base.id * 10 + i,
+          urn: `${base.urn}-${i}`,
+          title: reupload
+            ? `${base.user?.username} - ${base.title}${version}`
+            : `${base.title}${version}`,
+          user: reupload ? (reuploaders[round % reuploaders.length] as User) : base.user,
+        };
+  return {
+    likedAt: new Date(Date.UTC(2026, 10, 3) - i * 86_400_000 * 1.3).toISOString(),
+    track: copy,
+  };
+});
+
 const FOLLOWING: Record<number, [number, boolean]> = {
   11: [412_000, true],
   12: [21_300, false],
@@ -398,6 +416,13 @@ const searchPools: SearchPools = {
 };
 
 const everything = [...allLikes.map((like) => like.track), played, ...station, ...searchTracks];
+
+/** Re-uploads the stand-in diary has never played: new music for a radio, a different cut per track. */
+const unheard = searchTracks.filter((t) => t.user && reuploaders.includes(t.user));
+function newMusic(seed: number, count: number): Track[] {
+  const from = Math.abs(seed) % Math.max(1, unheard.length);
+  return [...unheard.slice(from), ...unheard.slice(0, from)].slice(0, count);
+}
 
 // --- breaking on purpose ----------------------------------------------------------
 
@@ -563,10 +588,10 @@ async function standIn(command: string, args: Record<string, unknown>): Promise<
       };
     }
     case "track_station":
-      return station;
+      return [...station, ...newMusic(Number(args.trackId), 40)];
     case "related_tracks":
-      // A different cut of the same music, so radio and related do not look the same.
-      return [...station].reverse().slice(0, 30);
+      // A different cut of new music, so radio and related do not look the same.
+      return newMusic(Number(args.trackId) * 7 + 3, 30);
     case "waveform":
       return waveformFor(String(args.url));
     case "stream": {

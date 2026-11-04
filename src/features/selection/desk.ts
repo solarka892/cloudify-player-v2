@@ -92,11 +92,12 @@ export function sourceRows(input: SourcesInput): SourceRow[] {
         break;
       case "history":
         empty = offered(id) === 0;
+        // History is what played on SoundCloud (and here) that the diary says you hear out.
         line = !empty
-          ? `${tracks(offered(id))}, которые ты обычно дослушиваешь`
+          ? `${tracks(offered(id))} из истории SoundCloud и дневника, которые ты дослушиваешь`
           : input.plays === 0
-            ? "Пусто: история придёт, когда дневник узнает, что из неё ты дослушиваешь"
-            : "Пусто: из истории ты пока ничего не дослушивал";
+            ? "Пусто: история SoundCloud придёт, когда дневник узнает, что из неё ты дослушиваешь"
+            : "Пусто: из истории SoundCloud сейчас нечего предложить сверх лайков и недавнего";
         break;
       case "stations": {
         const reason = input.stations[0]?.reason;

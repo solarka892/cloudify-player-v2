@@ -147,7 +147,7 @@ export function Hero({ me }: { me: Me }) {
               aria-controls="selection-desk"
               aria-label="Настроить подборку"
               title="Настроить подборку"
-              className={`${roundButton} ${deskOpen ? "text-glow-1" : ""}`}
+              className={`${roundButton} ${deskOpen ? "bg-[rgb(40_40_46/0.72)]" : ""}`}
             >
               <SlidersHorizontal className="size-5" aria-hidden="true" />
             </button>

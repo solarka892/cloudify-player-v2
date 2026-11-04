@@ -11,7 +11,7 @@ import {
   ThumbsUp,
   X,
 } from "lucide-react";
-import { type ReactNode, useEffect, useMemo, useRef } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import type { Track } from "@/api/types";
 import { usePanels } from "@/features/player/panels";
 import { usePlayer } from "@/features/player/store";
@@ -107,7 +107,14 @@ function Desk() {
         </button>
       </header>
       <div className="mt-[18px] grid grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(0,0.85fr)] gap-8 max-[1179px]:grid-cols-2">
-        <Balance picksOfPreview={selection.picks} />
+        <Balance
+          picksOfPreview={selection.picks}
+          newOffered={
+            selection.sources === null
+              ? null
+              : selection.sources.stations.offered + selection.sources.related.offered
+          }
+        />
         <Sources />
         <Known />
       </div>
@@ -117,8 +124,55 @@ function Desk() {
 
 const columnName = "mb-3 font-extrabold text-[13px] text-fg-faint";
 
+/** Covers move to their new places in the strip as the balance changes: the queue's own slide. */
+function useSlide(list: { current: HTMLElement | null }) {
+  const spots = useRef(new Map<string, DOMRect>());
+  useLayoutEffect(() => {
+    const node = list.current;
+    if (!node) return;
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const easing = "cubic-bezier(0.2, 0.8, 0.2, 1)";
+    const next = new Map<string, DOMRect>();
+    for (const item of node.querySelectorAll<HTMLElement>("[data-slide]")) {
+      const key = item.dataset.slide ?? "";
+      const now = item.getBoundingClientRect();
+      next.set(key, now);
+      const was = spots.current.get(key);
+      if (still || spots.current.size === 0) continue;
+      if (was && (was.left !== now.left || was.top !== now.top)) {
+        item.animate(
+          [
+            { transform: `translate(${was.left - now.left}px, ${was.top - now.top}px)` },
+            { transform: "none" },
+          ],
+          { duration: 160, easing },
+        );
+      } else if (!was) {
+        item.animate(
+          [
+            { opacity: 0, transform: "scale(0.94)" },
+            { opacity: 1, transform: "none" },
+          ],
+          {
+            duration: 160,
+            easing,
+          },
+        );
+      }
+    }
+    spots.current = next;
+  });
+}
+
 /** The balance, its sentence, the next twelve covers and this session's presses. */
-function Balance({ picksOfPreview }: { picksOfPreview: readonly Pick[] }) {
+function Balance({
+  picksOfPreview,
+  newOffered,
+}: {
+  picksOfPreview: readonly Pick[];
+  /** How many new tracks the radios and related lists offer now; `null` before they are read. */
+  newOffered: number | null;
+}) {
   const mood = useSelectionSession((s) => s.mood);
   const novelty = useSelectionSettings((s) => s.settings.novelty);
   const steers = useSelectionSession((s) => s.steers);
@@ -140,13 +194,29 @@ function Balance({ picksOfPreview }: { picksOfPreview: readonly Pick[] }) {
     return picksOfPreview.slice(0, STRIP).map((pick) => ({ track: pick.track, pick }));
   }, [playing, queue, index, picks, picksOfPreview]);
   const presses = steers.filter((s) => s.kind !== "skip");
+  const strip = useRef<HTMLUListElement>(null);
+  useSlide(strip);
+  // A track twice in the strip (it should not be) still gets a place of its own.
+  const seen = new Map<number, number>();
+  const keyOf = (id: number) => {
+    const n = (seen.get(id) ?? 0) + 1;
+    seen.set(id, n);
+    return n === 1 ? String(id) : `${id}~${n}`;
+  };
 
   return (
     <div className="max-[1179px]:col-span-2">
       <h3 className={columnName}>Знакомое и новое</h3>
       <MixSlider value={balance} label={said} onChange={setBalance} />
       <p className="mt-2 font-bold text-[14px] text-fg">{said}</p>
+      {balance > 0 && newOffered === 0 && (
+        <p className="mt-1 text-pretty font-bold text-[12.5px] text-fg-muted">
+          Новых сейчас нет: станции ещё не ответили или нашли только то, что ты уже слышал, — пока
+          играет знакомое.
+        </p>
+      )}
       <ul
+        ref={strip}
         className="mt-[18px] grid grid-cols-6 gap-2.5 max-[1179px]:grid-cols-12"
         aria-label="Дальше в подборке"
       >
@@ -154,8 +224,14 @@ function Balance({ picksOfPreview }: { picksOfPreview: readonly Pick[] }) {
           const fresh = pick !== null && SIDE[pick.source] === "new";
           const Tag = pick ? (fresh ? Sparkles : SOURCE_ICON[pick.source]) : Sparkles;
           const why = pick ? whyParts(pick.facts, now) : [];
+          const key = keyOf(track.id);
           return (
-            <li key={track.id} className="min-w-0" title={[track.title, ...why].join(" · ")}>
+            <li
+              key={key}
+              data-slide={key}
+              className="min-w-0"
+              title={[track.title, ...why].join(" · ")}
+            >
               <span className="relative block">
                 <Artwork
                   url={track.artworkUrl}
@@ -176,14 +252,18 @@ function Balance({ picksOfPreview }: { picksOfPreview: readonly Pick[] }) {
           );
         })}
       </ul>
-      <p className="mt-3 flex gap-3.5 font-bold text-[12px] text-fg-faint">
+      <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 font-bold text-[12px] text-fg-faint">
         <span className="inline-flex items-center gap-1.5">
-          <i className="size-2.5 rounded-[3px] bg-white/30" />
-          знакомое
+          <span className="grid size-5 place-content-center rounded-full bg-black/[0.78] text-white">
+            <Heart className="size-3" aria-hidden="true" />
+          </span>
+          знакомое: лайки, история, дневник
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <i className="size-2.5 rounded-[3px] bg-glow-1" />
-          новое
+          <span className="grid size-5 place-content-center rounded-full bg-black/[0.78] text-glow-1 shadow-[0_0_0_1.5px_color-mix(in_srgb,var(--glow-1)_70%,transparent)]">
+            <Sparkles className="size-3" aria-hidden="true" />
+          </span>
+          новое: станции и похожие
         </span>
       </p>
       {presses.length > 0 && (
