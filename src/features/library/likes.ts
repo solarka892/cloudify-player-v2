@@ -2,6 +2,7 @@ import { type InfiniteData, useMutation, useQueryClient } from "@tanstack/react-
 import { useMemo } from "react";
 import { likeTrack, unlikeTrack } from "@/api/library";
 import type { LikedTrack, Page, Track } from "@/api/types";
+import { noteLiked } from "@/features/diary/record";
 import { useAllLikes } from "@/features/library/queries";
 import { usePlayer } from "@/features/player/store";
 import { actionFailed } from "@/features/problems/watch";
@@ -58,6 +59,8 @@ export function useToggleLike() {
       actionFailed(`like:${track.id}`, likeWords(track.title, !liked, error), error);
     },
     onSuccess: (_data, { track, liked }) => {
+      // Liked (or not) while it plays: the diary keeps that with the play.
+      noteLiked(track.id, !liked);
       if (liked) {
         usePlayer.getState().say(`Убрал из лайков: ${track.title}`, {
           label: "Вернуть",

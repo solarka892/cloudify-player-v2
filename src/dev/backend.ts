@@ -21,6 +21,7 @@ import type {
   User,
   Waveform,
 } from "@/api/types";
+import { answerDiary } from "@/dev/diary";
 import { answerSearch, type SearchPools } from "@/dev/search";
 
 const art = (key: string, ext = "jpg") => `https://i1.sndcdn.com/artworks-${key}-large.${ext}`;
@@ -577,6 +578,8 @@ async function standIn(command: string, args: Record<string, unknown>): Promise<
       return stream;
     }
     default: {
+      const written = answerDiary(command, args, [...likes, played, ...station]);
+      if (written !== undefined) return written;
       const searched = answerSearch(searchPools, command, args);
       if (searched !== undefined) return searched;
       throw new ApiError("app", `dev backend: no stand-in for ${command}`);

@@ -14,6 +14,9 @@ pub enum CommandError {
     /// The OS keychain refused to read, store or delete the session.
     #[error("keychain: {0}")]
     Keychain(String),
+    /// A file of the app's own on this computer (the listening diary) could not be read or written.
+    #[error("storage: {0}")]
+    Storage(String),
     /// The app itself could not do it (a window would not open, sign-in already running).
     #[error("{0}")]
     App(String),
@@ -26,6 +29,7 @@ impl Serialize for CommandError {
         let (kind, message) = match self {
             Self::SoundCloud(error) => return error.serialize(serializer),
             Self::Keychain(message) => ("keychain", message),
+            Self::Storage(message) => ("storage", message),
             Self::App(message) => ("app", message),
         };
         let mut out = serializer.serialize_struct("Error", 4)?;
@@ -52,6 +56,10 @@ mod tests {
         assert_eq!(
             serde_json::to_value(CommandError::Keychain("denied".into())).unwrap(),
             json!({ "kind": "keychain", "message": "denied", "status": null, "retryAfterSecs": null })
+        );
+        assert_eq!(
+            serde_json::to_value(CommandError::Storage("disk full".into())).unwrap(),
+            json!({ "kind": "storage", "message": "disk full", "status": null, "retryAfterSecs": null })
         );
         assert_eq!(
             serde_json::to_value(CommandError::App("busy".into())).unwrap(),

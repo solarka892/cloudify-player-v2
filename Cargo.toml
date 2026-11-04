@@ -12,6 +12,7 @@ publish = false
 
 [workspace.dependencies]
 soundcloud = { path = "crates/soundcloud" }
+diary = { path = "crates/diary" }
 
 reqwest = { version = "0.13", default-features = false, features = [
   "rustls",
@@ -23,8 +24,13 @@ reqwest = { version = "0.13", default-features = false, features = [
   "gzip",
   "brotli",
 ] }
+# Local time and the system time zone for the diary.
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 futures-util = { version = "0.3", default-features = false, features = ["std"] }
+iana-time-zone = "0.1"
 regex = "1"
+# SQLite built in, so the diary needs nothing from the system.
+rusqlite = { version = "0.41", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"

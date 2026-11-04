@@ -29,9 +29,33 @@ export type QueueSource =
   | { kind: "reposts" }
   | { kind: "artist"; title: string }
   | { kind: "station"; title: string }
-  | { kind: "search"; title: string };
+  | { kind: "search"; title: string }
+  /** The track the app picked up where it stopped last time. */
+  | { kind: "resume" };
 
 export type SkipReason = "skip" | "dislike" | "ended" | "unavailable";
+
+/**
+ * Why the playing track stops being the one playing: a skip reason, or it
+ * starts over («again»: on repeat, or sent back to its start), or a new queue
+ * takes its place, or the player stops.
+ */
+export type LeaveReason = SkipReason | "again" | "replaced" | "stopped";
+
+type LeaveListener = (track: Track, reason: LeaveReason, position: number) => void;
+
+const leaveListeners = new Set<LeaveListener>();
+
+/**
+ * Hears every time the playing track is left, and why, while it is still the
+ * playing one (`position` is where it was): the listening diary writes it down.
+ */
+export function onLeave(listener: LeaveListener): () => void {
+  leaveListeners.add(listener);
+  return () => {
+    leaveListeners.delete(listener);
+  };
+}
 
 /** Off; the whole queue round and round; one track over and over. */
 export type Repeat = "off" | "all" | "one";
@@ -174,7 +198,7 @@ function restored(): Pick<
     index: 0,
     original: null,
     heard: new Set([first.key]),
-    source: { kind: "history" },
+    source: { kind: "resume" },
     position: point.position,
     duration: point.track.durationMs / 1000,
     startAt: point.position,
@@ -198,8 +222,16 @@ export const usePlayer = create<PlayerState>()((set, get) => {
     }));
   };
 
+  /** Tells whoever listens (the diary) that the playing track is being left, and why. */
+  const leave = (reason: LeaveReason) => {
+    const { queue, index, position } = get();
+    const now = queue[index];
+    if (now) for (const listener of leaveListeners) listener(now.track, reason, position);
+  };
+
   /** Reports an entry left early, so an endless source can learn from it. */
   const leaving = (reason: SkipReason) => {
+    leave(reason);
     const { queue, index, options, position } = get();
     const now = queue[index];
     if (now && reason !== "ended") options.onSkip?.(now.track, reason, position);
@@ -222,6 +254,7 @@ export const usePlayer = create<PlayerState>()((set, get) => {
       const order = startOrder(tracks, index, options.shuffle ?? false);
       const now = order.queue[order.index];
       if (!now) return;
+      leave("replaced");
       const startAt = options.startAt ?? 0;
       set((s) => ({
         ...order,
@@ -254,6 +287,7 @@ export const usePlayer = create<PlayerState>()((set, get) => {
       if (index < 0) return;
       if (reason === "ended" && repeat === "one") {
         // The same track again, from the top: a fresh load, as if it had just been chosen.
+        leave("again");
         set((s) => ({ position: 0, startAt: 0, playing: true, loadId: s.loadId + 1 }));
         return;
       }
@@ -284,9 +318,12 @@ export const usePlayer = create<PlayerState>()((set, get) => {
       const { index, position, queue } = get();
       if (index < 0) return;
       if (position > 3 || !queue[index - 1]) {
+        // Back to its start: heard a while, it is played again.
+        if (position > 3) leave("again");
         get().seek(0);
         return;
       }
+      leave("skip");
       playAt(queue, index - 1);
     },
 
@@ -425,7 +462,8 @@ export const usePlayer = create<PlayerState>()((set, get) => {
 
     report: (patch) => set(patch),
 
-    stop: () =>
+    stop: () => {
+      leave("stopped");
       set((s) => ({
         queue: [],
         index: -1,
@@ -441,7 +479,8 @@ export const usePlayer = create<PlayerState>()((set, get) => {
         notice: null,
         noticeAction: null,
         loadId: s.loadId + 1,
-      })),
+      }));
+    },
   };
 });
 

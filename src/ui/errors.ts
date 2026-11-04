@@ -26,6 +26,8 @@ export function describeError(error: unknown): string {
       return "Это не похоже на ключ входа SoundCloud.";
     case "keychain":
       return "Система не дала сохранить вход в связку ключей.";
+    case "storage":
+      return "Файл дневника на этом компьютере не открывается или не записывается.";
     case "decode":
     case "api":
       return "SoundCloud ответил что-то непонятное.";

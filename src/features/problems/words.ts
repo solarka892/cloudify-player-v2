@@ -190,6 +190,7 @@ export function partOf(key: QueryKey): Part | null {
         return { name: "Результаты поиска", form: "pl" };
     }
   }
+  if (head === "diary") return { name: "Дневник", form: "m" };
   if (head === "session" || head === "waveform") return null;
   return { name: "Часть страницы", form: "f" };
 }
@@ -223,6 +224,16 @@ const ASKED: Record<string, string> = {
   waveform: "Волна трека",
   track_station: "Радио по треку",
   artist_station: "Радио артиста",
+  diary_start: "Записать прослушивание в дневник",
+  diary_progress: "Записать, докуда дослушал",
+  diary_end: "Записать, чем закончилось",
+  diary_liked: "Записать лайк в дневник",
+  diary_plays: "Дневник",
+  diary_settings: "Настройки дневника",
+  diary_keep: "Сколько хранить дневник",
+  diary_city: "Город для светового дня",
+  diary_forget: "Убрать из дневника",
+  diary_clear: "Стереть дневник",
 };
 
 const STATUS: Record<number, string> = {
@@ -258,6 +269,7 @@ export function detailsOf(error: ApiError, crash = false, stack?: string): Detai
   } else if (error.kind === "network") answer = "Не ответил: нет сети";
   else if (error.kind === "client-id") answer = "Не нашёлся ключ client_id на soundcloud.com";
   else if (error.kind === "decode") answer = "Ответ непонятного вида";
+  else if (error.kind === "storage") answer = "SoundCloud ни при чём: файл на этом компьютере";
   else answer = "—";
   const asked = error.command ? `${ASKED[error.command] ?? "Запрос"} (${error.command})` : null;
   const where = stack

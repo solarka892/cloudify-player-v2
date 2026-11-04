@@ -222,4 +222,121 @@ export type ErrorKind =
   | "decode"
   | "api"
   | "keychain"
+  | "storage"
   | "app";
+
+// --- the listening diary (crates/diary) -------------------------------------------
+
+/** Where a play came from: the player's queue source, as the diary keeps it. */
+export interface PlaySource {
+  kind:
+    | "selection"
+    | "likes"
+    | "playlist"
+    | "history"
+    | "reposts"
+    | "artist"
+    | "station"
+    | "search"
+    | "resume"
+    | "other";
+  /** A playlist's title, the search query, the artist. */
+  title: string | null;
+  /** A playlist's id. */
+  id: number | null;
+}
+
+/**
+ * How a play ended: to the end; left for another track; left with «не то»;
+ * started over (on repeat, or sent back to its start); stopped without moving
+ * on (the app closed, the track broke off).
+ */
+export type PlayOutcome = "finished" | "skipped" | "rejected" | "again" | "stopped";
+
+/** The part of the day by the clock: 0–6, 6–12, 12–18, 18–24. */
+export type PartOfDay = "night" | "morning" | "day" | "evening";
+
+export type Weekday = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
+export type Season = "winter" | "spring" | "summer" | "autumn";
+
+/** The setting a play started in. Every key is always there; what is not known is `null`. */
+export interface PlaySetting {
+  tod: PartOfDay | null;
+  dow: Weekday | null;
+  season: Season | null;
+  /** Hours from sunrise to sunset that day, to a tenth. */
+  daylight: number | null;
+  /** The sun's height in whole degrees: below 0 after sunset, below −6 dark. */
+  sun: number | null;
+  /** The latitude those were worked out for. */
+  lat: number | null;
+  /** A city the person named, or their time zone's. */
+  place: "city" | "zone" | null;
+  /** Not recorded yet: `null` until the app learns to ask. */
+  weather: unknown;
+  activity: unknown;
+  mood: unknown;
+}
+
+/** One play, as the diary keeps it. */
+export interface Play {
+  id: number;
+  /** The track as the app showed it when it last played. */
+  track: Track;
+  /** When the sound started, in milliseconds since 1970. */
+  startedAt: number;
+  /** Minutes the clock ran ahead of UTC then: the day and hour it was there. */
+  utcOffset: number;
+  endedAt: number | null;
+  /** `null` while it plays. */
+  outcome: PlayOutcome | null;
+  fromMs: number;
+  positionMs: number;
+  /** Sound really heard: seeking past a part does not count. */
+  listenedMs: number;
+  durationMs: number;
+  /** Liked while it played. */
+  liked: boolean;
+  source: PlaySource;
+  /** Put next by hand («Играть следующим»). */
+  added: boolean;
+  setting: PlaySetting;
+}
+
+/** Plays newest first; pass `next` back as `before` for older ones. */
+export interface DiaryPage {
+  items: Play[];
+  next: string | null;
+}
+
+/** How far a play got. */
+export interface Heard {
+  positionMs: number;
+  listenedMs: number;
+}
+
+/** A city the sun is worked out for, to a tenth of a degree. */
+export interface DiaryCity {
+  name: string;
+  lat: number;
+  lon: number;
+}
+
+/** The city a time zone is named after (`Europe/Moscow`), standing in until a city is named. */
+export interface ZoneCity {
+  zone: string;
+  lat: number;
+  lon: number;
+}
+
+export interface DiarySettings {
+  /** Plays older than this are let go; `null` keeps them all. */
+  keepDays: number | null;
+  city: DiaryCity | null;
+  zone: ZoneCity | null;
+  /** How many plays are kept. */
+  plays: number;
+  /** When the oldest kept play started. */
+  since: number | null;
+}

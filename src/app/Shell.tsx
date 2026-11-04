@@ -3,6 +3,7 @@ import type { Me } from "@/api/types";
 import { queryClient } from "@/app/queryClient";
 import { ScrollRoot } from "@/app/scrollRoot";
 import { type Tab, TopBar } from "@/app/TopBar";
+import { startDiaryRecorder } from "@/features/diary/record";
 import { HomePage } from "@/features/home/HomePage";
 import { WallSkeleton } from "@/features/library/CoverWall";
 import { LibraryPage } from "@/features/library/LibraryPage";
@@ -57,6 +58,8 @@ export function Shell({ me }: { me: Me }) {
   useEffect(() => setScroller(page.current), []);
 
   useEffect(() => startAudioEngine(), []);
+  // Every play goes into the listening diary, on this computer only.
+  useEffect(() => startDiaryRecorder(), []);
   // A lost network is watched for its return; what could not load then loads by itself.
   useEffect(() => watchConnection(queryClient), []);
   // Space, the arrows, M, S, R, Q and ? — the same everywhere in the window.

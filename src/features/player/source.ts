@@ -37,6 +37,8 @@ export function fromTitle(source: QueueSource | null): string {
       return "Из репостов";
     case "history":
       return "Из истории";
+    case "resume":
+      return "С прошлого раза";
     case "artist":
       return `Популярное · ${source.title}`;
     case "station":
