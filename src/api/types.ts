@@ -302,6 +302,8 @@ export interface Play {
   durationMs: number;
   /** Liked while it played. */
   liked: boolean;
+  /** «Больше такого» was pressed while it played. */
+  more: boolean;
   source: PlaySource;
   /** Put next by hand («Играть следующим»). */
   added: boolean;
@@ -351,4 +353,47 @@ export interface DiarySettings {
   plays: number;
   /** When the oldest kept play started. */
   since: number | null;
+}
+
+/**
+ * One closed play as «Подборка» reads it: track id, artist id, when it started
+ * (ms since 1970), how it ended (0 finished, 1 skipped, 2 «не то», 3 again,
+ * 4 stopped), seconds heard, seconds in when it ended, seconds long, flags
+ * (1 liked, 2 «больше такого», 4 added by hand). Mirrors `diary::PlayRow`.
+ */
+export type DiaryPlayRow = [
+  track: number,
+  artist: number | null,
+  at: number,
+  outcome: number,
+  heardS: number,
+  positionS: number,
+  durationS: number,
+  flags: number,
+];
+
+/** A track heard to the end, and when last. */
+export interface DiaryFinished {
+  track: Track;
+  at: number;
+}
+
+/** A stretch of the past (last winter, this week a year ago) and what was heard out in it. */
+export interface DiaryWindow {
+  from: number;
+  to: number;
+  tracks: { track: Track; times: number }[];
+}
+
+/** What «Подборка» learns from: every closed play, and the tracks the diary can offer back. */
+export interface DiaryTaste {
+  /** Newest first. */
+  plays: DiaryPlayRow[];
+  since: number | null;
+  /** Heard to the end lately, newest first, each once: what radios grow from. */
+  finished: DiaryFinished[];
+  winter: DiaryWindow;
+  yearAgo: DiaryWindow;
+  /** Heard to the end more than once, the latest first. */
+  kept: Track[];
 }

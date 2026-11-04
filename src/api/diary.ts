@@ -4,6 +4,7 @@ import type {
   DiaryCity,
   DiaryPage,
   DiarySettings,
+  DiaryTaste,
   Heard,
   PlayOutcome,
   PlaySource,
@@ -41,6 +42,21 @@ export function diaryEnd(id: number, outcome: PlayOutcome, heard: Heard): Promis
 /** The track was liked, or the like taken back, while this play went on. */
 export function diaryLiked(id: number, liked: boolean): Promise<void> {
   return call<void>("diary_liked", { id, liked });
+}
+
+/** «Больше такого» was pressed, or taken back, while this play went on. */
+export function diaryMore(id: number, more: boolean): Promise<void> {
+  return call<void>("diary_more", { id, more });
+}
+
+/** «Не то» taken back: the play reads as skipped; `false` when it was not a «не то». */
+export function diaryUnreject(id: number): Promise<boolean> {
+  return call<boolean>("diary_unreject", { id });
+}
+
+/** What «Подборка» learns from: every closed play as numbers, and the tracks it can offer back. */
+export function diaryTaste(): Promise<DiaryTaste> {
+  return call<DiaryTaste>("diary_taste");
 }
 
 /**

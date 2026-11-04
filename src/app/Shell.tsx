@@ -30,7 +30,7 @@ import type { Part as Named } from "@/features/problems/words";
 import { SearchPage } from "@/features/search/SearchPage";
 import { type Opened, useSearch } from "@/features/search/store";
 import { moodById } from "@/features/selection/moods";
-import { useSelection } from "@/features/selection/useSelection";
+import { useSelection, useSelectionFeed } from "@/features/selection/useSelection";
 
 const PAGE: Named = { name: "Страница", form: "f" };
 const PLAYER: Named = { name: "Плеер", form: "m" };
@@ -67,6 +67,8 @@ export function Shell({ me }: { me: Me }) {
   // Every like, loading from the start: the library and its shuffle need all of them.
   useLikesInBackground();
 
+  // «Подборка» is gathered here once, from the library and the diary, for every screen.
+  useSelectionFeed();
   // The light takes its colours from what plays, or from what the selection would play.
   const selection = useSelection();
   const playing = usePlayer(currentTrack);

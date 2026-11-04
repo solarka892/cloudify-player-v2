@@ -1,7 +1,7 @@
 //! The listening diary: the player writes plays, the «Дневник» screen reads
 //! them. Everything stays in a file on this computer. Twins: `src/api/diary.ts`.
 
-use diary::{City, DaySummary, Diary, Heard, NewPlay, Now, Outcome, Page, Settings, Source};
+use diary::{City, DaySummary, Diary, Heard, NewPlay, Now, Outcome, Page, Settings, Source, Taste};
 use serde::Deserialize;
 use soundcloud::Track;
 use tauri::State;
@@ -85,6 +85,26 @@ pub async fn diary_end(
 #[tauri::command]
 pub async fn diary_liked(id: i64, liked: bool, diary: State<'_, DiaryState>) -> CommandResult<()> {
     diary.with(move |diary| diary.set_liked(id, liked)).await
+}
+
+/// «Больше такого» was pressed (or taken back) while this play went on.
+#[tauri::command]
+pub async fn diary_more(id: i64, more: bool, diary: State<'_, DiaryState>) -> CommandResult<()> {
+    diary.with(move |diary| diary.set_more(id, more)).await
+}
+
+/// «Не то» taken back: the play reads as skipped. `false` when it was not a «не то».
+#[tauri::command]
+pub async fn diary_unreject(id: i64, diary: State<'_, DiaryState>) -> CommandResult<bool> {
+    diary.with(move |diary| diary.unreject(id)).await
+}
+
+/// What «Подборка» learns from: every closed play as numbers, and the tracks
+/// the diary can offer back (heard out lately, last winter, a year ago, often).
+#[tauri::command]
+pub async fn diary_taste(diary: State<'_, DiaryState>) -> CommandResult<Taste> {
+    let now = Now::system();
+    diary.with(move |diary| diary.taste(&now)).await
 }
 
 /// Plays, newest first; `before` is the `next` of the page before. With

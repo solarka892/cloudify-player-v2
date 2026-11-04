@@ -5,7 +5,7 @@ import { playInOrder } from "@/features/library/play";
 import { bestArtist } from "@/features/search/best";
 import { useQuickHits, useSuggestions } from "@/features/search/queries";
 import { useSearch } from "@/features/search/store";
-import { canPlay } from "@/features/selection/buildQueue";
+import { canPlay } from "@/features/selection/engine";
 import { Artwork } from "@/ui/Artwork";
 import { formatCount, plural } from "@/ui/format";
 

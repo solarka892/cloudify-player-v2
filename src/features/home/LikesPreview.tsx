@@ -4,7 +4,7 @@ import { useOpener } from "@/features/library/nav";
 import { useLikes } from "@/features/library/queries";
 import { currentTrack, usePlayer } from "@/features/player/store";
 import { Held } from "@/features/problems/Held";
-import { canPlay } from "@/features/selection/buildQueue";
+import { canPlay } from "@/features/selection/engine";
 import { Artwork } from "@/ui/Artwork";
 import { formatCount, formatDuration } from "@/ui/format";
 import { stateBadge } from "@/ui/trackState";

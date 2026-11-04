@@ -8,8 +8,12 @@ import { ApiError } from "@/api/invoke";
 import type {
   DaySummary,
   DiaryCity,
+  DiaryFinished,
   DiaryPage,
+  DiaryPlayRow,
   DiarySettings,
+  DiaryTaste,
+  DiaryWindow,
   Heard,
   PartOfDay,
   Play,
@@ -143,6 +147,7 @@ function seed(tracks: readonly Track[]) {
           listenedMs: position,
           durationMs: length,
           liked: next() < 0.06,
+          more: false,
           source,
           added: next() < 0.05,
           setting: settingAt(at),
@@ -160,6 +165,55 @@ function prune(now = Date.now()) {
   const before = plays.length;
   plays = plays.filter((play) => play.startedAt >= cutoff);
   return before - plays.length;
+}
+
+const OUTCOME_CODE: Record<PlayOutcome, number> = {
+  finished: 0,
+  skipped: 1,
+  rejected: 2,
+  again: 3,
+  stopped: 4,
+};
+
+/** «Подборка»'s view of the diary, as Rust works it out (roughly: the windows by days). */
+function taste(now: number): DiaryTaste {
+  const closed = plays
+    .filter((p) => p.outcome !== null)
+    .sort((a, b) => b.startedAt - a.startedAt || b.id - a.id);
+  const rows: DiaryPlayRow[] = closed.map((p) => [
+    p.track.id,
+    p.track.user?.id ?? null,
+    p.startedAt,
+    OUTCOME_CODE[p.outcome ?? "stopped"],
+    Math.floor(p.listenedMs / 1000),
+    Math.floor(p.positionMs / 1000),
+    Math.floor(p.durationMs / 1000),
+    (p.liked ? 1 : 0) | (p.more ? 2 : 0) | (p.added ? 4 : 0),
+  ]);
+  const sentAway = new Set(closed.filter((p) => p.outcome === "rejected").map((p) => p.track.id));
+  const heardOut = closed.filter(
+    (p) => (p.outcome === "finished" || p.outcome === "again") && !sentAway.has(p.track.id),
+  );
+  const finished: DiaryFinished[] = [];
+  const times = new Map<number, { track: Track; times: number }>();
+  for (const p of heardOut) {
+    if (!finished.some((f) => f.track.id === p.track.id)) {
+      finished.push({ track: p.track, at: p.startedAt });
+    }
+    const seen = times.get(p.track.id) ?? { track: p.track, times: 0 };
+    seen.times += 1;
+    times.set(p.track.id, seen);
+  }
+  const window = (from: number, to: number): DiaryWindow => ({ from, to, tracks: [] });
+  const year = new Date(now).getFullYear();
+  return {
+    plays: rows,
+    since: closed.at(-1)?.startedAt ?? null,
+    finished: finished.slice(0, 12),
+    winter: window(new Date(year - 1, 11, 1).getTime(), new Date(year, 2, 1).getTime()),
+    yearAgo: window(now - 368 * DAY, now - 361 * DAY),
+    kept: [...times.values()].filter((t) => t.times >= 2).map((t) => t.track),
+  };
 }
 
 /** As Rust does: a play that is gone (erased, forgotten) takes no more writes, quietly. */
@@ -200,6 +254,7 @@ export function answerDiary(
         listenedMs: 0,
         durationMs: start.track.durationMs,
         liked: false,
+        more: false,
         source: start.source,
         added: start.added,
         setting: settingAt(now),
@@ -233,6 +288,17 @@ export function answerDiary(
     case "diary_liked":
       find(args.id).liked = Boolean(args.liked);
       return null;
+    case "diary_more":
+      find(args.id).more = Boolean(args.more);
+      return null;
+    case "diary_unreject": {
+      const play = find(args.id);
+      if (play.outcome !== "rejected") return false;
+      play.outcome = "skipped";
+      return true;
+    }
+    case "diary_taste":
+      return taste(now);
     case "diary_plays": {
       const words = typeof args.find === "string" ? args.find.trim().toLowerCase() : "";
       const sorted = [...plays]

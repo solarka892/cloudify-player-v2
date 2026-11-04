@@ -8,7 +8,7 @@ import { useLikedIds, useToggleLike } from "@/features/library/likes";
 import { useOpener } from "@/features/library/nav";
 import { TrackMenu } from "@/features/library/TrackMenu";
 import { currentTrack, type QueueSource, usePlayer } from "@/features/player/store";
-import { canPlay } from "@/features/selection/buildQueue";
+import { canPlay } from "@/features/selection/engine";
 import { Artwork } from "@/ui/Artwork";
 import { stateBadge } from "@/ui/trackState";
 

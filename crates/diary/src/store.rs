@@ -16,8 +16,17 @@ use serde_json::Value;
 use crate::error::{Error, Result};
 use crate::setting::{City, Now, Place, Setting, ZoneCity};
 
-/// Raised whenever the tables change, with a step in `migrate`.
+/// Raised when the tables change in a way an older version could not read,
+/// with a step in `migrate`. A column an older version can simply ignore is
+/// added in place instead (see `add_missing_columns`), so a file opened by
+/// this version still opens in the one before it.
 const SCHEMA_VERSION: i32 = 1;
+
+/// Columns added after version 1 that older versions ignore: name and definition.
+const LATER_COLUMNS: &[(&str, &str)] = &[
+    // «Больше такого» was pressed while the play went on.
+    ("more", "INTEGER NOT NULL DEFAULT 0"),
+];
 
 const SCHEMA_V1: &str = "
 CREATE TABLE tracks (
@@ -195,6 +204,8 @@ pub struct Play {
     pub duration_ms: u64,
     /// Liked while it played.
     pub liked: bool,
+    /// «Больше такого» was pressed while it played.
+    pub more: bool,
     pub source: Source,
     pub added: bool,
     pub setting: Setting,
@@ -236,7 +247,7 @@ pub struct Settings {
 
 /// The listening diary, open.
 pub struct Diary {
-    db: Connection,
+    pub(crate) db: Connection,
 }
 
 impl Diary {
@@ -347,6 +358,25 @@ impl Diary {
         Ok(())
     }
 
+    /// «Больше такого» was pressed (or taken back) while this play went on.
+    pub fn set_more(&mut self, id: i64, more: bool) -> Result<()> {
+        self.db.execute(
+            "UPDATE plays SET more = ?2 WHERE id = ?1",
+            params![id, more],
+        )?;
+        Ok(())
+    }
+
+    /// «Не то» taken back: the play reads as simply skipped where it was left.
+    /// `false` when it did not end with «не то».
+    pub fn unreject(&mut self, id: i64) -> Result<bool> {
+        let changed = self.db.execute(
+            "UPDATE plays SET outcome = 'skipped' WHERE id = ?1 AND outcome = 'rejected'",
+            [id],
+        )?;
+        Ok(changed == 1)
+    }
+
     /// Plays, newest first: up to `limit` from before the `before` cursor of
     /// an earlier page, or from the latest.
     pub fn plays(&self, before: Option<&str>, limit: u32) -> Result<Page> {
@@ -369,7 +399,7 @@ impl Diary {
         let mut statement = self.db.prepare_cached(
             "SELECT p.id, t.json, p.started_at, p.utc_offset, p.ended_at, p.outcome, p.from_ms,
                     p.position_ms, p.listened_ms, p.duration_ms, p.liked, p.source_kind,
-                    p.source_title, p.source_id, p.added, p.setting
+                    p.source_title, p.source_id, p.added, p.setting, p.more
              FROM plays p JOIN tracks t ON t.urn = p.track
              WHERE (p.started_at, p.id) < (?1, ?2)
                AND (?4 IS NULL OR p.track IN (SELECT value FROM json_each(?4)))
@@ -510,7 +540,7 @@ impl Diary {
             .and_then(|value| value.parse::<u32>().ok()))
     }
 
-    fn city(&self) -> Result<Option<City>> {
+    pub(crate) fn city(&self) -> Result<Option<City>> {
         Ok(match self.get(CITY)? {
             Some(json) => serde_json::from_str(&json).ok(),
             None => None,
@@ -548,6 +578,20 @@ fn migrate(db: &Connection) -> Result<()> {
         tx.execute_batch(SCHEMA_V1)?;
         tx.pragma_update(None, "user_version", SCHEMA_VERSION)?;
         tx.commit()?;
+    }
+    add_missing_columns(db)
+}
+
+/// Adds the columns an older file lacks; older versions read on without them.
+fn add_missing_columns(db: &Connection) -> Result<()> {
+    let mut statement = db.prepare("SELECT name FROM pragma_table_info('plays')")?;
+    let present = statement
+        .query_map([], |row| row.get::<_, String>(0))?
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+    for (name, definition) in LATER_COLUMNS {
+        if !present.iter().any(|column| column == name) {
+            db.execute_batch(&format!("ALTER TABLE plays ADD COLUMN {name} {definition}"))?;
+        }
     }
     Ok(())
 }
@@ -611,6 +655,7 @@ fn play_of_row(row: &Row<'_>) -> rusqlite::Result<Play> {
         listened_ms: unsigned(row.get(8)?),
         duration_ms: unsigned(row.get(9)?),
         liked: row.get(10)?,
+        more: row.get(16)?,
         source: Source {
             kind: SourceKind::parse(&row.get::<_, String>(11)?),
             title: row.get(12)?,
@@ -1024,6 +1069,64 @@ mod tests {
             ]
         );
         assert_eq!(diary.days(1).unwrap().len(), 1);
+    }
+
+    #[test]
+    fn more_like_this_is_marked_and_not_this_can_be_taken_back() {
+        let mut diary = Diary::open_in_memory().unwrap();
+        let id = diary.start(&track(1, "Кинолента"), &evening(0)).unwrap();
+        diary.set_more(id, true).unwrap();
+        assert!(diary.plays(None, 1).unwrap().items[0].more);
+        diary.set_more(id, false).unwrap();
+        assert!(!diary.plays(None, 1).unwrap().items[0].more);
+
+        let sent = diary.start(&track(2, "АЧЧА"), &evening(1)).unwrap();
+        diary
+            .end(
+                sent,
+                Outcome::Rejected,
+                heard(7_000, 7_000),
+                evening(2).utc_ms,
+            )
+            .unwrap();
+        assert!(diary.unreject(sent).unwrap());
+        let play = &diary.plays(None, 1).unwrap().items[0];
+        assert_eq!(
+            (play.outcome, play.position_ms),
+            (Some(Outcome::Skipped), 7_000)
+        );
+        // Only «не то» can be taken back.
+        assert!(!diary.unreject(sent).unwrap());
+        assert!(!diary.unreject(id).unwrap());
+    }
+
+    #[test]
+    fn a_file_from_before_more_gains_the_column_and_stays_readable_by_it() {
+        let folder =
+            std::env::temp_dir().join(format!("cloudify-diary-more-{}", std::process::id()));
+        let path = folder.join("diary.sqlite3");
+        std::fs::create_dir_all(&folder).unwrap();
+        {
+            // A file as the first diary wrote it: version 1, no `more`.
+            let db = Connection::open(&path).unwrap();
+            db.execute_batch(SCHEMA_V1).unwrap();
+            db.pragma_update(None, "user_version", 1).unwrap();
+        }
+        let mut diary = Diary::open(&path).unwrap();
+        let id = diary.start(&track(1, "Кинолента"), &evening(0)).unwrap();
+        diary.set_more(id, true).unwrap();
+        let version: i32 = diary
+            .db
+            .pragma_query_value(None, "user_version", |row| row.get(0))
+            .unwrap();
+        assert_eq!(
+            version, 1,
+            "an added column does not lock older versions out"
+        );
+        drop(diary);
+        // Opening it again adds nothing twice.
+        assert!(Diary::open(&path).unwrap().plays(None, 1).unwrap().items[0].more);
+        std::fs::remove_dir_all(folder).unwrap();
     }
 
     #[test]

@@ -1,4 +1,11 @@
-import { diaryEnd, diaryLiked, diaryProgress, diaryStart } from "@/api/diary";
+import {
+  diaryEnd,
+  diaryLiked,
+  diaryMore,
+  diaryProgress,
+  diaryStart,
+  diaryUnreject,
+} from "@/api/diary";
 import type { Heard, PlayOutcome, PlaySource, Track } from "@/api/types";
 import {
   currentTrack,
@@ -39,11 +46,18 @@ interface Pen {
   id: number | null;
   /** A like made before the diary answered, to tell it after. */
   liked: boolean | null;
+  /** «Больше такого» pressed before the diary answered, to tell it after. */
+  more: boolean | null;
+  /** How it ended, once it has. */
+  outcome: PlayOutcome | null;
   savedAt: number;
   closed: boolean;
 }
 
 let pen: Pen | null = null;
+/** The last few plays closed, newest first: «Вернуть» can still reach them. */
+let lately: Pen[] = [];
+const LATELY = 8;
 let chain: Promise<void> = Promise.resolve();
 const written = new Set<() => void>();
 
@@ -132,6 +146,8 @@ function penFor(s: State): Pen | null {
     started: false,
     id: null,
     liked: null,
+    more: null,
+    outcome: null,
     savedAt: 0,
     closed: false,
   };
@@ -155,6 +171,38 @@ export function noteLiked(trackId: number, liked: boolean) {
   });
 }
 
+/** The play of this track still going on, or else its latest one: what a press refers to. */
+function playOf(trackId: number): Pen | null {
+  if (pen && pen.track.id === trackId) return pen;
+  return lately.find((p) => p.track.id === trackId) ?? null;
+}
+
+/**
+ * «Больше такого» was pressed (or taken back) on this track: its play is marked,
+ * so the selection keeps learning from it.
+ */
+export function noteMore(trackId: number, more: boolean) {
+  const p = playOf(trackId);
+  if (!p) return;
+  if (!p.started) {
+    p.more = more;
+    return;
+  }
+  later(async () => {
+    if (p.id !== null) await diaryMore(p.id, more);
+  });
+}
+
+/** «Не то» taken back: the play that ended with it reads as skipped. */
+export function takeBackRejected(trackId: number) {
+  const p = lately.find((closed) => closed.track.id === trackId && closed.outcome === "rejected");
+  if (!p) return;
+  p.outcome = "skipped";
+  later(async () => {
+    if (p.id !== null) await diaryUnreject(p.id);
+  });
+}
+
 /**
  * Starts writing the diary as the player plays; returns the function that
  * stops. `clock` is for tests.
@@ -167,6 +215,7 @@ export function startDiaryRecorder(clock: () => number = Date.now): () => void {
     later(async () => {
       p.id = await diaryStart({ track: p.track, source: p.source, added: p.added, fromMs });
       if (p.liked !== null) await diaryLiked(p.id, p.liked);
+      if (p.more !== null) await diaryMore(p.id, p.more);
     });
   };
 
@@ -183,6 +232,8 @@ export function startDiaryRecorder(clock: () => number = Date.now): () => void {
     if (p.closed) return;
     p.closed = true;
     if (!p.started) return;
+    p.outcome = outcome;
+    lately = [p, ...lately.filter((other) => other !== p)].slice(0, LATELY);
     const heard = heardOf(p);
     later(async () => {
       if (p.id !== null) await diaryEnd(p.id, outcome, heard);
@@ -196,7 +247,16 @@ export function startDiaryRecorder(clock: () => number = Date.now): () => void {
     close(p, outcomeOf(reason));
     // Started over on the same load (sent back to its start): the next sound is a new play.
     if (reason === "again")
-      pen = { ...p, listened: 0, started: false, id: null, liked: null, closed: false };
+      pen = {
+        ...p,
+        listened: 0,
+        started: false,
+        id: null,
+        liked: null,
+        more: null,
+        outcome: null,
+        closed: false,
+      };
   };
 
   const watch = (s: State, prev: State) => {
@@ -232,5 +292,6 @@ export function startDiaryRecorder(clock: () => number = Date.now): () => void {
     stopLeaving();
     stopWatching();
     pen = null;
+    lately = [];
   };
 }

@@ -7,6 +7,9 @@
 //! a latitude, and the latitude is a city the person named or, until they do,
 //! the city their time zone is named after.
 //!
+//! «Подборка» reads it through [`Diary::taste`]: every closed play as plain
+//! numbers, and the tracks it can offer back.
+//!
 //! Start with [`Diary`]: [`Diary::start`] when a track's sound starts,
 //! [`Diary::progress`] while it plays, [`Diary::end`] when it ends.
 
@@ -16,6 +19,7 @@ mod error;
 mod setting;
 mod store;
 mod sun;
+mod taste;
 mod zones;
 
 pub use error::{Error, Result};
@@ -24,3 +28,4 @@ pub use store::{
     DaySummary, Diary, Heard, MAX_PAGE, NewPlay, Outcome, Page, Play, Settings, Source, SourceKind,
 };
 pub use sun::{altitude, day_length, sunrise_sunset};
+pub use taste::{Finished, MAX_TASTE_PLAYS, PlayRow, Remembered, Taste, Window, flag, outcome};

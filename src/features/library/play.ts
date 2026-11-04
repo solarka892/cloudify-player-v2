@@ -3,7 +3,7 @@ import type { Track } from "@/api/types";
 import { makeFilter } from "@/features/library/filter";
 import { useAllLikes } from "@/features/library/queries";
 import { type QueueSource, usePlayer } from "@/features/player/store";
-import { canPlay } from "@/features/selection/buildQueue";
+import { canPlay } from "@/features/selection/engine";
 
 /** What the filter reads of a track: its title and who uploaded it. */
 export function trackText(track: Track): string {

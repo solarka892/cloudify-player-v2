@@ -564,6 +564,9 @@ async function standIn(command: string, args: Record<string, unknown>): Promise<
     }
     case "track_station":
       return station;
+    case "related_tracks":
+      // A different cut of the same music, so radio and related do not look the same.
+      return [...station].reverse().slice(0, 30);
     case "waveform":
       return waveformFor(String(args.url));
     case "stream": {

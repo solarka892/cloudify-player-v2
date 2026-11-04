@@ -32,7 +32,7 @@ import { FilterField, primaryButton, StageActions, StageNote } from "@/features/
 import { currentTrack, usePlayer } from "@/features/player/store";
 import { Held } from "@/features/problems/Held";
 import { useLoadMore } from "@/features/search/useLoadMore";
-import { canPlay } from "@/features/selection/buildQueue";
+import { canPlay } from "@/features/selection/engine";
 import { useSelection } from "@/features/selection/useSelection";
 import { formatCount, formatLength, plural } from "@/ui/format";
 

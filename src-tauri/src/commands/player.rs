@@ -1,6 +1,6 @@
 //! What playing needs. Twins: `src/api/player.ts`.
 
-use soundcloud::{Stream, Track, Waveform};
+use soundcloud::{PageRequest, Stream, Track, Waveform};
 use tauri::State;
 
 use crate::error::CommandResult;
@@ -8,6 +8,8 @@ use crate::state::AppState;
 
 /// Tracks a station returns; SoundCloud sends about fifty whatever is asked.
 const STATION_SIZE: u32 = 50;
+/// Tracks like one track: the first page is enough for the selection.
+const RELATED_SIZE: u32 = 50;
 
 /// A playable stream for a track, resolved as the signed-in user (a
 /// rights-restricted track refuses an anonymous caller). Short-lived: the
@@ -41,4 +43,19 @@ pub async fn artist_station(user_id: u64, state: State<'_, AppState>) -> Command
         .await
         .artist_station(user_id, STATION_SIZE)
         .await?)
+}
+
+/// Tracks like one track (what powers SoundCloud's autoplay): the selection's
+/// second source of new music, beside the radio.
+#[tauri::command]
+pub async fn related_tracks(
+    track_id: u64,
+    state: State<'_, AppState>,
+) -> CommandResult<Vec<Track>> {
+    Ok(state
+        .client()
+        .await
+        .related_tracks(track_id, PageRequest::first(RELATED_SIZE))
+        .await?
+        .items)
 }

@@ -172,7 +172,11 @@ export function partOf(key: QueryKey): Part | null {
   if (head === "playlist") return { name: "Плейлист", form: "m" };
   if (head === "artist") return { name: "Популярное артиста", form: "n" };
   // Without them the selection still plays from the likes; only the new finds are missing.
-  if (head === "station") return { name: "Похожие треки для подборки", form: "pl" };
+  if (head === "station" || head === "related")
+    return { name: "Похожие треки для подборки", form: "pl" };
+  // The selection's own reading of the diary: when it fails, the selection plays by its
+  // rules and says so on its own; the diary's trouble is the diary's to tell.
+  if (head === "selection") return null;
   if (head === "search") {
     if (second === "suggest" || second === "hits") return null;
     switch (third) {
@@ -224,10 +228,14 @@ const ASKED: Record<string, string> = {
   waveform: "Волна трека",
   track_station: "Радио по треку",
   artist_station: "Радио артиста",
+  related_tracks: "Похожие треки",
   diary_start: "Записать прослушивание в дневник",
   diary_progress: "Записать, докуда дослушал",
   diary_end: "Записать, чем закончилось",
   diary_liked: "Записать лайк в дневник",
+  diary_more: "Записать «больше такого» в дневник",
+  diary_unreject: "Отменить «не то» в дневнике",
+  diary_taste: "Что подборка знает из дневника",
   diary_plays: "Дневник",
   diary_settings: "Настройки дневника",
   diary_keep: "Сколько хранить дневник",

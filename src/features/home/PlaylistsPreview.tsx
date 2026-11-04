@@ -7,7 +7,7 @@ import { usePlayer } from "@/features/player/store";
 import { Held } from "@/features/problems/Held";
 import { actionFailed } from "@/features/problems/watch";
 import { actionWords } from "@/features/problems/words";
-import { canPlay } from "@/features/selection/buildQueue";
+import { canPlay } from "@/features/selection/engine";
 import { formatCount, plural } from "@/ui/format";
 import { Mosaic } from "@/ui/Mosaic";
 

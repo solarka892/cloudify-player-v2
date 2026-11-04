@@ -49,6 +49,7 @@ function play(time: string, patch: Partial<Play> = {}): Play {
     listenedMs: 200_000,
     durationMs: 200_000,
     liked: false,
+    more: false,
     source: { kind: "likes", title: null, id: null },
     added: false,
     setting: setting(),

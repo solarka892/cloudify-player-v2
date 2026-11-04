@@ -20,3 +20,8 @@ export function trackStation(trackId: number): Promise<Track[]> {
 export function artistStation(userId: number): Promise<Track[]> {
   return call<Track[]>("artist_station", { userId });
 }
+
+/** Tracks like one track (what SoundCloud's autoplay plays): up to fifty. */
+export function relatedTracks(trackId: number): Promise<Track[]> {
+  return call<Track[]>("related_tracks", { trackId });
+}
