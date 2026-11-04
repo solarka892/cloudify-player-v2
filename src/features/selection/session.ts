@@ -5,6 +5,7 @@ import { queryClient } from "@/app/queryClient";
 import { noteMore, takeBackRejected } from "@/features/diary/record";
 import { type QueueOptions, usePlayer } from "@/features/player/store";
 import {
+  NOVELTY_STEPS,
   type Pick,
   type Pool,
   type Selection,
@@ -272,6 +273,30 @@ function takeBackNotThis(track: Track) {
   forgetSkip(track.id);
   takeBackRejected(track.id);
   rebuild();
+}
+
+/** A press taken back from the desk, as its «Вернуть» would. */
+export function takeBack(press: Steer) {
+  if (press.kind === "more") takeBackMore(press.track);
+  else if (press.kind === "less") takeBackNotThis(press.track);
+}
+
+/** How much is new, as the balance shows it: «Любимое» and «Незнакомое» pin it to its ends. */
+export function balanceOf(mood: MoodId, novelty: number): number {
+  if (mood === "fav") return 0;
+  if (mood === "new") return NOVELTY_STEPS;
+  return novelty;
+}
+
+/** The balance moved: a pinned mood lets go of it, and what follows follows the new balance. */
+export function setBalance(novelty: number) {
+  const pinned = ["fav", "new"].includes(useSelectionSession.getState().mood);
+  if (pinned) useSelectionSession.setState({ mood: "usual" });
+  const settings = useSelectionSettings.getState();
+  const before = settings.settings;
+  settings.setNovelty(novelty);
+  // The same number as before: no setting changed, but the mood did.
+  if (pinned && useSelectionSettings.getState().settings === before) rebuild();
 }
 
 /** A setting changed while the selection plays: what follows follows it at once. */

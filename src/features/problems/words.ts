@@ -174,9 +174,6 @@ export function partOf(key: QueryKey): Part | null {
   // Without them the selection still plays from the likes; only the new finds are missing.
   if (head === "station" || head === "related")
     return { name: "Похожие треки для подборки", form: "pl" };
-  // The selection's own reading of the diary: when it fails, the selection plays by its
-  // rules and says so on its own; the diary's trouble is the diary's to tell.
-  if (head === "selection") return null;
   if (head === "search") {
     if (second === "suggest" || second === "hits") return null;
     switch (third) {

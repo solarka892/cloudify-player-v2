@@ -30,12 +30,14 @@ import type { Part as Named } from "@/features/problems/words";
 import { SearchPage } from "@/features/search/SearchPage";
 import { type Opened, useSearch } from "@/features/search/store";
 import { moodById } from "@/features/selection/moods";
+import { SelectionDesk } from "@/features/selection/SelectionDesk";
 import { useSelection, useSelectionFeed } from "@/features/selection/useSelection";
 
 const PAGE: Named = { name: "Страница", form: "f" };
 const PLAYER: Named = { name: "Плеер", form: "m" };
 const QUEUE: Named = { name: "Очередь", form: "f" };
 const KEYS: Named = { name: "Справка по клавишам", form: "f" };
+const DESK: Named = { name: "«Настроить подборку»", form: "n" };
 
 /** A page's shape while it cannot show itself: where the light and the covers would be. */
 function PageFrames() {
@@ -156,6 +158,9 @@ export function Shell({ me }: { me: Me }) {
         </Part>
         <Part name={KEYS} frames={null}>
           <KeysHelp />
+        </Part>
+        <Part name={DESK} frames={null}>
+          <SelectionDesk />
         </Part>
       </div>
     </OpenerContext>

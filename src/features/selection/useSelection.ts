@@ -9,6 +9,7 @@ import { useAllLikes, useLikes, useRecentPlays } from "@/features/library/querie
 import {
   canPlay,
   LEARNING_PLAYS,
+  type Pick,
   type Pool,
   type Seed,
   type Selection,
@@ -25,7 +26,7 @@ import {
   useSelectionSession,
 } from "@/features/selection/session";
 import { useSelectionSettings } from "@/features/selection/settings";
-import { learn } from "@/features/selection/taste";
+import { learn, type Taste } from "@/features/selection/taste";
 
 // «Подборка» as the screens need it. The shell gathers what it is made from —
 // your likes, SoundCloud's history, the listening diary, radios and related
@@ -33,6 +34,7 @@ import { learn } from "@/features/selection/taste";
 // the same answer: what would play now, and how much it has learned.
 
 const NO_TRACKS: readonly Track[] = [];
+const NO_PICKS: readonly Pick[] = [];
 const NO_POOLS: readonly Pool[] = [];
 /** Radios and related lists grow from this many tracks heard to the end lately. */
 const SEEDS = 3;
@@ -56,6 +58,13 @@ interface Feed {
   status: SelectionStatus;
   error: unknown;
   preview: Selection | null;
+  /** What the radios and related lists grow from now. */
+  seeds: { stations: readonly Seed[]; related: readonly Seed[] };
+  /** How many likes the selection reads. */
+  likes: number;
+  /** What the diary taught, and the artists it names. */
+  taste: Taste | null;
+  names: ReadonlyMap<number, string>;
   /** Plays the diary has taught it from. */
   plays: number;
   learning: Learning;
@@ -65,10 +74,16 @@ interface Feed {
   retry: () => void;
 }
 
+const NO_NAMES: ReadonlyMap<number, string> = new Map();
+
 const useFeed = create<Feed>()(() => ({
   status: "loading",
   error: null,
   preview: null,
+  seeds: { stations: [], related: [] },
+  likes: 0,
+  taste: null,
+  names: NO_NAMES,
   plays: 0,
   learning: "rules",
   since: null,
@@ -110,7 +125,7 @@ export function useSelectionFeed() {
   const allLikes = useAllLikes();
   const history = useRecentPlays();
   const taste = useQuery({
-    queryKey: ["selection", "taste"],
+    queryKey: ["diary", "taste"],
     queryFn: diaryTaste,
     staleTime: TASTE_EVERY_MS,
     retry: false,
@@ -123,7 +138,7 @@ export function useSelectionFeed() {
       if (timer) return;
       timer = setTimeout(() => {
         timer = null;
-        void client.invalidateQueries({ queryKey: ["selection", "taste"] });
+        void client.invalidateQueries({ queryKey: ["diary", "taste"] });
       }, TASTE_EVERY_MS);
     });
     return () => {
@@ -191,6 +206,10 @@ export function useSelectionFeed() {
     () => (taste.data ? learn(taste.data.plays, Date.now()) : null),
     [taste.data],
   );
+  const names = useMemo(
+    () => (taste.data ? new Map(taste.data.artists.map((a) => [a.id, a.name])) : NO_NAMES),
+    [taste.data],
+  );
 
   useEffect(() => {
     provide({ likes, history: played, pools, taste: learned });
@@ -239,6 +258,10 @@ export function useSelectionFeed() {
       status,
       error: firstLikes.error,
       preview,
+      seeds,
+      likes: likes.length,
+      taste: learned,
+      names,
       plays,
       learning,
       since: diary?.since ?? null,
@@ -249,7 +272,7 @@ export function useSelectionFeed() {
           }
         : null,
     });
-  }, [status, firstLikes.error, preview, plays, learning, diary]);
+  }, [status, firstLikes.error, preview, seeds, likes, learned, names, plays, learning, diary]);
   useEffect(() => {
     useFeed.setState({ retry: () => again.current() });
   }, []);
@@ -281,6 +304,12 @@ export function useSelection() {
     since: feed.since,
     windows: feed.windows,
     sources: feed.preview?.sources ?? null,
+    /** The preview's picks, with why each is there. */
+    picks: feed.preview?.picks ?? NO_PICKS,
+    seeds: feed.seeds,
+    likesCount: feed.likes,
+    taste: feed.taste,
+    names: feed.names,
     start: (index = 0) => {
       if (feed.preview) start(feed.preview, index);
     },

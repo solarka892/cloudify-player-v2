@@ -1,4 +1,4 @@
-import { AudioLines, Heart, Pause, Play as PlayIcon, Repeat, X } from "lucide-react";
+import { AudioLines, Heart, Pause, Play as PlayIcon, Repeat, ThumbsUp, X } from "lucide-react";
 import type { Play } from "@/api/types";
 import { clockOf, type Ending, endingOf, sourceWords } from "@/features/diary/days";
 import { useOpener } from "@/features/library/nav";
@@ -9,7 +9,7 @@ const round =
   "pointer-events-auto grid size-8 place-content-center rounded-full text-fg-muted transition-colors duration-150 hover:bg-white/[0.08] hover:text-fg";
 
 /** How far it got, as a short bar, and how it ended, in words. */
-function EndingCell({ ending, liked }: { ending: Ending; liked: boolean }) {
+function EndingCell({ ending, liked, more }: { ending: Ending; liked: boolean; more: boolean }) {
   const share = Math.max(0.04, Math.min(1, ending.share));
   return (
     <span
@@ -35,6 +35,12 @@ function EndingCell({ ending, liked }: { ending: Ending; liked: boolean }) {
         {liked && (
           <Heart className="size-[13px] shrink-0 fill-glow-1 text-glow-1" aria-label="лайкнул" />
         )}
+        {more && (
+          <ThumbsUp
+            className="size-[13px] shrink-0 text-glow-1"
+            aria-label="попросил больше такого"
+          />
+        )}
       </span>
     </span>
   );
@@ -44,7 +50,13 @@ function EndingCell({ ending, liked }: { ending: Ending; liked: boolean }) {
 function LiveEnding({ play }: { play: Play }) {
   const position = usePlayer((s) => s.position);
   const playing = usePlayer((s) => s.playing);
-  return <EndingCell ending={endingOf(play, { position, playing })} liked={play.liked} />;
+  return (
+    <EndingCell
+      ending={endingOf(play, { position, playing })}
+      liked={play.liked}
+      more={play.more}
+    />
+  );
 }
 
 /**
@@ -134,7 +146,7 @@ export function PlayRow({
         {play.outcome === null && now ? (
           <LiveEnding play={play} />
         ) : (
-          <EndingCell ending={endingOf(play)} liked={play.liked} />
+          <EndingCell ending={endingOf(play)} liked={play.liked} more={play.more} />
         )}
       </span>
       <button

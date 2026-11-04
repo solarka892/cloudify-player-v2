@@ -67,6 +67,12 @@ export function when(at: number, now: number): string {
   return then.getFullYear() === today.getFullYear() ? date : `${date} ${then.getFullYear()}`;
 }
 
+/** A month ahead, always with its year: «в марте 2027». */
+export function monthYear(at: number): string {
+  const then = new Date(at);
+  return `в ${MONTHS_IN[then.getMonth()]} ${then.getFullYear()}`;
+}
+
 /** The month something last happened in: «в августе», «в августе 2025». */
 function inMonth(at: number, now: number): string {
   const then = new Date(at);

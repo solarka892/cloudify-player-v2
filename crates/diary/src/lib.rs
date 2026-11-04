@@ -28,4 +28,6 @@ pub use store::{
     DaySummary, Diary, Heard, MAX_PAGE, NewPlay, Outcome, Page, Play, Settings, Source, SourceKind,
 };
 pub use sun::{altitude, day_length, sunrise_sunset};
-pub use taste::{Finished, MAX_TASTE_PLAYS, PlayRow, Remembered, Taste, Window, flag, outcome};
+pub use taste::{
+    Artist, Finished, MAX_TASTE_PLAYS, PlayRow, Remembered, Taste, Window, flag, outcome,
+};

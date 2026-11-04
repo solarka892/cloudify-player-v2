@@ -158,6 +158,10 @@ function run(id: KeyId, event: KeyboardEvent): boolean {
         panels.showKeys(false);
         return true;
       }
+      if (panels.desk && !document.querySelector("[role='menu']")) {
+        panels.showDesk(false);
+        return true;
+      }
       // An open menu takes this Escape for itself.
       if (panels.queue && !document.querySelector("[role='menu']")) {
         panels.showQueue(false);

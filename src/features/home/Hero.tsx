@@ -1,13 +1,16 @@
-import { Pause, Play, SkipForward, ThumbsDown } from "lucide-react";
+import { Pause, Play, SkipForward, SlidersHorizontal, ThumbsDown } from "lucide-react";
 import { ApiError } from "@/api/invoke";
 import type { Me } from "@/api/types";
 import { useOpener } from "@/features/library/nav";
+import { usePanels } from "@/features/player/panels";
 import { currentTrack, usePlayer } from "@/features/player/store";
 import { useLoudness } from "@/features/player/useLoudness";
+import { LEARNING_PLAYS } from "@/features/selection/engine";
+import { LearnBadge } from "@/features/selection/LearnBadge";
 import { MOODS, moodById } from "@/features/selection/moods";
-import { useSelection } from "@/features/selection/useSelection";
+import { type Learning, useSelection } from "@/features/selection/useSelection";
 import { Artwork } from "@/ui/Artwork";
-import { formatCount } from "@/ui/format";
+import { formatCount, plural } from "@/ui/format";
 import { Ribbon } from "@/ui/Ribbon";
 
 const roundButton =
@@ -21,6 +24,20 @@ function selectionProblem(error: unknown): string {
   return "Подборка не собралась: лайки не загрузились.";
 }
 
+/** «Как обычно» says honestly how the selection picks: by its rules, or by what it has learned. */
+function usualLine(learning: Learning, plays: number): string {
+  switch (learning) {
+    case "rules":
+      return "Пока по правилам: два лайка, потом трек со станции. Тебя ещё не выучил — учусь с каждым треком, который дослушаешь или пропустишь.";
+    case "learning":
+      return `Учусь на твоём дневнике: ${plays} из ${LEARNING_PLAYS} прослушиваний. Пока правила главнее того, что я выучил.`;
+    case "learned":
+      return `Подбираю по твоему дневнику — ${formatCount(plays)} ${plural(plays, ["прослушивание", "прослушивания", "прослушиваний"])}. Скипнутое сюда не вернётся.`;
+    case "unreadable":
+      return "Дневник сейчас не читается, поэтому по правилам: два лайка, потом трек со станции.";
+  }
+}
+
 /** «Подборка»: the endless selection, its light, its moods, and the cover that plays. */
 export function Hero({ me }: { me: Me }) {
   const selection = useSelection();
@@ -32,8 +49,12 @@ export function Hero({ me }: { me: Me }) {
   const open = useOpener();
   const loudness = useLoudness(nowPlaying ?? shown);
   const likes = me.user.likesCount;
+  const deskOpen = usePanels((s) => s.desk);
 
-  let line = mood.line(likes ? formatCount(likes) : null);
+  let line =
+    selection.mood === "usual"
+      ? usualLine(selection.learning, selection.plays)
+      : mood.line(likes ? formatCount(likes) : null);
   if (selection.status === "error") line = selectionProblem(selection.error);
   else if (selection.status === "empty") {
     line =
@@ -113,13 +134,25 @@ export function Hero({ me }: { me: Me }) {
               onClick={onDislike}
               disabled={!active}
               aria-label="Не то — больше не предлагать"
-              title="Не то — больше не предлагать"
+              title="Не то — больше не предлагать, и похожего меньше"
               className={roundButton}
             >
               <ThumbsDown className="size-5" aria-hidden="true" />
             </button>
+            <button
+              type="button"
+              data-desk-toggle
+              onClick={() => usePanels.getState().showDesk()}
+              aria-expanded={deskOpen}
+              aria-controls="selection-desk"
+              aria-label="Настроить подборку"
+              title="Настроить подборку"
+              className={`${roundButton} ${deskOpen ? "text-glow-1" : ""}`}
+            >
+              <SlidersHorizontal className="size-5" aria-hidden="true" />
+            </button>
           </div>
-          <fieldset className="mt-[22px] flex flex-wrap gap-2">
+          <fieldset className="mt-[22px] flex flex-wrap items-center gap-2">
             <legend className="sr-only">Настроение подборки</legend>
             {MOODS.map((option) => (
               <button
@@ -132,6 +165,7 @@ export function Hero({ me }: { me: Me }) {
                 {option.label}
               </button>
             ))}
+            <LearnBadge learning={selection.learning} plays={selection.plays} onLight />
           </fieldset>
         </div>
         <figure className="-mt-1 -mb-[30px] w-[clamp(220px,21vw,300px)] min-w-0">

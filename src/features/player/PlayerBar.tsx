@@ -10,6 +10,9 @@ import {
   Shuffle,
   SkipBack,
   SkipForward,
+  SlidersHorizontal,
+  ThumbsDown,
+  ThumbsUp,
   Volume1,
   Volume2,
   VolumeX,
@@ -23,6 +26,9 @@ import { currentTrack, hasNext, usePlayer } from "@/features/player/store";
 import { useLoudness } from "@/features/player/useLoudness";
 import { VolumeSlider } from "@/features/player/VolumeSlider";
 import { WaveformSeek } from "@/features/player/WaveformSeek";
+import { moreLikeThis, notThis } from "@/features/selection/session";
+import { usePickOf } from "@/features/selection/useSelection";
+import { whyParts } from "@/features/selection/why";
 import { Artwork } from "@/ui/Artwork";
 import { formatSeconds } from "@/ui/format";
 
@@ -55,6 +61,9 @@ export function PlayerBar() {
   const repeat = usePlayer((s) => s.repeat);
   const endless = usePlayer((s) => Boolean(s.options.refill));
   const queueOpen = usePanels((s) => s.queue);
+  const deskOpen = usePanels((s) => s.desk);
+  const fromSelection = source?.kind === "selection";
+  const pick = usePickOf(fromSelection ? (track?.id ?? null) : null);
   const { toggle, next, previous, seek, setVolume, toggleMute, toggleShuffle, cycleRepeat, say } =
     usePlayer.getState();
   const loudness = useLoudness(track);
@@ -71,7 +80,8 @@ export function PlayerBar() {
 
   const shownVolume = muted ? 0 : volume;
   const VolumeIcon = shownVolume === 0 ? VolumeX : shownVolume < 0.5 ? Volume1 : Volume2;
-  const fromLabel = from(source);
+  // While the selection plays, the line under the title says why this track, not just where from.
+  const fromLabel = (pick && whyParts(pick.facts, Date.now())[0]) || from(source);
   const shuffleName = endless
     ? "Подборка и так вперемешку"
     : shuffled
@@ -217,6 +227,29 @@ export function PlayerBar() {
       </div>
 
       <div className="flex items-center justify-end gap-2.5">
+        {fromSelection && track && (
+          <>
+            <button
+              type="button"
+              onClick={notThis}
+              aria-label="Не то"
+              title="Не то — больше не предлагать, и похожего меньше"
+              className={iconButton}
+            >
+              <ThumbsDown className="size-5" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={moreLikeThis}
+              aria-label="Больше такого"
+              title="Больше такого — похожее пойдёт раньше"
+              className={iconButton}
+            >
+              <ThumbsUp className="size-5" aria-hidden="true" />
+            </button>
+            <span aria-hidden="true" className="mx-0.5 h-5 w-px bg-white/[0.12]" />
+          </>
+        )}
         <button
           type="button"
           disabled
@@ -237,6 +270,18 @@ export function PlayerBar() {
           className={iconButton}
         >
           <MicVocal className="size-5" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          data-desk-toggle
+          onClick={() => usePanels.getState().showDesk()}
+          aria-expanded={deskOpen}
+          aria-controls="selection-desk"
+          aria-label="Настроить подборку"
+          title="Настроить подборку"
+          className={`${iconButton} ${deskOpen ? "bg-white/10 text-fg" : ""}`}
+        >
+          <SlidersHorizontal className="size-5" aria-hidden="true" />
         </button>
         <button
           type="button"

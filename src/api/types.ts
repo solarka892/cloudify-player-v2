@@ -396,4 +396,6 @@ export interface DiaryTaste {
   yearAgo: DiaryWindow;
   /** Heard to the end more than once, the latest first. */
   kept: Track[];
+  /** Every artist the plays name, so what was learned can be told in names. */
+  artists: { id: number; name: string }[];
 }

@@ -250,6 +250,10 @@ GET /tracks/{id}/playlists_without_albums    "in playlists"
 GET /tracks/{id}/download                    🔒 the artist's original file
 ```
 
+`/related` (first page, 50) is the selection's second source of new music,
+beside the station; both grow from the tracks heard to the end lately
+(`related_tracks` and `track_station` commands).
+
 `/tracks?ids=` does **not** keep the requested order — re-sort afterwards. It
 answers a bare JSON array (not `{ collection }`), and 51 ids is a `400`.
 `/related` pages by cursor like the user lists. Comments carry `timestamp`,

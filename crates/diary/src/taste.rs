@@ -64,6 +64,13 @@ pub struct Remembered {
     pub times: u32,
 }
 
+/// An artist the diary has heard, by the name the app last showed.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Artist {
+    pub id: u64,
+    pub name: String,
+}
+
 /// A stretch of the past — last winter, this week a year ago — and what was
 /// heard in it. Its dates are there even when the diary does not reach back
 /// that far, so the selection can say when it will.
@@ -89,6 +96,8 @@ pub struct Taste {
     pub year_ago: Window,
     /// Heard to the end more than once, the latest first.
     pub kept: Vec<Value>,
+    /// Every artist the plays name, so what was learned can be told in names.
+    pub artists: Vec<Artist>,
 }
 
 /// Plays of tracks that were never sent away with «не то».
@@ -115,7 +124,30 @@ impl Diary {
             winter: self.window(at(winter_from), at(winter_to))?,
             year_ago: self.window(at(week_from), at(week_to))?,
             kept: self.kept()?,
+            artists: self.artists()?,
         })
+    }
+
+    fn artists(&self) -> Result<Vec<Artist>> {
+        let mut statement = self.db.prepare_cached(
+            "SELECT json_extract(json, '$.user.id') AS id, json_extract(json, '$.user.username')
+             FROM tracks WHERE id IS NOT NULL GROUP BY id ORDER BY MAX(seen) DESC",
+        )?;
+        let rows = statement.query_map([], |row| {
+            Ok((
+                row.get::<_, Option<i64>>(0)?,
+                row.get::<_, Option<String>>(1)?,
+            ))
+        })?;
+        let mut out = Vec::new();
+        for row in rows {
+            if let (Some(id), Some(name)) = row?
+                && let Ok(id) = u64::try_from(id)
+            {
+                out.push(Artist { id, name });
+            }
+        }
+        Ok(out)
     }
 
     fn play_rows(&self) -> Result<Vec<PlayRow>> {
@@ -291,7 +323,7 @@ mod tests {
     fn track(id: u64, artist: u64) -> NewPlay {
         NewPlay {
             urn: format!("soundcloud:tracks:{id}"),
-            track: json!({ "id": id, "title": format!("t{id}"), "user": { "id": artist } }),
+            track: json!({ "id": id, "title": format!("t{id}"), "user": { "id": artist, "username": format!("a{artist}") } }),
             duration_ms: 200_000,
             from_ms: 0,
             source: Source {
@@ -499,5 +531,9 @@ mod tests {
         assert_eq!(year_ago, [Some(1)]);
         assert_eq!(ids(&taste.kept), [3]);
         assert_eq!(taste.since, Some(moscow(-380).utc_ms));
+        // Every artist the plays name, once.
+        let mut artists: Vec<_> = taste.artists.iter().map(|a| a.id).collect();
+        artists.sort_unstable();
+        assert_eq!(artists, [10, 20, 30, 40]);
     }
 }

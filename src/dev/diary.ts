@@ -213,6 +213,13 @@ function taste(now: number): DiaryTaste {
     winter: window(new Date(year - 1, 11, 1).getTime(), new Date(year, 2, 1).getTime()),
     yearAgo: window(now - 368 * DAY, now - 361 * DAY),
     kept: [...times.values()].filter((t) => t.times >= 2).map((t) => t.track),
+    artists: [
+      ...new Map(
+        closed.flatMap((p) =>
+          p.track.user ? [[p.track.user.id, p.track.user.username] as const] : [],
+        ),
+      ),
+    ].map(([id, name]) => ({ id, name })),
   };
 }
 
