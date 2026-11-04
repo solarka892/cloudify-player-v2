@@ -1,6 +1,179 @@
 @import "tailwindcss";
 
-:root {
-  color-scheme: dark;
-  -webkit-font-smoothing: antialiased;
+/*
+ * Cloudify's ground is near-black; colour comes only from the music. The three
+ * --glow-* colours are taken from the cover of what is playing (see
+ * features/player/coverGlow.ts) and cross-fade when the track changes.
+ */
+@theme {
+  --color-ground: #08080a;
+  --color-panel: #121215;
+  --color-panel-hover: #18181c;
+  --color-dock: #0c0c0f;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-fg: #f4f4f6;
+  --color-fg-muted: rgb(244 244 246 / 0.62);
+  --color-fg-faint: rgb(244 244 246 / 0.5);
+  /* Text on the white pills. */
+  --color-ink: #0b0b0d;
+
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Unbounded Variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+@property --glow-1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ff9d6b;
+}
+@property --glow-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ff4fa3;
+}
+@property --glow-3 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #6b7bff;
+}
+
+@theme inline {
+  --color-glow-1: var(--glow-1);
+  --color-glow-2: var(--glow-2);
+  --color-glow-3: var(--glow-3);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+    transition:
+      --glow-1 1.6s ease,
+      --glow-2 1.6s ease,
+      --glow-3 1.6s ease;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    overflow: hidden;
+    background: var(--color-ground);
+    color: var(--color-fg);
+    font: 600 14px / 1.4 var(--font-sans);
+    /* A desktop app: dragging across the window must not paint selections. */
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+  }
+
+  input,
+  textarea {
+    user-select: text;
+    -webkit-user-select: text;
+    caret-color: var(--glow-1);
+  }
+
+  button:not(:disabled),
+  [role="slider"] {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: var(--glow-1);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--glow-1);
+    outline-offset: 3px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.16) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.16) padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(255 255 255 / 0.26);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      transition: none;
+    }
+  }
+}
+
+@layer components {
+  /* Film grain over the light, so the gradients never band. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    opacity: 0.45;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* A light that takes its own cover's colours crosses over to them like the app's own. */
+  .relight {
+    transition:
+      --glow-1 1.6s ease,
+      --glow-2 1.6s ease,
+      --glow-3 1.6s ease;
+  }
+  /* Pointing at covers moves the light quicker: it answers the hand, not the music. */
+  .relight-quick {
+    transition:
+      --glow-1 0.6s ease,
+      --glow-2 0.6s ease,
+      --glow-3 0.6s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .relight,
+    .relight-quick {
+      transition: none;
+    }
+  }
+
+  /* The light's soft edges: its box never shows as a line, wherever it sits. */
+  .ribbon-fade {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
+  }
+
+  /* Your music under the light: three columns, two rows in a narrow window. */
+  .home-grid {
+    display: grid;
+    align-items: start;
+    gap: 32px;
+    grid-template-columns: minmax(0, 400fr) minmax(0, 520fr) minmax(0, 344fr);
+    grid-template-areas: "resume likes pls";
+  }
+  @media (max-width: 1179px) {
+    .home-grid {
+      row-gap: 40px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-areas:
+        "resume pls"
+        "likes likes";
+    }
+  }
 }

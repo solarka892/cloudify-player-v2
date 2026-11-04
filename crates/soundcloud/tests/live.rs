@@ -93,6 +93,31 @@ fn searches_everything_and_suggests() {
 
 #[test]
 #[ignore = "talks to the real SoundCloud"]
+fn counts_the_genres_of_a_search() {
+    live(async {
+        let genres = CLIENT
+            .search_track_genres("deep house", &TrackFilters::default())
+            .await
+            .unwrap();
+        println!(
+            "genres: {:?}",
+            genres
+                .iter()
+                .map(|g| (&g.genre, g.count))
+                .collect::<Vec<_>>()
+        );
+        assert!(!genres.is_empty());
+        assert!(genres.windows(2).all(|pair| pair[0].count >= pair[1].count));
+        assert!(
+            genres
+                .iter()
+                .all(|g| g.genre == g.genre.to_lowercase() && g.count > 0)
+        );
+    });
+}
+
+#[test]
+#[ignore = "talks to the real SoundCloud"]
 fn genre_filter_is_matched_in_lowercase() {
     live(async {
         let filters = TrackFilters {

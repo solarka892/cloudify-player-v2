@@ -299,9 +299,10 @@ GET /stream?limit=200&linked_partitioning=1                   the feed from peop
 ```
 
 `/me/play-history` without `/tracks` is a `404`; anonymously
-`/me/play-history/tracks` answers `401`, so that is the route (2026-11). Its
-items have not been seen signed in; `played_at` may be an epoch number rather
-than an ISO string, so accept both.
+`/me/play-history/tracks` answers `401`, so that is the route (2026-11).
+✅ Signed in (2026-11-03, through the app) it answers and its items decode
+with the current model; the raw `played_at` was not inspected, so keep
+accepting both an ISO string and an epoch number.
 
 `/me` is how a token is validated: `200` means good, `401` means dead (after
 the one `client_id` retry). The play history repeats a track once per play —
@@ -338,6 +339,30 @@ parameter"}`. A genre that matches nothing — including the right genre in the
 wrong case: `House` finds nothing, `house` finds 3.7 million — comes back as
 an empty result, indistinguishable from "nothing found". So reject bad values
 before sending, and lowercase the genre.
+
+**Counts by field (`facet`)** ✅ 2026-11-04. Add `facet=genre` to
+`/search/tracks` and the reply gains
+`facets: [{ name: "genre", facets: [{ value, count, filter }] }]` — the genres
+among this search's tracks, values already lowercase (`hip-hop & rap`,
+`alternative rock`), each with its count and the ready query parameter
+(`filter.genre=hip-hop+%26+rap`). The counts respect the other `filter.*`
+parameters sent with it; nine genres come back, not sorted. That is what the
+app's genre filter offers: `search_track_genres` asks with `limit=1`, the
+other filters, and no genre (so choosing one never hides the rest).
+`facet=model` on `/search` counts the kinds instead: `sound`, `set`
+(playlists and albums) and `person`. Search replies also carry a
+`query_urn` (`soundcloud:search:<hex>`), repeated in `next_href`; nothing
+needs it.
+
+What a search really returns (2026-11-04, «pyrokinesis», «molchat doma»,
+«deep house», no session): `/search` puts the best-matching person first —
+the artist when the query is their name — then mostly tracks; the same artist
+also leads `/search/users`. A genre query has no such person: `deep house`
+first finds a verified account called `x`. So the app makes an artist the
+page's hero only when a near-top person's name *is* the query and they are
+verified or have 5 000+ followers. Among artists' own tracks, label releases
+(`MONETIZE` + `AD_SUPPORTED`) are again offered only encrypted to an anonymous
+caller: 23 of the first 120 for «pyrokinesis».
 
 ### Discovery ✅
 
@@ -478,6 +503,19 @@ Ways to get it:
 Validate any token with `GET /me` before storing it. Store it in the OS
 keyring only.
 
+How the app does way 1 (`src-tauri/src/signin.rs`, 2026-11): a separate
+window labelled `signin` opens `https://soundcloud.com/signin` as an
+**incognito** webview (nothing of the session stays in it, so switching
+accounts works), with a current Safari user agent on macOS so Google and Apple
+sign-in do not refuse an embedded webview. No capability names that window,
+so the remote page cannot call the app. An async command polls the window's
+cookie store every ~600 ms for `oauth_token` on `soundcloud.com` and
+`m.soundcloud.com` (accepting only that domain and its subdomains), checks the
+value with `/me`, stores it, and closes the window. A value `/me` refused is
+not tried twice; closing the window ends the wait. Reading cookies happens
+off the main thread: on Windows it deadlocks there. Not yet tried against a
+real account.
+
 Phones are redirected to `m.soundcloud.com`, where the cookie is set
 host-only — look for it on that host as well, or the sign-in never "finishes".
 
@@ -499,6 +537,61 @@ Reply: `{ syncedLyrics, plainLyrics }`; synced lyrics are LRC
 fall back from `get` to `search`. No result is normal for remixes and DJ sets,
 not an error.
 
+## The official API (api.soundcloud.com) — not used yet
+
+SoundCloud also runs a documented public API for registered apps
+(https://developers.soundcloud.com/docs/api/guide, OpenAPI spec at
+`/docs/api/explorer/api.json`, read 2026-11-03). Cloudify does not use it; this
+is what it would take and give.
+
+**Getting in.** Registering an app needs an **Artist Pro** subscription
+(https://developers.soundcloud.com/docs/api/register-app), via
+soundcloud.com/you/apps or SoundCloud's CLI; you get a `client_id` and a
+`client_secret`. Auth is OAuth 2.1 (`secure.soundcloud.com/authorize` →
+`POST secure.soundcloud.com/oauth/token`) with PKCE (S256) and a redirect URI,
+for desktop a custom scheme. **All clients are treated as confidential**: the
+secret is needed for every token, so it cannot ship inside an open-source app —
+it would have to live on the user's machine (keychain), per user. Access tokens
+last about an hour; refresh tokens are single-use (store the new one every time).
+`Client Credentials` (no user) is for public data only, limited to 50 tokens per
+12 h per app and 30 per hour per IP. Header: `Authorization: OAuth <token>`.
+`POST /disconnect` revokes the app; `POST /sign-out` also ends the website session.
+
+**Limits are per app (`client_id`), not per user**
+(https://developers.soundcloud.com/docs/api/rate-limits): about 100 requests a
+minute overall; streams 1 500 per 24 h; search 3 000 per hour; likes 500 per
+24 h (reads of like lists included); reposts 500 per 24 h; downloads 10 a minute.
+429 with `Retry-After` and `X-Ratelimit-*` headers. Fine for one listener, not
+for a public release sharing one app ("production access" can raise them ~10×).
+
+**Routes** (ids are URNs, `soundcloud:tracks:123`):
+
+| Area | Routes |
+|---|---|
+| Me | `GET /me`, `/me/tracks`, `/me/playlists`, `/me/likes/tracks`, `/me/likes/playlists`, `/me/likes/system-playlists`, `/me/reposts/tracks`, `/me/reposts/playlists`, `/me/recently-played/tracks`, `/me/followers`, `/me/followings`, `/me/followings/tracks`, `/me/feed`, `/me/feed/tracks`, `/me/activities`, `/me/activities/tracks`, `/me/activities/all/own` |
+| Writes | `POST/DELETE /likes/tracks/{urn}`, `/likes/playlists/{urn}`; `POST/DELETE /reposts/tracks/{urn}`, `/reposts/playlists/{urn}`; `PUT/DELETE /me/followings/{urn}`; `POST /tracks/{urn}/comments` (`comment.body`, `comment.timestamp` ms) |
+| Tracks | `GET/POST /tracks` (search with `q`, `ids`, `genres`, `access`, `bpm[from]`/`bpm[to]`, `duration[…]`; upload), `GET/PUT/DELETE /tracks/{urn}`, `/streams`, `/preview`, `/related`, `/comments`, `/favoriters`, `/reposters`, `PUT /storefront` |
+| Playlists | `GET/POST /playlists`, `GET/PUT/DELETE /playlists/{urn}`, `/tracks`, `/reposters`; `GET /system-playlists/{id}` (Daily Drops, Weekly Wave and the like, presumably) |
+| Users | `GET /users` (search), `/users/{urn}` and its `tracks`, `playlists`, `likes/tracks`, `likes/playlists`, `likes/system-playlists`, `reposts/…`, `followers`, `followings`, `related`, `web-profiles`, `favorites` |
+| Other | `GET /resolve`, `/oembed` |
+
+Not there, unlike api-v2: stations, the home page's rows (`/mixed-selections`),
+search suggestions, messages, notifications beyond `/me/activities`.
+
+**Rules that matter for Cloudify.** A custom player must credit the uploader,
+show a SoundCloud logo and link back to the track. The terms (as the app
+registration pages quote them) forbid downloading or storing audio, Discord
+bots, library-transfer tools and DJ software without approval — so offline
+downloads (features stage 3) and a Discord status could not go through this API.
+
+**Where it would help:** the writes. Through api-v2 a like or follow from a
+non-browser client is refused by DataDome (see "Writes"); the official API is
+made for apps. If the author has Artist Pro, a personal app (secret kept in the
+keychain, never in the repo) could carry likes, reposts, follows, comments and
+playlist edits, and maybe system playlists, while api-v2 stays the source for
+everything else. Not built. **Decided 2026-11-03: not now** — api-v2 stays the
+only path; revisit if likes and follows through it really get refused.
+
 ## Still unknown
 
 - Message and comment bodies — needs one signed-in session watched in DevTools.
@@ -508,3 +601,6 @@ not an error.
   anonymous caller is offered only encrypted.
 - Uploading tracks (a policy → S3 → create flow; routes not found by guessing).
 - Blocking or reporting a user (`/users/{id}/block` is a 404).
+- The user's liked stations (the website's library has a «Stations» tab): no
+  route known. The library builds its own from the artists most present in
+  the likes, through `/stations/soundcloud:artist-stations:{id}/tracks`.

@@ -1,0 +1,597 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-04T00:00:00Z",
+  "title": "Design System: Cloudify",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Ground",
+        "canonical": "#08080a",
+        "tonalRamp": [
+          "oklch(10% 0.004 286)",
+          "oklch(13% 0.004 286)",
+          "oklch(18% 0.004 286)",
+          "oklch(28% 0.004 286)",
+          "oklch(42% 0.004 286)",
+          "oklch(58% 0.004 286)",
+          "oklch(76% 0.004 286)",
+          "oklch(94% 0.004 286)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel",
+        "canonical": "#121215",
+        "tonalRamp": [
+          "oklch(12% 0.005 286)",
+          "oklch(18% 0.005 286)",
+          "oklch(24% 0.005 286)",
+          "oklch(34% 0.005 286)",
+          "oklch(46% 0.005 286)",
+          "oklch(60% 0.005 286)",
+          "oklch(78% 0.005 286)",
+          "oklch(95% 0.005 286)"
+        ]
+      },
+      "panel-hover": {
+        "role": "neutral",
+        "displayName": "Panel Lift",
+        "canonical": "#18181c",
+        "tonalRamp": [
+          "oklch(14% 0.006 286)",
+          "oklch(21% 0.006 286)",
+          "oklch(28% 0.006 286)",
+          "oklch(38% 0.006 286)",
+          "oklch(50% 0.006 286)",
+          "oklch(64% 0.006 286)",
+          "oklch(80% 0.006 286)",
+          "oklch(95% 0.006 286)"
+        ]
+      },
+      "dock": {
+        "role": "neutral",
+        "displayName": "Dock",
+        "canonical": "#0c0c0f",
+        "tonalRamp": [
+          "oklch(11% 0.005 286)",
+          "oklch(15% 0.005 286)",
+          "oklch(21% 0.005 286)",
+          "oklch(31% 0.005 286)",
+          "oklch(44% 0.005 286)",
+          "oklch(59% 0.005 286)",
+          "oklch(77% 0.005 286)",
+          "oklch(94% 0.005 286)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "rgb(255 255 255 / 0.08)"
+      },
+      "fg": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "#f4f4f6",
+        "tonalRamp": [
+          "oklch(15% 0.003 286)",
+          "oklch(27% 0.003 286)",
+          "oklch(39% 0.003 286)",
+          "oklch(51% 0.003 286)",
+          "oklch(63% 0.003 286)",
+          "oklch(75% 0.003 286)",
+          "oklch(87% 0.003 286)",
+          "oklch(97% 0.003 286)"
+        ]
+      },
+      "fg-muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "rgb(244 244 246 / 0.62)"
+      },
+      "fg-faint": {
+        "role": "neutral",
+        "displayName": "Faint",
+        "canonical": "rgb(244 244 246 / 0.5)"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#0b0b0d"
+      },
+      "glow-1": {
+        "role": "primary",
+        "displayName": "Cover Glow (default warm apricot)",
+        "canonical": "var(--glow-1)",
+        "tonalRamp": [
+          "oklch(25% 0.06 45)",
+          "oklch(35% 0.09 45)",
+          "oklch(45% 0.12 45)",
+          "oklch(55% 0.14 45)",
+          "oklch(65% 0.15 45)",
+          "oklch(75% 0.13 45)",
+          "oklch(85% 0.08 45)",
+          "oklch(95% 0.03 45)"
+        ]
+      },
+      "glow-2": {
+        "role": "primary",
+        "displayName": "Cover Glow Two (default hot rose)",
+        "canonical": "var(--glow-2)",
+        "tonalRamp": [
+          "oklch(25% 0.09 355)",
+          "oklch(35% 0.13 355)",
+          "oklch(45% 0.17 355)",
+          "oklch(55% 0.21 355)",
+          "oklch(65% 0.23 355)",
+          "oklch(75% 0.16 355)",
+          "oklch(85% 0.09 355)",
+          "oklch(95% 0.03 355)"
+        ]
+      },
+      "glow-3": {
+        "role": "primary",
+        "displayName": "Cover Glow Three (default electric periwinkle)",
+        "canonical": "var(--glow-3)",
+        "tonalRamp": [
+          "oklch(25% 0.09 275)",
+          "oklch(35% 0.13 275)",
+          "oklch(45% 0.17 275)",
+          "oklch(55% 0.2 275)",
+          "oklch(63% 0.2 275)",
+          "oklch(73% 0.14 275)",
+          "oklch(85% 0.08 275)",
+          "oklch(95% 0.03 275)"
+        ]
+      },
+      "smoke": {
+        "role": "neutral",
+        "displayName": "Smoke",
+        "canonical": "rgb(10 10 12 / 0.62)"
+      },
+      "smoke-hover": {
+        "role": "neutral",
+        "displayName": "Smoke, hover",
+        "canonical": "rgb(40 40 46 / 0.72)"
+      },
+      "rim": {
+        "role": "neutral",
+        "displayName": "Rim",
+        "canonical": "rgb(255 255 255 / 0.16)"
+      },
+      "veil": {
+        "role": "neutral",
+        "displayName": "Veil",
+        "canonical": "rgb(255 255 255 / 0.07)"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The one big word of a full screen («Подборка», «Cloudify», offline title); scales with its container, single line. «Библиотека» uses min(108px, 12.5cqi)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Title of a section page that is not built yet."
+      },
+      "section": {
+        "displayName": "Section",
+        "purpose": "Section titles and the wordmark."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The single line under a display word; white at 80% with a soft shadow on the light."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Track and playlist titles in rows, cards and the player (14–16.5px)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default text; never below weight 600."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Counts, durations, timestamps, helper text; tabular figures."
+      },
+      "badge": {
+        "displayName": "Badge",
+        "purpose": "State badges on track rows and the keyboard hint."
+      },
+      "fitted-name": {
+        "displayName": "Fitted name",
+        "purpose": "Opened playlist or person name, measured to fit: one line up to 112px while ≥64px, else two balanced lines up to 84px (≥44px), else three at 34–60px. Unbounded 800, 0.92, −0.055em."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-menu",
+        "value": "0 18px 40px -16px rgb(0 0 0 / 0.8)",
+        "purpose": "Popovers over content, always with a line border."
+      },
+      {
+        "name": "hero-cover",
+        "value": "0 30px 60px -24px rgb(0 0 0 / 0.8)",
+        "purpose": "The large cover in the hero and the opened playlist/person face beside its name."
+      },
+      {
+        "name": "inner-rim",
+        "value": "inset 0 0 0 1px rgb(255 255 255 / 0.16)",
+        "purpose": "Edge of smoky buttons, chips, the filter well on the light, and the rounds on a cover."
+      },
+      {
+        "name": "play-round-over-cover",
+        "value": "0 10px 30px -10px rgb(0 0 0 / 0.8)",
+        "purpose": "The 56px white play round on a track tile; the 44px round on playlist and station tiles uses 0 10px 24px -10px."
+      },
+      {
+        "name": "now-playing-ring",
+        "value": "0 0 0 3px var(--glow-1)",
+        "purpose": "Ring around the playing track's cover on a wall or shelf."
+      },
+      {
+        "name": "text-on-light-display",
+        "value": "0 10px 50px rgb(0 0 0 / 0.35)",
+        "purpose": "text-shadow for the display word over the ribbon."
+      },
+      {
+        "name": "text-on-light-lead",
+        "value": "0 2px 16px rgb(0 0 0 / 0.4)",
+        "purpose": "text-shadow for the lead line over the ribbon."
+      }
+    ],
+    "motion": [
+      {
+        "name": "glow-crossfade",
+        "value": "--glow-1/2/3 1.6s ease",
+        "purpose": "Cover colours cross-fade on :root when the track changes; none under reduced motion."
+      },
+      {
+        "name": "state",
+        "value": "150ms ease",
+        "purpose": "Colour changes on hover and press for buttons, rows, panels, tabs."
+      },
+      {
+        "name": "topbar-backing",
+        "value": "200ms",
+        "purpose": "The top bar's backing and blur appearing once the page scrolls past 8px."
+      },
+      {
+        "name": "press-spring",
+        "value": "scale 1.03 hover / 0.97 active, 150ms ease-out",
+        "purpose": "White pills; the 44px player play button uses 1.05 / 0.95."
+      },
+      {
+        "name": "ribbon-frame-rate",
+        "value": "33ms playing / 66ms paused",
+        "purpose": "The light redraws at about 30 / 15 fps, stops when hidden or off screen, never runs under reduced motion."
+      },
+      {
+        "name": "mood-ease",
+        "value": "~500ms exponential approach",
+        "purpose": "Energy and pace of the light ease toward a new mood instead of jumping."
+      },
+      {
+        "name": "relight",
+        "value": "--glow-1/2/3 1.6s ease on a local wrapper",
+        "purpose": "The library's light crossing to an opened item's or the playing cover's colours; none under reduced motion."
+      },
+      {
+        "name": "relight-quick",
+        "value": "--glow-1/2/3 0.6s ease, after a 70ms rest",
+        "purpose": "The light following the cover the pointer or focus rests on."
+      },
+      {
+        "name": "tile-hover",
+        "value": "cover scale 1.04 over 300ms ease-out; veil, play round and corner rounds 150ms",
+        "purpose": "Track tile hover/focus anatomy; corner rounds rise 4px."
+      },
+      {
+        "name": "sticky-backing",
+        "value": "200ms",
+        "purpose": "The library actions row growing the top bar's backing once stuck."
+      },
+      {
+        "name": "notice-timeout",
+        "value": "7000ms",
+        "purpose": "A player notice (and its one action) steps aside."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "window-min",
+        "value": "960px"
+      },
+      {
+        "name": "home-grid-two-columns",
+        "value": "1179px"
+      },
+      {
+        "name": "window-default",
+        "value": "1280px"
+      },
+      {
+        "name": "wall-min-tile",
+        "value": "196px"
+      },
+      {
+        "name": "shelf-min-item",
+        "value": "168px"
+      },
+      {
+        "name": "tile-grid-min",
+        "value": "164px"
+      },
+      {
+        "name": "opened-face-hidden-below-container",
+        "value": "768px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Pill",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one action a screen exists for: white pill, ink text, icon left.",
+      "html": "<button class=\"ds-pill\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M6 3.5v17a1 1 0 0 0 1.5.86l14-8.5a1 1 0 0 0 0-1.72l-14-8.5A1 1 0 0 0 6 3.5Z\"/></svg>Слушать подборку</button>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 10px; height: 54px; padding: 0 26px 0 20px; border: none; border-radius: 9999px; background: #fff; color: var(--color-ink, #0b0b0d); font: 800 16px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: transform 150ms ease-out; } .ds-pill:hover { transform: scale(1.03); } .ds-pill:active { transform: scale(0.97); } .ds-pill:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-pill:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }"
+    },
+    {
+      "name": "Round Secondary",
+      "kind": "button",
+      "refersTo": "button-round",
+      "description": "Smoky 54px circle with a 1px inner rim, beside the primary pill on the light.",
+      "html": "<button class=\"ds-round\" aria-label=\"Дальше\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polygon points=\"5 4 15 12 5 20 5 4\"/><line x1=\"19\" x2=\"19\" y1=\"5\" y2=\"19\"/></svg></button>",
+      "css": ".ds-round { display: grid; place-content: center; width: 54px; height: 54px; border: none; border-radius: 9999px; background: rgb(10 10 12 / 0.62); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16); color: var(--color-fg, #f4f4f6); cursor: pointer; transition: background-color 150ms ease; } .ds-round:hover { background: rgb(40 40 46 / 0.72); } .ds-round:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-round:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Mood Chips",
+      "kind": "chip",
+      "refersTo": "chip-mood",
+      "description": "Single-choice pills that reshape the light; the selected one turns solid white.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">Как обычно</button><button class=\"ds-chip\" aria-pressed=\"false\">Любимое</button><button class=\"ds-chip\" aria-pressed=\"false\">Спокойнее</button></div>",
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 8px; } .ds-chip { height: 36px; padding: 0 15px; border: none; border-radius: 9999px; background: rgb(10 10 12 / 0.66); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16); backdrop-filter: blur(6px); color: rgb(255 255 255 / 0.9); font: 700 14px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: color 150ms ease, background-color 150ms ease; } .ds-chip:hover { color: #fff; } .ds-chip[aria-pressed=\"true\"] { background: #fff; color: var(--color-ink, #0b0b0d); box-shadow: none; } .ds-chip:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Top Bar Navigation",
+      "kind": "nav",
+      "refersTo": "nav-tab",
+      "description": "Text tabs in pills; the current tab gets a white-10% pill.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-tab\" aria-current=\"page\">Главная</button><button class=\"ds-tab\">Библиотека</button><button class=\"ds-tab\">Дневник</button></nav>",
+      "css": ".ds-nav { display: flex; gap: 4px; } .ds-tab { height: 38px; padding: 0 16px; border: none; border-radius: 19px; background: transparent; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font: 700 15px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: color 150ms ease; } .ds-tab:hover { color: var(--color-fg, #f4f4f6); } .ds-tab[aria-current=\"page\"] { background: rgb(255 255 255 / 0.1); color: var(--color-fg, #f4f4f6); } .ds-tab:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "The top bar's live search: a veil well with icon; the keyboard hint while empty, a 28px clear round once there is text; brightens on focus.",
+      "html": "<label class=\"ds-search\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input type=\"search\" value=\"pyrokinesis\" placeholder=\"Трек, артист, плейлист\" aria-label=\"Поиск\"><button type=\"button\" aria-label=\"Стереть\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M18 6 6 18M6 6l12 12\"/></svg></button></label>",
+      "css": ".ds-search { display: flex; align-items: center; gap: 10px; width: 340px; height: 40px; padding: 0 6px 0 16px; border-radius: 20px; background: rgb(255 255 255 / 0.07); color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); transition: background-color 150ms ease; } .ds-search:focus-within { background: rgb(255 255 255 / 0.1); } .ds-search input { flex: 1; min-width: 0; height: 100%; border: none; outline: none; background: transparent; color: var(--color-fg, #f4f4f6); caret-color: var(--glow-1, #ff9d6b); font: 600 14px \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-search input::placeholder { color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-search input::-webkit-search-cancel-button { display: none; } .ds-search button { display: grid; place-content: center; width: 28px; height: 28px; border: none; border-radius: 9999px; background: transparent; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-search button:hover { background: rgb(255 255 255 / 0.1); color: var(--color-fg, #f4f4f6); } .ds-search button:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-search kbd { margin-right: 10px; padding: 4px 7px; border-radius: 6px; background: rgb(255 255 255 / 0.08); font: 700 11px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; }"
+    },
+    {
+      "name": "Resume Card",
+      "kind": "card",
+      "refersTo": "card-panel",
+      "description": "A flat tonal panel with artwork, title, artist, a faint timestamp and a glow progress strip.",
+      "html": "<button class=\"ds-card\"><span class=\"ds-card-art\"></span><span class=\"ds-card-text\"><b>Track title</b><span>Artist</span><small>Остановился сегодня на 0:20</small></span><span class=\"ds-card-track\"><span style=\"width:22%\"></span></span></button>",
+      "css": ".ds-card { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center; gap: 16px; width: 400px; padding: 16px; border: none; border-radius: 22px; background: var(--color-panel, #121215); color: var(--color-fg, #f4f4f6); text-align: left; cursor: pointer; transition: background-color 150ms ease; } .ds-card:hover { background: var(--color-panel-hover, #18181c); } .ds-card:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-card-art { width: 104px; height: 104px; border-radius: 14px; background: var(--color-panel-hover, #18181c); } .ds-card-text { min-width: 0; font: 700 14px/1.4 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-card-text b { display: block; font-weight: 800; font-size: 16.5px; line-height: 1.25; } .ds-card-text span { display: block; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-card-text small { display: block; margin-top: 10px; font-size: 12.5px; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); font-variant-numeric: tabular-nums; } .ds-card-track { position: relative; grid-column: span 2; height: 4px; border-radius: 4px; background: rgb(255 255 255 / 0.1); } .ds-card-track span { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: linear-gradient(to right, var(--glow-2, #ff4fa3), var(--glow-1, #ff9d6b)); }"
+    },
+    {
+      "name": "Track Row",
+      "kind": "custom",
+      "refersTo": "badge-state",
+      "description": "50px row with thumbnail, title, artist, an honest state badge and the duration.",
+      "html": "<button class=\"ds-row\"><span class=\"ds-row-art\"></span><span class=\"ds-row-text\"><b>Track title</b><span>Artist</span></span><span class=\"ds-badge\">Go+ · 30 с</span><span class=\"ds-row-time\">5:18</span></button>",
+      "css": ".ds-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto 46px; align-items: center; gap: 14px; width: 520px; height: 50px; padding: 0 8px; border: none; border-radius: 12px; background: transparent; color: var(--color-fg, #f4f4f6); text-align: left; cursor: pointer; transition: background-color 150ms ease; font: 700 14px/1.4 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-row:hover { background: rgb(255 255 255 / 0.05); } .ds-row:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-row-art { width: 44px; height: 44px; border-radius: 9px; background: var(--color-panel-hover, #18181c); } .ds-row-text { min-width: 0; } .ds-row-text b { display: block; font-weight: 800; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-row-text span { display: block; font-size: 13px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-badge { padding: 4px 8px; border-radius: 8px; background: rgb(255 255 255 / 0.07); color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font-weight: 800; font-size: 11px; line-height: 1; white-space: nowrap; } .ds-row-time { text-align: right; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Section Header",
+      "kind": "custom",
+      "refersTo": "section",
+      "description": "Unbounded section title, a quiet count, and «Все» at the far end.",
+      "html": "<div class=\"ds-sh\"><h2>Лайки</h2><span>1 312</span><button>Все</button></div>",
+      "css": ".ds-sh { display: flex; align-items: baseline; gap: 10px; width: 520px; color: var(--color-fg, #f4f4f6); } .ds-sh h2 { margin: 0; font: 700 19px/1 \"Unbounded Variable\", ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.02em; } .ds-sh span { font: 700 14px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); font-variant-numeric: tabular-nums; } .ds-sh button { margin-left: auto; border: none; background: none; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font: 700 13.5px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: color 150ms ease; } .ds-sh button:hover { color: var(--color-fg, #f4f4f6); }"
+    },
+    {
+      "name": "Player Transport",
+      "kind": "custom",
+      "refersTo": "player-play",
+      "description": "White 44px play circle between muted icon buttons, then the real waveform as the seek bar.",
+      "html": "<div class=\"ds-transport\"><button class=\"ds-icon\" aria-label=\"Назад\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polygon points=\"19 20 9 12 19 4 19 20\"/><line x1=\"5\" x2=\"5\" y1=\"19\" y2=\"5\"/></svg></button><button class=\"ds-play\" aria-label=\"Пауза\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><rect x=\"6\" y=\"4\" width=\"4\" height=\"16\" rx=\"1\"/><rect x=\"14\" y=\"4\" width=\"4\" height=\"16\" rx=\"1\"/></svg></button><button class=\"ds-icon\" aria-label=\"Дальше\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polygon points=\"5 4 15 12 5 20 5 4\"/><line x1=\"19\" x2=\"19\" y1=\"5\" y2=\"19\"/></svg></button><div class=\"ds-wave\" role=\"slider\" tabindex=\"0\" aria-label=\"Перемотка\"><i class=\"on\" style=\"height:14px\"></i><i class=\"on\" style=\"height:22px\"></i><i class=\"on\" style=\"height:30px\"></i><i class=\"on\" style=\"height:26px\"></i><i style=\"height:18px\"></i><i style=\"height:28px\"></i><i style=\"height:34px\"></i><i style=\"height:20px\"></i><i style=\"height:12px\"></i><i style=\"height:24px\"></i></div></div>",
+      "css": ".ds-transport { display: flex; align-items: center; gap: 8px; padding: 20px 18px; background: var(--color-dock, #0c0c0f); border-top: 1px solid var(--color-line, rgb(255 255 255 / 0.08)); } .ds-icon { display: grid; place-content: center; width: 32px; height: 32px; border: none; border-radius: 9999px; background: none; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); cursor: pointer; transition: color 150ms ease; } .ds-icon:hover { color: var(--color-fg, #f4f4f6); } .ds-play { display: grid; place-content: center; width: 44px; height: 44px; border: none; border-radius: 9999px; background: #fff; color: var(--color-ink, #0b0b0d); cursor: pointer; transition: transform 150ms ease; } .ds-play:hover { transform: scale(1.05); } .ds-play:active { transform: scale(0.95); } .ds-icon:focus-visible, .ds-play:focus-visible, .ds-wave:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-wave { display: flex; align-items: center; gap: 2px; width: 200px; height: 34px; margin-left: 14px; } .ds-wave i { flex: 1; border-radius: 2px; background: rgb(255 255 255 / 0.18); } .ds-wave i.on { background: linear-gradient(to bottom, var(--glow-1, #ff9d6b), var(--glow-2, #ff4fa3)); }"
+    },
+    {
+      "name": "Track Tile",
+      "kind": "card",
+      "refersTo": "track-tile",
+      "description": "A big 12px-cornered cover with title and artist always shown; hover or focus brings a veil, a white play round and heart / «…» rounds.",
+      "html": "<div class=\"ds-tt\"><div class=\"ds-tt-cover\"><button class=\"ds-tt-art\" aria-label=\"Слушать: Track title\"></button><span class=\"ds-tt-veil\"></span><span class=\"ds-tt-play\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M6 3.5v17a1 1 0 0 0 1.5.86l14-8.5a1 1 0 0 0 0-1.72l-14-8.5A1 1 0 0 0 6 3.5Z\"/></svg></span><span class=\"ds-tt-go\">Go+ · 30 с</span><span class=\"ds-tt-acts\"><button class=\"ds-tt-round\" aria-label=\"В лайки\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"/></svg></button><button class=\"ds-tt-round\" aria-label=\"Ещё\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><circle cx=\"5\" cy=\"12\" r=\"1.6\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\"/><circle cx=\"19\" cy=\"12\" r=\"1.6\"/></svg></button></span></div><b>Track title</b><span>Artist</span></div>",
+      "css": ".ds-tt { width: 196px; color: var(--color-fg, #f4f4f6); font: 700 13px/1.25 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-tt-cover { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 12px; background: var(--color-panel-hover, #18181c); } .ds-tt-art { position: absolute; inset: 0; border: none; border-radius: 12px; background: linear-gradient(135deg, #3a2a4a, #1b1b24); transition: transform 300ms ease-out; cursor: pointer; } .ds-tt:hover .ds-tt-art { transform: scale(1.04); } .ds-tt-art:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-tt-veil { position: absolute; inset: 0; background: rgb(0 0 0 / 0.35); opacity: 0; transition: opacity 150ms; pointer-events: none; } .ds-tt-play { position: absolute; top: 50%; left: 50%; display: grid; place-content: center; width: 56px; height: 56px; border-radius: 9999px; background: #fff; color: var(--color-ink, #0b0b0d); box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.8); transform: translate(-50%, -50%) scale(0.9); opacity: 0; transition: opacity 150ms, transform 150ms; pointer-events: none; } .ds-tt-go { position: absolute; top: 8px; left: 8px; padding: 4px 6px; border-radius: 6px; background: rgb(0 0 0 / 0.65); color: rgb(255 255 255 / 0.9); font: 800 10.5px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; pointer-events: none; } .ds-tt-acts { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 6px; opacity: 0; transform: translateY(4px); transition: opacity 150ms, transform 150ms; } .ds-tt-round { display: grid; place-content: center; width: 36px; height: 36px; border: none; border-radius: 9999px; background: rgb(10 10 12 / 0.72); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16); color: #fff; cursor: pointer; transition: background-color 150ms; } .ds-tt-round:hover { background: rgb(40 40 46 / 0.9); } .ds-tt-round:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-tt:hover .ds-tt-veil, .ds-tt:focus-within .ds-tt-veil, .ds-tt:hover .ds-tt-play, .ds-tt:focus-within .ds-tt-play, .ds-tt:hover .ds-tt-acts, .ds-tt:focus-within .ds-tt-acts { opacity: 1; } .ds-tt:hover .ds-tt-play, .ds-tt:focus-within .ds-tt-play { transform: translate(-50%, -50%) scale(1); } .ds-tt:hover .ds-tt-acts, .ds-tt:focus-within .ds-tt-acts { transform: none; } .ds-tt b { display: block; margin-top: 10px; font-weight: 800; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-tt > span { display: block; margin-top: 2px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); }"
+    },
+    {
+      "name": "Shelf Title",
+      "kind": "custom",
+      "refersTo": "section",
+      "description": "A shelf's title, count and chevron as one button that opens the whole section.",
+      "html": "<h2 class=\"ds-shelf\"><button><span class=\"t\">Лайки</span><span class=\"n\">1 574</span><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9 18 6-6-6-6\"/></svg></button></h2>",
+      "css": ".ds-shelf { margin: 0; } .ds-shelf button { display: inline-flex; align-items: center; gap: 10px; padding: 0 4px 0 0; border: none; border-radius: 8px; background: none; color: var(--color-fg, #f4f4f6); cursor: pointer; } .ds-shelf .t { font: 700 19px/1 \"Unbounded Variable\", ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.02em; } .ds-shelf .n { font: 700 14px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); font-variant-numeric: tabular-nums; } .ds-shelf svg { margin-left: -4px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); transition: transform 150ms, color 150ms; } .ds-shelf button:hover svg { transform: translateX(2px); color: var(--color-fg, #f4f4f6); } .ds-shelf button:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Section Chips",
+      "kind": "chip",
+      "refersTo": "chip-section",
+      "description": "The library's sections in the mood-chip material, each with its count; the current one is white.",
+      "html": "<nav class=\"ds-schips\"><button aria-current=\"page\">Всё</button><button>Лайки <span>1 574</span></button><button>Плейлисты <span>38</span></button><button>Станции</button></nav>",
+      "css": ".ds-schips { display: flex; flex-wrap: wrap; gap: 8px; } .ds-schips button { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 15px; border: none; border-radius: 9999px; background: rgb(10 10 12 / 0.66); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16); color: rgb(255 255 255 / 0.9); font: 700 14px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: color 150ms, background-color 150ms; } .ds-schips button:hover { color: #fff; } .ds-schips button span { font-size: 12.5px; opacity: 0.55; font-variant-numeric: tabular-nums; } .ds-schips button[aria-current=\"page\"] { background: #fff; color: var(--color-ink, #0b0b0d); box-shadow: none; } .ds-schips button:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Filter Well",
+      "kind": "input",
+      "refersTo": "input-filter",
+      "description": "Smoke and rim on the light (not veil), with the match count inside the field.",
+      "html": "<label class=\"ds-filter\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input type=\"search\" value=\"night\" placeholder=\"Найти у себя\" aria-label=\"Найти у себя\"><span>120 из 1 574</span></label>",
+      "css": ".ds-filter { display: flex; align-items: center; gap: 10px; width: 340px; height: 40px; padding: 0 6px 0 16px; border-radius: 20px; background: rgb(10 10 12 / 0.62); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16); color: rgb(255 255 255 / 0.7); transition: background-color 150ms; } .ds-filter:focus-within { background: rgb(40 40 46 / 0.72); } .ds-filter input { flex: 1; min-width: 0; height: 100%; border: none; outline: none; background: transparent; color: var(--color-fg, #f4f4f6); caret-color: var(--glow-1, #ff9d6b); font: 600 14px \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-filter input::placeholder { color: rgb(255 255 255 / 0.7); } .ds-filter span { padding-right: 10px; white-space: nowrap; color: rgb(255 255 255 / 0.65); font: 700 12.5px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Floating Track Menu",
+      "kind": "custom",
+      "refersTo": "menu-floating",
+      "description": "Panel with a line border and the floating-menu shadow; 40px items, muted until hovered or focused.",
+      "html": "<div class=\"ds-menu\" role=\"menu\"><button role=\"menuitem\">Играть следующим</button><button role=\"menuitem\">Радио по треку</button><button role=\"menuitem\">Перейти к артисту</button><button role=\"menuitem\">Скопировать ссылку</button></div>",
+      "css": ".ds-menu { width: 240px; padding: 6px; border: 1px solid var(--color-line, rgb(255 255 255 / 0.08)); border-radius: 16px; background: var(--color-panel, #121215); box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.8); } .ds-menu button { display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 12px; border: none; border-radius: 12px; background: transparent; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font: 700 14px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; text-align: left; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-menu button:hover, .ds-menu button:focus-visible { background: rgb(255 255 255 / 0.06); color: var(--color-fg, #f4f4f6); outline: none; }"
+    },
+    {
+      "name": "Playlist Tile",
+      "kind": "card",
+      "refersTo": "tile-playlist",
+      "description": "An 18px panel tile with a mosaic; the tile opens, a white round rises to play.",
+      "html": "<div class=\"ds-pt\"><span class=\"ds-pt-mosaic\"><i></i><i></i><i></i><i></i></span><button class=\"ds-pt-play\" aria-label=\"Слушать\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M6 3.5v17a1 1 0 0 0 1.5.86l14-8.5a1 1 0 0 0 0-1.72l-14-8.5A1 1 0 0 0 6 3.5Z\"/></svg></button><b>Night drive</b><span>38 треков</span></div>",
+      "css": ".ds-pt { position: relative; width: 168px; padding: 10px; border-radius: 18px; background: var(--color-panel, #121215); color: var(--color-fg, #f4f4f6); transition: background-color 150ms; } .ds-pt:hover { background: var(--color-panel-hover, #18181c); } .ds-pt-mosaic { display: grid; grid-template-columns: 1fr 1fr; aspect-ratio: 1; overflow: hidden; border-radius: 12px; } .ds-pt-mosaic i:nth-child(1) { background: #3a2a4a; } .ds-pt-mosaic i:nth-child(2) { background: #24324a; } .ds-pt-mosaic i:nth-child(3) { background: #4a2a30; } .ds-pt-mosaic i:nth-child(4) { background: #2a4a3c; } .ds-pt-play { position: absolute; right: 18px; top: 112px; display: grid; place-content: center; width: 44px; height: 44px; border: none; border-radius: 9999px; background: #fff; color: var(--color-ink, #0b0b0d); box-shadow: 0 10px 24px -10px rgb(0 0 0 / 0.8); opacity: 0; transform: translateY(4px); transition: opacity 150ms, transform 150ms; cursor: pointer; } .ds-pt:hover .ds-pt-play, .ds-pt-play:focus-visible { opacity: 1; transform: none; } .ds-pt-play:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-pt b { display: block; margin-top: 10px; font: 800 14px/1.25 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-pt span { display: block; font: 700 12.5px/1.4 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); }"
+    },
+    {
+      "name": "Search Suggestions",
+      "kind": "custom",
+      "refersTo": "menu-suggest",
+      "description": "The field's list while typing: SoundCloud's completions, the artist and tracks found at once, then «Искать»; groups split by a line.",
+      "html": "<div class=\"ds-suggest\" role=\"listbox\" aria-label=\"Подсказки\"><div class=\"ds-sg-opt\" role=\"option\" aria-selected=\"true\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><span>pyro<b>kinesis</b></span></div><div class=\"ds-sg-opt\" role=\"option\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><span>pyro<b>kinesis легенда о богине</b></span></div><div class=\"ds-sg-sep\" role=\"presentation\"></div><div class=\"ds-sg-opt ds-sg-hit\" role=\"option\"><span class=\"ds-sg-art ds-sg-round\"></span><span class=\"ds-sg-text\"><b>pyrokinesis</b><span>Артист · 34 842 подписчика</span></span></div><div class=\"ds-sg-opt ds-sg-hit\" role=\"option\"><span class=\"ds-sg-art\"></span><span class=\"ds-sg-text\"><b>Легенда о богине гроз</b><span>Трек · pyrokinesis</span></span></div><div class=\"ds-sg-sep\" role=\"presentation\"></div><div class=\"ds-sg-opt ds-sg-go\" role=\"option\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9 10-5 5 5 5\"/><path d=\"M20 4v7a4 4 0 0 1-4 4H4\"/></svg><span>Искать «<b>pyro</b>»</span></div></div>",
+      "css": ".ds-suggest { width: 420px; padding: 6px; border: 1px solid rgb(255 255 255 / 0.08); border-radius: 16px; background: var(--color-panel, #121215); box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.8); } .ds-sg-opt { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; border-radius: 12px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font: 700 14px/1.2 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: default; white-space: nowrap; overflow: hidden; } .ds-sg-opt:hover, .ds-sg-opt[aria-selected=\"true\"] { background: rgb(255 255 255 / 0.06); color: var(--color-fg, #f4f4f6); } .ds-sg-opt b { font-weight: 800; color: var(--color-fg, #f4f4f6); } .ds-sg-hit { height: 52px; } .ds-sg-art { flex: none; width: 36px; height: 36px; border-radius: 9px; background: var(--color-panel-hover, #18181c); } .ds-sg-round { border-radius: 9999px; } .ds-sg-text { min-width: 0; line-height: 1.25; } .ds-sg-text b { display: block; font-size: 14px; overflow: hidden; text-overflow: ellipsis; } .ds-sg-text span { display: block; font-size: 12.5px; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); overflow: hidden; text-overflow: ellipsis; } .ds-sg-go { color: var(--color-fg, #f4f4f6); } .ds-sg-go svg { color: var(--glow-1, #ff9d6b); flex: none; } .ds-sg-sep { height: 1px; margin: 6px 12px; background: rgb(255 255 255 / 0.08); }"
+    },
+    {
+      "name": "Filter Column",
+      "kind": "custom",
+      "refersTo": "filter-column",
+      "description": "The track filters beside the full list: one panel; genres as counted choice rows, length and date as pills, a Go+ switch.",
+      "html": "<aside class=\"ds-fcol\" aria-label=\"Фильтры треков\"><fieldset><legend>Жанр</legend><button type=\"button\" aria-pressed=\"false\"><span>Любой</span></button><button type=\"button\" aria-pressed=\"true\"><span>Hip-hop &amp; rap</span><i>1 204</i><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 6 9 17l-5-5\"/></svg></button><button type=\"button\" aria-pressed=\"false\"><span>Russian rap</span><i>412</i></button></fieldset><fieldset><legend>Длина</legend><div class=\"ds-fpills\"><button type=\"button\" aria-pressed=\"true\">Любая</button><button type=\"button\" aria-pressed=\"false\">до 2 мин</button><button type=\"button\" aria-pressed=\"false\">2–10 мин</button><button type=\"button\" aria-pressed=\"false\">30+ мин</button></div></fieldset><button type=\"button\" class=\"ds-fswitch\" role=\"switch\" aria-checked=\"false\">Только Go+<span><span></span></span></button></aside>",
+      "css": ".ds-fcol { width: 240px; padding: 14px; border-radius: 22px; background: var(--color-panel, #121215); font-family: \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-fcol fieldset { margin: 12px 0 0; padding: 0; border: none; } .ds-fcol fieldset:first-child { margin-top: 0; } .ds-fcol legend { padding: 4px 8px 8px; font-weight: 700; font-size: 12.5px; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); } .ds-fcol fieldset > button { display: flex; align-items: center; gap: 8px; width: 100%; height: 34px; padding: 0 10px; border: none; border-radius: 10px; background: transparent; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font-weight: 700; font-size: 13.5px; line-height: 1; font-family: inherit; text-align: left; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-fcol fieldset > button span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-fcol fieldset > button i { font-style: normal; font-size: 12px; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); font-variant-numeric: tabular-nums; } .ds-fcol fieldset > button svg { flex: none; color: var(--glow-1, #ff9d6b); } .ds-fcol fieldset > button:hover { background: rgb(255 255 255 / 0.06); color: var(--color-fg, #f4f4f6); } .ds-fcol fieldset > button[aria-pressed=\"true\"] { background: rgb(255 255 255 / 0.1); color: var(--color-fg, #f4f4f6); } .ds-fpills { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 4px 4px; } .ds-fpills button { height: 30px; padding: 0 11px; border: none; border-radius: 9999px; background: rgb(255 255 255 / 0.06); color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font-weight: 700; font-size: 13px; line-height: 1; font-family: inherit; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-fpills button:hover { color: var(--color-fg, #f4f4f6); } .ds-fpills button[aria-pressed=\"true\"] { background: #fff; color: var(--color-ink, #0b0b0d); } .ds-fswitch { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 40px; margin-top: 12px; padding: 0 10px; border: none; border-radius: 12px; background: transparent; color: var(--color-fg, #f4f4f6); font-weight: 700; font-size: 13.5px; line-height: 1; font-family: inherit; cursor: pointer; transition: background-color 150ms; } .ds-fswitch:hover { background: rgb(255 255 255 / 0.06); } .ds-fswitch > span { position: relative; width: 36px; height: 22px; border-radius: 9999px; background: rgb(255 255 255 / 0.16); transition: background-color 150ms; } .ds-fswitch > span > span { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 9999px; background: #fff; transition: transform 150ms; } .ds-fswitch[aria-checked=\"true\"] > span { background: var(--glow-1, #ff9d6b); } .ds-fswitch[aria-checked=\"true\"] > span > span { transform: translateX(14px); } .ds-fcol button:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Found Track Row",
+      "kind": "custom",
+      "refersTo": "track-row-found",
+      "description": "Search's 56px row: the whole row plays; the thumbnail shows a play glyph and a heart and «…» appear on hover; wide in the full list with genre, plays and date.",
+      "html": "<div class=\"ds-frow\"><span class=\"ds-frow-art\"><span><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M7 4.5v15l12-7.5z\"/></svg></span></span><span class=\"ds-frow-text\"><b>Легенда о богине гроз (slowed + reverb) [prod. by ...] — re-upload</b><span>pyrokinesis</span></span><span class=\"ds-frow-cell ds-frow-genre\">Russian rap</span><span class=\"ds-frow-cell ds-frow-num\">4 200 000</span><span class=\"ds-frow-cell ds-frow-num\">12 мар 2021</span><span class=\"ds-frow-acts\"><button type=\"button\" aria-label=\"В лайки\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"/></svg></button><button type=\"button\" aria-label=\"Ещё\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><circle cx=\"5\" cy=\"12\" r=\"1.6\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\"/><circle cx=\"19\" cy=\"12\" r=\"1.6\"/></svg></button></span><span class=\"ds-frow-cell ds-frow-time\">3:41</span></div>",
+      "css": ".ds-frow { display: flex; align-items: center; gap: 12px; width: 760px; height: 56px; padding: 0 10px; border-radius: 12px; color: var(--color-fg, #f4f4f6); font-family: \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: background-color 150ms; } .ds-frow:hover, .ds-frow:focus-within { background: rgb(255 255 255 / 0.05); } .ds-frow-art { position: relative; flex: none; width: 44px; height: 44px; border-radius: 9px; background: var(--color-panel-hover, #18181c); } .ds-frow-art > span { position: absolute; inset: 0; display: grid; place-content: center; border-radius: 9px; background: rgb(0 0 0 / 0.45); color: #fff; opacity: 0; transition: opacity 150ms; } .ds-frow:hover .ds-frow-art > span, .ds-frow:focus-within .ds-frow-art > span { opacity: 1; } .ds-frow-text { flex: 1; min-width: 0; } .ds-frow-text b { display: block; font-weight: 800; font-size: 14.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-frow-text span { display: block; margin-top: 2px; font-weight: 700; font-size: 13px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-frow-cell { flex: none; font-weight: 700; font-size: 12.5px; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-frow-genre { width: 150px; } .ds-frow-num { width: 98px; text-align: right; } .ds-frow-time { width: 44px; text-align: right; } .ds-frow-acts { display: flex; gap: 2px; opacity: 0; transition: opacity 150ms; } .ds-frow:hover .ds-frow-acts, .ds-frow:focus-within .ds-frow-acts { opacity: 1; } .ds-frow-acts button { display: grid; place-content: center; width: 32px; height: 32px; border: none; border-radius: 9999px; background: transparent; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-frow-acts button:hover { background: rgb(255 255 255 / 0.08); color: var(--color-fg, #f4f4f6); } .ds-frow-acts button:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Light From the Cover",
+    "overview": "Cloudify is a near-black room with one light source: the cover of whatever is playing. Three hues are read from that artwork, lifted so they glow on a dark ground, and drawn as a soft ribbon of light behind one very large word. Everything else in the window stays neutral, so the music is always the only colour on screen. When the track changes, the whole interface (the light, the progress fills, the mark, the focus ring, the text selection) cross-fades to the new cover over 1.6 seconds.\n\nThe window is built for hours of background listening. The light swells with the playing track's real loudness curve, slows to a drift when paused, and costs almost nothing when nobody is looking. Type is big and heavy where it names a place and calm everywhere else. Surfaces are soft, rounded, tonal steps of near-black; actions are white pills and smoky rounds. Real artwork appears wherever a track, playlist or person is shown, and a missing cover is a quiet tile, never a broken image.\n\nThe mood is close to a large streaming service's dark \"for you\" screen in polish and energy, but the layout, names, mark and colours are Cloudify's own. No fixed brand accent exists, and none of SoundCloud's or Yandex Music's brand marks or signature colours are used.",
+    "keyCharacteristics": [
+      "Near-black ground; all colour comes from the playing cover through three live `--glow-*` variables.",
+      "A blurred, grain-covered ribbon of light behind one huge Unbounded word.",
+      "White pill for the primary action; smoky round buttons with a 1 px inner rim for the rest.",
+      "Heavy Manrope (600 and up) for all running text; Unbounded only for names of places.",
+      "Rounded tonal panels instead of borders and shadows.",
+      "Big real covers as the way into music: a wall you point at, and the light takes the hues of what you point at.",
+      "Motion that is slow, soft, cheap at idle, and off under reduced motion."
+    ],
+    "rules": [
+      {
+        "name": "The Music Paints Rule",
+        "body": "No component gets a fixed accent colour. Anything that needs emphasis takes `glow-1`/`glow-2` (or white for actions); everything else stays on the neutral scale.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Yellow Turn Rule",
+        "body": "Moods may rotate the cover's hues (`hueShift`), but a rotated hue that lands between 44° and 68° is pushed out to orange or lime. A cover's own yellow is the music's and stays; a yellow the app produces itself is never allowed.",
+        "section": "colors"
+      },
+      {
+        "name": "The Cross-Fade Rule",
+        "body": "Glow colours never jump. They are registered with `@property` and transition over 1.6 s on `:root`; reduced motion switches them instantly.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pointed Light Rule",
+        "body": "A page's own light may borrow colours locally by setting `--glow-*` on its wrapper: first from the cover the pointer or focus rests on (a tile on a wall, or a found track's row), else from the opened playlist or person, else from the artist a search names, else it keeps the playing track's. Pointing answers the hand in 0.6 s after a 70 ms rest; everything else crosses over in 1.6 s; leaving the covers gives the light back. Only the light relights.",
+        "section": "colors"
+      },
+      {
+        "name": "The Smoke On Light Rule",
+        "body": "Anything placed on the light is smoke with a rim, never veil: a white wash vanishes into the light's brightest band. Veil is for wells on ground.",
+        "section": "colors"
+      },
+      {
+        "name": "The Place Name Rule",
+        "body": "Unbounded names places: the hero word, page titles, section titles and the wordmark. It never sets a track title, a button, a label or a sentence.",
+        "section": "typography"
+      },
+      {
+        "name": "The Heavy Body Rule",
+        "body": "Manrope never drops below 600. Hierarchy among small text comes from weight (600 / 700 / 800) and the three text tones, not from thin weights.",
+        "section": "typography"
+      },
+      {
+        "name": "The Windowed Wall Rule",
+        "body": "A wall that can hold thousands of covers keeps only the rows near the screen in the page (two rows of overscan), all rows one fixed height. Loading walls show quiet panel tiles in the wall's own rhythm.",
+        "section": "layout"
+      },
+      {
+        "name": "The One Row Shelf Rule",
+        "body": "A shelf shows one row that fits the window and nothing more; the rest is one click away through its title, never behind a sideways scroll.",
+        "section": "layout"
+      },
+      {
+        "name": "The Answer First Rule",
+        "body": "A search leads with what it most likely means. An artist becomes the page's hero (name, face, «Радио артиста») only when SoundCloud ranks a same-named account in its top three people and that account is verified or has 5 000+ followers; otherwise the query itself is the title and the tracks are the answer. While typing, a name that starts with what is typed (from three letters) will do. A namesake never takes the hero.",
+        "section": "layout"
+      },
+      {
+        "name": "The Every Name Opens Rule",
+        "body": "An artist's name or face, wherever it is shown (a tile, a row, the player, the home screen, a playlist's lead, the search hero), opens that artist's page: in place of the results while searching, else in the library. A name inside a row or card that plays sits above the row's own play target, so the rest of the row still plays.",
+        "section": "layout"
+      },
+      {
+        "name": "The Read First Rule",
+        "body": "Found tracks are rows, not covers: a found title is read before it is played, and re-uploads come with long, messy names that a caption under a cover cuts short. The wall of covers is for music you already know (the library).",
+        "section": "layout"
+      },
+      {
+        "name": "The Counted Choices Rule",
+        "body": "A filter offers what the results actually hold. The genre list is the search's own genres as SoundCloud counts them, each with its count, counted with the other filters but not the genre, so a choice never empties the list by surprise; a chosen genre stays listed even when the counts stop naming it. Totals on chips and titles are SoundCloud's estimates and are shown as such, never padded.",
+        "section": "layout"
+      },
+      {
+        "name": "The Tonal Step Rule",
+        "body": "Cards and tiles are flat panels; they never get a drop shadow. A shadow means the thing is floating over other content (a menu, a white play round over artwork) or is the hero cover and its twin, the opened face.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Grain Over Light Rule",
+        "body": "Any surface that shows the ribbon also carries the grain overlay.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Cheap Light Rule",
+        "body": "The ribbon redraws at about 30 fps while playing and 15 fps while paused, paints into a canvas a quarter of its drawn size, stops when it is off screen or the window is hidden, and does not animate at all under reduced motion. Mood changes ease in over roughly half a second.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** take every accent from `--glow-1`/`--glow-2`/`--glow-3`; let a cover change the whole window.",
+      "**Do** keep the ground near-black (`#08080a`) and separate surfaces by tonal steps (ground, dock, panel, panel-hover).",
+      "**Do** make the primary action a white pill with ink text, and give secondary actions on the light the smoky fill with a 1 px inner rim.",
+      "**Do** set the one big word in Unbounded 800 scaled to its container, and everything else in Manrope at 600 or heavier.",
+      "**Do** show real artwork wherever a track, playlist or person appears, with the quiet tile fallback.",
+      "**Do** put grain over any surface that shows the light, and fade the light's edges.",
+      "**Do** stop or slow every running animation when the window is hidden, off screen, paused or under reduced motion.",
+      "**Do** say in the interface why something does not work (region, Go+ preview, offline, expired sign-in), on the row or tile and before play: unplayable covers are dimmed and disabled with the reason as their second line; Go+ previews carry their chip.",
+      "**Do** let a page's own light take the colours of what is pointed at or opened, and give it back when the pointer leaves.",
+      "**Do** window any list that can run into thousands, and keep the actions row in reach while it scrolls.",
+      "**Do** lead a search with its answer: the artist it names, by the strict test of The Answer First Rule, else the query and its tracks; show found tracks as rows, so a long title can be read.",
+      "**Do** offer only filter choices the results hold, with their counts."
+    ],
+    "donts": [
+      "**Don't** add a fixed brand accent, SoundCloud's orange as a UI colour, or Yandex Music's signature yellow; a mood turn must never produce yellow.",
+      "**Don't** put borders around cards or tiles; `line` belongs only to the player bar's top edge, floating menus and the rule under a list's column heads.",
+      "**Don't** put veil wells on the light; there they are smoke with a rim.",
+      "**Don't** hide a track's name until hover; the caption under a cover is always there.",
+      "**Don't** give flat panels drop shadows.",
+      "**Don't** set track titles, buttons or sentences in Unbounded, or use Manrope below 600.",
+      "**Don't** use stroked outline-only or square-cornered buttons; actions are filled pills and circles, or bare muted icons and text.",
+      "**Don't** let colour transitions jump or the light run at full frame rate while idle.",
+      "**Don't** add eyebrow labels or kickers above titles; a section is named by its title alone."
+    ]
+  }
+}

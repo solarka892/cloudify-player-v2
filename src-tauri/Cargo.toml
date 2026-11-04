@@ -20,5 +20,10 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
+soundcloud.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+# The OS keychain: Keychain on macOS, Credential Manager on Windows, Secret Service on Linux.
+keyring = "4"

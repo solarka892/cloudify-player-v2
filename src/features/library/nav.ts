@@ -1,0 +1,90 @@
+import { createContext, useCallback, useContext, useMemo } from "react";
+import { create } from "zustand";
+import type { Playlist, User } from "@/api/types";
+import { useScrollRoot } from "@/app/scrollRoot";
+
+export type SectionId =
+  | "all"
+  | "likes"
+  | "playlists"
+  | "albums"
+  | "reposts"
+  | "followings"
+  | "stations"
+  | "history";
+
+export const SECTION_NAMES: Record<SectionId, string> = {
+  all: "Библиотека",
+  likes: "Лайки",
+  playlists: "Плейлисты",
+  albums: "Альбомы",
+  reposts: "Репосты",
+  followings: "Подписки",
+  stations: "Станции",
+  history: "История",
+};
+
+/**
+ * What the library shows: one of its sections, or one thing opened from it.
+ * An opened thing carries what is already known about it, so its name and
+ * cover are there before the rest arrives.
+ */
+export type LibraryView =
+  | { kind: "section"; section: SectionId }
+  | { kind: "playlist"; playlist: Playlist; from: SectionId }
+  | { kind: "artist"; user: User; from: SectionId };
+
+interface LibraryNav {
+  view: LibraryView;
+  open: (view: LibraryView) => void;
+}
+
+/** Kept outside the page, so the library is where you left it when you come back. */
+export const useLibraryNav = create<LibraryNav>()((set) => ({
+  view: { kind: "section", section: "all" },
+  open: (view) => set({ view }),
+}));
+
+/** Opens a view, from its top. */
+export function useOpenView(): (view: LibraryView) => void {
+  const scroller = useScrollRoot();
+  return useCallback(
+    (view: LibraryView) => {
+      useLibraryNav.getState().open(view);
+      scroller?.scrollTo({ top: 0 });
+    },
+    [scroller],
+  );
+}
+
+/** The section a view belongs to: its own, or the one it was opened from. */
+export function sectionOf(view: LibraryView): SectionId {
+  return view.kind === "section" ? view.section : view.from;
+}
+
+/** Where an artist or a playlist pressed on a tile or in a menu opens. */
+export interface Opener {
+  artist: (user: User) => void;
+  playlist: (playlist: Playlist) => void;
+}
+
+/**
+ * A page that opens things in place of its own (search) says so here; without
+ * one they open in the library, from the section that is open there.
+ */
+export const OpenerContext = createContext<Opener | null>(null);
+
+export function useOpener(): Opener {
+  const own = useContext(OpenerContext);
+  const open = useOpenView();
+  return useMemo(
+    () =>
+      own ?? {
+        artist: (user) =>
+          open({ kind: "artist", user, from: sectionOf(useLibraryNav.getState().view) }),
+        playlist: (playlist) =>
+          open({ kind: "playlist", playlist, from: sectionOf(useLibraryNav.getState().view) }),
+      },
+    [own, open],
+  );
+}
