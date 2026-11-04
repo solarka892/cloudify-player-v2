@@ -66,6 +66,7 @@ typography:
 rounded:
   hairline: "2px"
   sm: "4px"
+  key: "7px"
   thumb: "9px"
   md: "12px"
   art: "14px"
@@ -287,6 +288,96 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.pill}"
     size: "44px"
+  player-mode:
+    textColor: "{colors.fg-muted}"
+    rounded: "{rounded.pill}"
+    size: "32px"
+  player-mode-on:
+    textColor: "{colors.glow-1}"
+  player-round-open:
+    backgroundColor: "rgb(255 255 255 / 0.1)"
+    textColor: "{colors.fg}"
+  sheet-queue:
+    backgroundColor: "{colors.panel}"
+    rounded: "{rounded.card}"
+    width: "min(430px, calc(100vw - 32px))"
+    height: "min(660px, calc(100vh - 180px))"
+  queue-row:
+    textColor: "{colors.fg}"
+    typography: "{typography.title}"
+    rounded: "{rounded.md}"
+    height: "56px"
+  queue-row-hover:
+    backgroundColor: "rgb(255 255 255 / 0.05)"
+  sheet-keys:
+    backgroundColor: "{colors.panel}"
+    padding: "22px 32px"
+  keycap:
+    backgroundColor: "{colors.veil}"
+    textColor: "{colors.fg}"
+    rounded: "{rounded.key}"
+    height: "26px"
+    padding: "0 7px"
+  keycap-small:
+    height: "22px"
+    padding: "0 6px"
+  key-drawn:
+    backgroundColor: "rgb(255 255 255 / 0.1)"
+    textColor: "{colors.fg}"
+    rounded: "{rounded.key}"
+    size: "34px"
+  key-drawn-lit:
+    backgroundColor: "{colors.glow-1}"
+    textColor: "{colors.ink}"
+  status-button:
+    backgroundColor: "rgb(255 255 255 / 0.08)"
+    textColor: "{colors.fg}"
+    rounded: "{rounded.pill}"
+    height: "38px"
+    padding: "0 15px 0 12px"
+  status-button-hover:
+    backgroundColor: "rgb(255 255 255 / 0.13)"
+  status-button-open:
+    backgroundColor: "rgb(255 255 255 / 0.16)"
+  status-button-expired:
+    backgroundColor: "#ffffff"
+    textColor: "{colors.ink}"
+  panel-problems:
+    backgroundColor: "{colors.panel}"
+    rounded: "{rounded.card}"
+    width: "min(440px, calc(100vw - 44px))"
+    padding: "8px"
+  problem-card:
+    textColor: "{colors.fg}"
+    rounded: "{rounded.menu}"
+    padding: "14px 14px 14px 16px"
+  problem-card-focused:
+    backgroundColor: "rgb(255 255 255 / 0.04)"
+  problem-action:
+    backgroundColor: "rgb(255 255 255 / 0.1)"
+    textColor: "{colors.fg}"
+    rounded: "{rounded.pill}"
+    height: "32px"
+    padding: "0 13px"
+  problem-action-hover:
+    backgroundColor: "rgb(255 255 255 / 0.16)"
+  sheet-expired:
+    backgroundColor: "{colors.panel}"
+    rounded: "{rounded.card}"
+    width: "min(460px, calc(100vw - 44px))"
+    padding: "22px 22px 20px"
+  button-sign-in-again:
+    backgroundColor: "#ffffff"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
+    height: "46px"
+    padding: "0 22px 0 18px"
+  held-pill:
+    backgroundColor: "rgb(10 10 12 / 0.86)"
+    textColor: "{colors.fg}"
+    rounded: "{rounded.pill}"
+    height: "36px"
+    padding: "0 14px 0 12px"
 ---
 
 # Design System: Cloudify
@@ -326,13 +417,13 @@ The three hex values in the frontmatter are the registered initial values shown 
 - **Panel** (`panel`): every card, tile, popover and skeleton block.
 - **Panel Lift** (`panel-hover`): hover state of panels, and the fill behind artwork while it loads or when it is missing.
 - **Dock** (`dock`): the player bar, one step above ground so it reads as a separate floor.
-- **Line** (`line`): the hairline on top of the player bar and around floating menus (with the separators between groups inside the search suggestions), and the one rule under a wide list's column heads. Nowhere else.
+- **Line** (`line`): the hairline on top of the player bar, around floating menus and the sheets that rise over the player (the queue, and the key help on all but its bottom edge), the separators between groups inside the search suggestions, and the one rule under a wide list's column heads. Nowhere else.
 - **Paper White** (`fg`): primary text and icons on hover.
 - **Muted** (`fg-muted`): artist names, secondary lines, idle icons, nav tabs at rest.
 - **Faint** (`fg-faint`): counts, durations, timestamps, the disclaimer. It is the lowest text tone allowed and is used only for short labels.
 - **Ink** (`ink`): text and icons on white pills and the selected chip.
 - **Smoke** (`smoke`, `smoke-hover`) with **Rim** (`rim`): the translucent dark fill and 1 px inner rim of everything that sits on the light: secondary round buttons, mood and section chips, the library's filter well and its jump round. Over a cover (the heart and «…» rounds on a track tile) the smoke deepens to black at 72 %, 90 % on hover, so the rounds hold up on any artwork.
-- **Veil** (`veil`): white at 7 % for wells on ground: the top bar's search field, the token input, state badges, the keyboard hint.
+- **Veil** (`veil`): white at 7 % for wells on ground: the top bar's search field, the token input, state badges, the keyboard hint, keycaps.
 
 ### Named Rules
 **The Music Paints Rule.** No component gets a fixed accent colour. Anything that needs emphasis takes `glow-1`/`glow-2` (or white for actions); everything else stays on the neutral scale.
@@ -344,6 +435,8 @@ The three hex values in the frontmatter are the registered initial values shown 
 **The Pointed Light Rule.** A page's own light may borrow colours locally by setting `--glow-*` on its wrapper: first from the cover the pointer or focus rests on (a tile on a wall, or a found track's row), else from the opened playlist or person, else from the artist a search names, else it keeps the playing track's. Pointing answers the hand in 0.6 s after a 70 ms rest (so a sweep across covers does not flicker); everything else crosses over in 1.6 s; leaving the covers gives the light back. Only the light relights: progress fills, focus ring and selection keep the playing track's colours.
 
 **The Smoke On Light Rule.** Anything placed on the light is smoke with a rim, never veil: a white wash vanishes into the light's brightest band. Veil is for wells on ground.
+
+**The Grey Light Rule.** While there is no network or the sign-in has expired, the light from the cover goes grey (`grayscale(1) brightness(0.5)`) on the shell and on the sign-in and unreachable stages, and the colour comes back the same way when they return, both over 1.6 s (instantly under reduced motion). The ribbon keeps moving; only its colour is taken. Nothing else in the window changes colour for it.
 
 ## Typography
 
@@ -358,7 +451,7 @@ Both are self-hosted through fontsource, with Cyrillic, and ship inside the app.
 - **Display** (Unbounded 800, `min(132px, 15cqi)`, 0.92, −0.055em, single line): the one big word of a full screen: «Подборка», «Cloudify» on sign-in, the offline title. It scales with its container so it never wraps or clips in a 960 px window, and carries a soft dark text shadow to sit on the light. «Библиотека» is the same face one step smaller (`min(108px, 12.5cqi)`), because its actions and chips share the first screen.
 - **Fitted name** (Unbounded 800, 0.92, −0.055em, same text shadow): the name of an opened playlist or person, and the search page's title (the found artist's name, or the query itself), which can be anything. It is measured, not guessed: one line up to 112 px while that stays at 64 px or more; otherwise balanced over two lines up to 84 px (no smaller than 44 px); a very long name gets three lines at 34–60 px. Never clipped mid-letter, never shrunk to body size.
 - **Headline** (Unbounded 800, `clamp(64px, 8vw, 112px)`, 0.92, −0.055em): the title of a section page that is not built yet.
-- **Section** (Unbounded 700, 19px, 1, −0.02em): section titles («Продолжить», «Лайки», «Плейлисты») and the wordmark beside the mark.
+- **Section** (Unbounded 700, 19px, 1, −0.02em): section titles («Продолжить», «Лайки», «Плейлисты»), the key help's «Клавиши», and the wordmark beside the mark.
 - **Lead** (Manrope 600, 17px, 1.45, max 42–52ch): the one line under a display word, in white at 80 % with a soft shadow when it sits on the light.
 - **Title** (Manrope 800, 14–16.5px, about 1.25): track and playlist titles in rows, cards, tiles and the player (14.5px under a track tile and in a found track's row, 14px under playlist and person tiles and in the search suggestions); 19px bold under the hero cover.
 - **Body** (Manrope 600, 14px, 1.4): the default for everything; nav tabs and secondary buttons go to 700 at 15px.
@@ -366,7 +459,7 @@ Both are self-hosted through fontsource, with Cyrillic, and ship inside the app.
 - **Badge** (Manrope 800, 11px, 1): state badges on rows («Go+ · 30 с», «не в твоём регионе») and the keyboard hint; 10.5px on the Go+ chip that sits on a cover.
 
 ### Named Rules
-**The Place Name Rule.** Unbounded names places: the hero word, page titles, section titles and the wordmark. It never sets a track title, a button, a label or a sentence.
+**The Place Name Rule.** Unbounded names places: the hero word, page titles, section titles, the titles of panels and sheets («Клавиши», «Что не так», «Вход устарел») and the wordmark. It never sets a track title, a button, a label or a sentence.
 
 **The Heavy Body Rule.** Manrope never drops below 600. Hierarchy among small text comes from weight (600 / 700 / 800) and the three text tones, not from thin weights.
 
@@ -384,7 +477,8 @@ A full-height window: the page scrolls under a floating 68 px top bar, and an 84
 - **Walls (a section in full):** track covers in columns of at least 196 px (six across a 1440 px window), 24 px apart across and 28 px down, the caption included in each row. Playlist, person and station tiles use a 164 px minimum grid with 18 / 20 px gaps.
 - **Opened playlist or person:** a back link, the fitted name with its lead line, and the face at the right (`clamp(180px, 20cqi, 240px)`, 40 px from the text, bottoms aligned). The face hides when the content column is narrower than 768 px; the name then takes the full width.
 - **Sticky actions:** the actions row (the library's, or search's kinds) sticks 68 px from the top, under the top bar, and spans the full width; once the page has scrolled past it, it grows the top bar's backing (ground at 80 %, strong blur) over 200 ms.
-- **Player bar:** three columns: now playing at `clamp(180px, 24vw, 320px)`, the transport with the waveform taking all remaining width, then secondary controls and a 92 px volume slider; column gaps `clamp(16px, 2.2vw, 30px)`.
+- **Player bar:** three columns: now playing at `clamp(180px, 24vw, 320px)`, the transport with the waveform taking all remaining width, then secondary controls and a 92 px volume slider; column gaps `clamp(16px, 2.2vw, 30px)`. At 1100 px and narrower the now-playing column is a fixed 180 px and the volume slider 72 px, so the waveform keeps its room.
+- **Sheets over the player:** the queue floats 16 px from the right edge and 12 px above the bar (`bottom: 96px`), `min(430px, 100vw − 32px)` wide and `min(660px, 100vh − 180px)` tall, so it never reaches under the top bar. The key help spans the full width directly on top of the bar (from 84 px up), 32 px side padding, its keyboard at the left and its text 36 px to the right; its key map is one column, two from 1100 px. Only one shows at a time: while the key help is open the queue steps aside and comes back after.
 - **Full-screen states** (sign-in, unreachable): the same light centred vertically, content capped at 1100 px, scrolling instead of clipping in a small window, the disclaimer pinned at the bottom.
 
 ### Named Rules
@@ -405,16 +499,20 @@ A full-height window: the page scrolls under a floating 68 px top bar, and an 84
 Depth is tonal and luminous, not shadowed. Surfaces step up from ground (`ground` → `dock` → `panel` → `panel-hover`), and the only real "height" is the light: blurred ribbon bands blended with `screen`, covered by film grain at 45 % overlay so the gradients never band. The ribbon's box fades out at its top and bottom 16 %, and a 120 px gradient into ground closes the hero, so the light never shows an edge.
 
 ### Shadow Vocabulary
-- **Floating menu** (`box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.8)`): popovers that float over content (the account menu, the search suggestions), together with a `line` border.
+- **Floating menu** (`box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.8)`): popovers that float over content (the account menu, the search suggestions, «Что не так», the «Вход устарел» sheet), together with a `line` border.
 - **Hero cover** (`box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.8)`): the large cover in the hero, so it lifts off the light.
 - **Opened face**: the face beside an opened playlist or person, and a found artist's face on the search page, use the hero cover shadow; they are that cover's twins.
 - **Play round over a cover** (`box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.8)` on the 56 px round of a track tile, `0 10px 24px -10px rgb(0 0 0 / 0.8)` on the 44 px round of a playlist or station tile): the white round floats over artwork.
 - **Inner rim** (`box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16)`): the edge of smoky buttons, chips and the filter well on the light, and of the rounds on a cover. It is an edge, not a lift.
+- **Sheet over the player**: the queue uses the floating-menu shadow; the key help, which rises from the bar's full width, throws it upward (`box-shadow: 0 -24px 60px -20px rgb(0 0 0 / 0.8)`).
+- **Dragged row** (`box-shadow: 0 18px 40px -12px rgb(0 0 0 / 0.85)` with the inner rim): the ghost of a queue row held by its grip, on `panel-hover`, floating over the list.
+- **Key edges** (`inset 0 -1px 0 rgb(255 255 255 / 0.06)` on a keycap; `inset 0 -2px 0` in `glow-1` at 70 % on a drawn key that does something): a bottom edge, not a lift.
+- **Status ping** (`box-shadow: 0 0 0 6px` in `glow-1` at 35 %, widening to 14 px as it fades, with a 1.08 scale, over 900 ms): the status button when an action fails. A ring that fades, not a lift; none under reduced motion.
 - **Now playing ring** (`box-shadow: 0 0 0 3px var(--glow-1)`): the cover of the playing track on a wall or shelf. A ring in the music's colour, not a lift.
 - **Text on light** (`text-shadow: 0 10px 50px rgb(0 0 0 / 0.35)` on display, `0 2px 16px rgb(0 0 0 / 0.4)` on the lead): keeps type readable whatever colour the light takes.
 
 ### Named Rules
-**The Tonal Step Rule.** Cards and tiles are flat panels; they never get a drop shadow. A shadow means the thing is floating over other content (a menu, a white play round over artwork) or is the hero cover and its twin, the opened face.
+**The Tonal Step Rule.** Cards and tiles are flat panels; they never get a drop shadow. A shadow means the thing is floating over other content (a menu, a sheet over the player, a dragged row, a white play round over artwork) or is the hero cover and its twin, the opened face.
 
 **The Grain Over Light Rule.** Any surface that shows the ribbon also carries the grain overlay.
 
@@ -422,7 +520,7 @@ Depth is tonal and luminous, not shadowed. Surfaces step up from ground (`ground
 
 ## Shapes
 
-Everything is round. Interactive controls are full pills or circles; containers use large soft radii that shrink as they nest: hero cover and an opened playlist's face 26 px, cards 22 px, tiles and section notices 18 px, popovers 16 px, artwork inside a card 14 px, track covers on walls and shelves, inner controls, menu items, row highlights and mosaics 12 px, filter choices 10 px, list thumbnails 9 px, badges 8 px, the Go+ chip on a cover 6 px. People are always circles: a followed or found artist's tile, an opened or found artist's face, and an artist among the search suggestions. Progress tracks and waveform bars are 4 px and 2 px rounded strips. Mosaics clip four covers into one rounded square. The mark is a single rounded stroke: one swell of a sound wave.
+Everything is round. Interactive controls are full pills or circles; containers use large soft radii that shrink as they nest: hero cover and an opened playlist's face 26 px, cards, the sheets over the player and the panels under the status button 22 px (the key help only at its top corners), tiles and section notices 18 px, popovers and the cards inside «Что не так» 16 px, artwork inside a card 14 px, track covers on walls and shelves, inner controls, menu items, row highlights and mosaics 12 px, filter choices 10 px, list thumbnails 9 px, badges 8 px, keycaps and drawn keys 7 px, the Go+ chip on a cover 6 px. People are always circles: a followed or found artist's tile, an opened or found artist's face, and an artist among the search suggestions. Progress tracks and waveform bars are 4 px and 2 px rounded strips. Mosaics clip four covers into one rounded square. The mark is a single rounded stroke: one swell of a sound wave.
 
 ## Components
 
@@ -434,6 +532,7 @@ Confident and soft: big pills, quick spring on press.
 - **Round secondary:** 54 px circle (or a 54 px pill with a label), smoke fill with the 1 px inner rim, white icon; hover deepens the smoke. Used beside the primary pill on the light.
 - **Player play:** a 44 px white circle with ink icon; scales to 1.05 / 0.95.
 - **Icon button:** 32 px circle, no fill, `fg-muted` icon that goes to `fg` on hover. Controls that do not work yet are disabled at 40 % with a title saying "скоро", never hidden behind fake behaviour.
+- **Mode round:** an icon button that is a mode (shuffle, repeat). On, its icon is `glow-1` with a 4 px `glow-1` dot just under it; off, it is a plain icon button. A round that opens a panel (the queue) instead sits on a white-10 % circle with a white icon while the panel is open.
 - **Quiet text button:** «Все» and «Ещё раз»: muted bold text, or a 32 px white-10 % pill.
 - **Focus:** a 2 px `glow-1` outline at 3 px offset everywhere.
 
@@ -449,7 +548,7 @@ Confident and soft: big pills, quick spring on press.
 - **Shadow Strategy:** none (see The Tonal Step Rule).
 - **Border:** none.
 - **Internal Padding:** 16 px for cards, 10 px for playlist tiles.
-- **Empty and failed states** use the same panel with muted 13.5px text that says exactly why; a retry button appears only when retrying can help.
+- **Empty states** use the same panel with muted 13.5px text that says exactly why. **Failed** parts do not: they keep their own shape (see Held Part), and what to do about them lives in «Что не так».
 
 ### Inputs / Fields
 - **Style:** veil fill (white at 7 %), no border; the search field is a 340 px, 40 px pill-like well (20 px radius) with a search icon and, while empty, the keyboard hint; the token field is 44 px with 12 px corners.
@@ -512,10 +611,62 @@ From a tile's «…» round: a 240 px `panel` with a `line` border, 16 px corner
 Three stroked bands (130, 70 and 26 px wide in a 1440 × 440 drawing), blurred by 48 and 26 px, drawn in two gradients across `glow-2`, `glow-1` and `glow-3`, blended with `screen`, painted into a quarter-size canvas and stretched. Their swell follows the playing track's loudness curve; moods set energy (height), pace (speed) and a hue turn. It reads its colours from its own element, so a wrapper that sets `--glow-*` relights it without touching the rest of the window. It sits behind the hero (440 px tall, from 40 px below the top), behind the library (420 px, under a 480 px grain box) and behind the full-screen states, always with grain and faded edges.
 
 ### Player Notice
-Under the playing title the player names the artist, and the name opens their page. The line under the playing title in the player bar can carry a short notice («Дальше: …», «Ссылка на трек скопирована») in white instead of the artist, for 7 seconds. It may carry one action that takes back what it reports («Вернуть»), set in Manrope 800 `glow-1`, underlined on hover; pressing it clears the notice.
+Under the playing title the player names the artist, and the name opens their page. The line under the playing title in the player bar can carry a short notice («Дальше: …», «Ссылка на трек скопирована») in white instead of the artist, for 7 seconds. It may carry one action that takes back what it reports («Вернуть»), set in Manrope 800 `glow-1`, underlined on hover; pressing it clears the notice. Taking a track out of the queue («Убрал «…»») and clearing what is next both report here with «Вернуть»; nothing asks for confirmation first.
 
 ### Waveform Seek
 The player's progress bar is the playing track's real waveform: 4 px bars with 2 px gaps, 8–34 px tall, the played part filled with a `glow-1` → `glow-2` vertical gradient and the rest white at 18 %. It is a keyboard slider (arrows ±5 s, Page keys ±30 s). Without a waveform it draws a quiet even line.
+
+### Player Bar
+The 84 px `dock` floor. Now playing at the left: a 56 px cover (12 px corners), the title in Manrope 800 at 15px, and under it the artist (a link) then « · » and where the queue came from, both muted 13px; the artist keeps its room and the source label is the one that truncates. The transport: shuffle, back, the 44 px white play round, next, repeat, 6 px apart, with shuffle and repeat as mode rounds (repeat cycles off → queue → track; repeat-one shows the repeat icon with a 1). Shuffle is disabled for the endless selection, which is already mixed, and its title says so. Then times in faint tabular figures around the waveform. At the right: heart, lyrics, the queue round (lit while the queue is open), mute and volume, 10 px apart. Every control's title names its key («Перемешать (S)», «Очередь (Q)»).
+
+### Queue Sheet
+«Дальше»: the queue in the floating-menu material (`panel`, `line` border, the floating-menu shadow) with 22 px corners, rising out of the queue round over the page (200 ms, from 10 px lower at 97 % scale, anchored toward the round; no motion under reduced motion). It takes the focus when it opens and gives it back to the queue round; Esc, Q, its × or a press outside it (the player bar and menus over it do not count) close it.
+- **Header:** a 72 px cover (12 px corners) that plays or pauses, with a 26 px black-70 % badge in its corner showing a `glow-1` sound or pause icon; beside it the title in Manrope 800 at 15.5px in `glow-1`, the artist (a muted link) and a faint 12.5px source line: where the queue came from, how many tracks, «вперемешку» or «по порядку», and a `glow-1` 800 text link «перемешать» / «вернуть порядок». The endless selection says instead that it picks itself as you listen. A 32 px × round at the top right.
+- **Tabs:** two filter pills (30 px, white 6 % muted, the chosen one white with ink, the count after the name in 12px figures at 60 %): «Дальше N» and the played-before tab, shown only when something is above the playing track. See The Honest Queue Rule for its name.
+- **List:** windowed like every long list (fixed heights: 56 px rows, 34 px group names, eight rows of overscan), its top and bottom fading out over 8 and 24 px. «Дальше» is in groups named in faint 12.5px bold: «Ты добавил» (what was added with «Играть следующим»), then «Дальше из …» (the source's own name: «Дальше из лайков», «Дальше из «…»», «Дальше в подборке»). The played-before tab lists newest first, its art and text at 45 % until pointed at. A row added by hand that sits outside «Ты добавил» carries a «ты добавил» badge in `glow-1` text on `glow-1` at 15 %.
+- **Row:** a 16 px grip column, the 44 px thumbnail (9 px corners), title in 14.5px 800 with the state badge and the artist link under it, the duration in faint figures and a 32 px × round. The whole row plays it; hover or focus tints it white at 5 %, shows the grip, the play veil on the thumbnail and the ×. The keyboard: arrows move between rows, Enter plays, Delete or Backspace takes out, Alt+↑/↓ moves the row.
+- **Dragging:** the grip lifts a ghost of the row (`panel-hover`, 12 px corners, the dragged-row shadow) that follows the pointer while its place stays empty; the rows between slide over by one row in 160 ms on `cubic-bezier(0.2, 0.8, 0.2, 1)` to open the gap; near the list's edge (48 px) the list scrolls; Esc puts it back.
+- **End note:** after the last row, in faint 12.5px, how the queue really ends: it stops, it starts again from the first track, the one track repeats, or the selection adds more.
+- **Footer:** «Впереди N треков · время» in faint tabular figures, and at the right the quiet 32 px white-10 % pill «Очистить дальше» with its icon (white at 16 % on hover, 40 % when there is nothing ahead).
+- **Empty:** «Очередь пуста» in 15px 800 with one muted line saying what to put on.
+
+**The Honest Queue Rule.** The queue never claims more than happened. The played-before tab is «Уже играло» only when every track above the playing one really played; when some were only passed over (a jump forward, a list started from its middle) it is «Выше в списке». The end of the list says how the queue will really end, with the key that changes it.
+
+### Key Help
+A sheet that rises 24 px out of the player bar over 240 ms (no motion under reduced motion): full width, `panel` with a `line` border on all but its bottom edge, 22 px top corners and the upward sheet shadow, 22 px / 32 px padding. The player bar under it stays usable. It takes the focus itself, not its button, so space still plays, and gives it back on close (Esc, ?, its × or a press outside).
+- **Keyboard:** a drawn keyboard of 34 px keys 4 px apart (wide keys in whole key widths), the arrows as a 34 × 25 px upside-down T at the end of the bottom row, the Mac or PC bottom row by platform, labels in Manrope 700 at 11.5px. A key that does something is white at 10 % with a `glow-1` underline; a key that does nothing is dimmed almost away; the pointed key, or every key of a pointed line, fills `glow-1` with ink text; a pressed key dips 1 px and shrinks to 96 %. Pointing at or pressing a key says what it does, and a press really does it.
+- **Text column:** «Клавиши» in Section type with a 32 px × round; a white-5 % banner (14 px corners, at least 62 px tall, announced politely) with the keycaps and the action in 15.5px 800, or, at rest, an invitation to point or press; then every line of the map as a 30 px row, muted 13px with its keycaps at the right, white at 6 % with white text while it is the line spoken of; last a faint note that keys are quiet while typing and that the layout does not matter.
+
+**The Quiet Keys Rule.** The window's single keys (space, arrows, digits, letters) stay silent while typing in a field, leave a focused control the keys it handles itself (a slider's arrows, a keyboard-focused button's space, a queue row's arrows), and never take Cmd or Ctrl shortcuts; the only ones the app uses are ⌘K / Ctrl+K and ⌘F / Ctrl+F, handled by the search and the filter. Held down, only seek and volume repeat. Esc closes the key help first, then the queue, and leaves an open menu its own Escape.
+
+**The Physical Keys Rule.** Hotkeys are read by the key's place on the keyboard, not the letter it types, so Q, S, R and M work the same in the Russian layout; the help draws them in Latin.
+
+### Keycap
+A key name as a cap, used in the key help and in the account menu («Горячие клавиши ?»): veil, 7 px corners, a 1 px white-6 % bottom edge, Manrope 800 white, 26 px tall (12px text) or 22 px small (11px); arrows are drawn as icons, a range as «0 … 9», the modifier by platform (⌘ / ⌥ on a Mac, Ctrl / Alt elsewhere).
+
+### Status Button
+The one place for what went wrong: a 38 px pill in the top bar between the search field and the account, there only while something is wrong. White at 8 % (13 % on hover, 16 % while open), Manrope 800 at 13.5px, a 17 px icon or an 8 px dot before the words. It arrives over 250 ms from 92 % scale.
+- **One problem:** its few words («Лайки не загрузились») after a `TriangleAlert` in `glow-1`. **Several:** «N проблем».
+- **Offline:** «Нет сети» after a pulsing `fg-faint` dot. **Back:** «Сеть вернулась» after a `glow-1` dot, for 3.5 s, then the button goes.
+- **Expired sign-in:** the button turns white with ink text, «Войти снова» with its icon, and opens the «Вход устарел» sheet instead of the panel.
+- **Ping:** when an action fails the button plays the status ping (see Elevation & Depth).
+- **«Что не так»:** a floating panel fixed under the bar at the right (62 px from the top, 22 px from the edge), 440 px wide, `panel`, `line` border, 22 px corners, the floating-menu shadow, 8 px padding, dropping in from 8 px higher over 200 ms; it scrolls inside itself and closes on Esc or a press outside. Its title in Section type with a 32 px × round. Each active problem is a card (16 px corners, 14 px / 16 px padding): the title in 15px 800, the plain-words text in muted 13.5px, then a row of 32 px white-10 % action pills («Повторить», «Перезапустить», «Войти снова», «Понятно»), a white-6 % countdown pill «Повторю сам через N с», the «Подробнее» disclosure (muted 800, its chevron turning over) and the time in faint tabular figures at the right. A card a part of the page asked for is tinted white at 4 % and opened. Problems that read the same are one card, and its «Повторить» asks for all of them.
+- **Подробнее:** a white-4 % well (12 px corners) of name–value rows in 13px bold (faint names in a 124 px column): what SoundCloud answered, what was asked, when; the raw message in a mono well (white at 5 %, 10 px corners, 12px monospace, muted, at most 112 px tall); and «Скопировать для отчёта» (white-8 % pill, «Скопировано» with a check for 2 s).
+- **Уже прошло:** solved problems below, named in faint 12.5px bold; their cards are shorter, the title muted 14px, no text, and the time says when it passed.
+- **Nothing wrong:** opened from «Сеть вернулась», the panel says in muted text that everything works and where a problem would show.
+
+**The One Place Rule.** Whatever goes wrong is told in one place: the status button and its «Что не так». A part of the page never carries its own error panel, banner or retry button; it keeps its shape and points to the one place. Reasons, actions and SoundCloud's answer live there, one click away.
+
+**The Useful Retry Rule.** «Повторить» appears only when asking again can help: not while offline (the app asks by itself when the network returns), not while SoundCloud has said how long to wait (the countdown says when it will ask by itself), never for a part that broke (that is «Перезапустить»). The words agree with the part that failed («История не загрузилась», «Плейлисты не загрузились»).
+
+### «Вход устарел» Sheet
+An expired sign-in asks again from the same spot as «Что не так», in the same material (460 px, 22 px padding, 20 px at the bottom), as an alert dialog; the page stays visible behind it and nothing is cleared. The title in Unbounded 800 at 30px; the text in muted 14px; then a 46 px white pill «Войти снова» (scales 1.03 / 0.97; a spinner and «Жду вход в окне SoundCloud…» while it waits), and muted «Позже» and «Подробнее»; a short status line under them when the window closes early or fails. Last, a faint 13px «Вставить ключ вручную» with a key icon that opens the token field in a white-4 % well.
+
+### Held Part
+A part SoundCloud did not fill keeps its shape: its own skeleton at 45 % opacity, not interactive, with one smoke pill over its top-left corner (14 px in): 36 px, black at 86 % with the rim and a 12 px backdrop blur, bold 13.5px white, a 16 px `glow-1` icon. It reads «Не загрузилось · что случилось», «Догрузится, когда появится сеть», «Догрузится через N с», «Загрузится после входа · войти снова» or «Сломалось · что случилось»; the links are `glow-1` 800, underlined on hover, and open the problem's card in «Что не так» or the sign-in sheet. Under a list that loaded part way, the pill stands alone 12 px below the list («Загрузилось не всё», «Остальное догрузится…»).
+- **Crash boundaries:** each page, each library view, each shelf, each home section and the player bar is its own part; one that throws shows its held frames and «Что не так» offers «Перезапустить», which mounts it afresh. The queue and the key help simply close and offer the same. If the window's frame itself breaks, a full-window «Сломалось» on ground (display type, a 17px lead, a 54 px white «Перезапустить окно» and the error in a mono well) is the last resort.
+
+**The Kept Shape Rule.** A part that failed is never replaced by a message: it keeps its size and skeleton at 45 % so the page does not jump, and fills in where it stands when it comes back. One broken part never takes the page down.
 
 ## Do's and Don'ts
 
@@ -532,10 +683,14 @@ The player's progress bar is the playing track's real waveform: 4 px bars with 2
 - **Do** window any list that can run into thousands, and keep the actions row in reach while it scrolls.
 - **Do** lead a search with its answer: the artist it names, by the strict test of The Answer First Rule, else the query and its tracks; show found tracks as rows, so a long title can be read.
 - **Do** offer only filter choices the results hold, with their counts.
+- **Do** read hotkeys by physical key and keep them quiet while typing; name each control's key in its title.
+- **Do** say what really happened and what will happen: «Уже играло» only for what played, and how the queue ends where it ends.
+- **Do** gather everything that went wrong in the status button and «Что не так», and show the button only while something is wrong.
+- **Do** keep a failed or broken part's shape as its skeleton at 45 % with one smoke pill, and grey the light while there is no network or sign-in.
 
 ### Don't:
 - **Don't** add a fixed brand accent, SoundCloud's orange as a UI colour, or Yandex Music's signature yellow; a mood turn must never produce yellow.
-- **Don't** put borders around cards or tiles; `line` belongs only to the player bar's top edge, floating menus and the rule under a list's column heads.
+- **Don't** put borders around cards or tiles; `line` belongs only to the player bar's top edge, floating menus, the sheets over the player and the rule under a list's column heads.
 - **Don't** put veil wells on the light; there they are smoke with a rim.
 - **Don't** hide a track's name until hover; the caption under a cover is always there.
 - **Don't** give flat panels drop shadows.
@@ -543,3 +698,5 @@ The player's progress bar is the playing track's real waveform: 4 px bars with 2
 - **Don't** use stroked outline-only or square-cornered buttons; actions are filled pills and circles, or bare muted icons and text.
 - **Don't** let colour transitions jump or the light run at full frame rate while idle.
 - **Don't** add eyebrow labels or kickers above titles; a section is named by its title alone.
+- **Don't** take a Cmd or Ctrl shortcut for a hotkey, or let a single-key hotkey fire while someone types.
+- **Don't** put an error panel, banner or retry button in place of a part that failed, or offer «Повторить» where asking again cannot help.

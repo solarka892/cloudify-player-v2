@@ -1,12 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
-import { isRetryable } from "@/api/invoke";
 import { playlist as fetchPlaylist } from "@/api/library";
 import type { Playlist } from "@/api/types";
 import { SectionHeader, SectionProblem } from "@/features/home/SectionHeader";
 import { usePlaylists } from "@/features/library/queries";
 import { usePlayer } from "@/features/player/store";
+import { Held } from "@/features/problems/Held";
+import { actionFailed } from "@/features/problems/watch";
+import { actionWords } from "@/features/problems/words";
 import { canPlay } from "@/features/selection/buildQueue";
-import { describeError } from "@/ui/errors";
 import { formatCount, plural } from "@/ui/format";
 import { Mosaic } from "@/ui/Mosaic";
 
@@ -31,7 +32,12 @@ export function PlaylistsPreview({
       if (tracks.length === 0) say(`В «${full.title}» нет треков, которые здесь играют`);
       else usePlayer.getState().playQueue(tracks, 0, { kind: "playlist", title: full.title });
     },
-    onError: (error) => say(describeError(error)),
+    onError: (error, item) =>
+      actionFailed(
+        "play-playlist",
+        actionWords("Плейлист не включился", `«${item.title}» не загрузился.`, error),
+        error,
+      ),
   });
   const items = playlists.data?.items ?? [];
 
@@ -44,15 +50,9 @@ export function PlaylistsPreview({
         onAll={onAll}
       />
       {playlists.isError ? (
-        <SectionProblem
-          text={describeError(playlists.error)}
-          {...(isRetryable(playlists.error) ? { onRetry: () => void playlists.refetch() } : {})}
-        />
+        <Held error={playlists.error} frames={<PlaylistsSkeleton />} />
       ) : playlists.isPending ? (
-        <div aria-hidden="true" className="mt-[18px] grid grid-cols-2 gap-3.5">
-          <div className="aspect-[0.8] rounded-[18px] bg-panel" />
-          <div className="aspect-[0.8] rounded-[18px] bg-panel" />
-        </div>
+        <PlaylistsSkeleton />
       ) : items.length === 0 ? (
         <SectionProblem text="Своих плейлистов пока нет. Собери первый на SoundCloud — он появится здесь." />
       ) : (
@@ -78,5 +78,14 @@ export function PlaylistsPreview({
         </div>
       )}
     </section>
+  );
+}
+
+function PlaylistsSkeleton() {
+  return (
+    <div aria-hidden="true" className="mt-[18px] grid grid-cols-2 gap-3.5">
+      <div className="aspect-[0.8] rounded-[18px] bg-panel" />
+      <div className="aspect-[0.8] rounded-[18px] bg-panel" />
+    </div>
   );
 }

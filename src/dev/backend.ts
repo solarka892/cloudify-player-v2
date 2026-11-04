@@ -5,6 +5,7 @@
 // is generated silence of the right length, since the browser has no backend.
 //
 // `?signed-out` shows the sign-in screen, `?offline` the unreachable one.
+// `?fail=…` breaks commands on purpose, to see how the app tells it: see `planned`.
 
 import { ApiError } from "@/api/invoke";
 import type {
@@ -397,10 +398,99 @@ const searchPools: SearchPools = {
 
 const everything = [...allLikes.map((like) => like.track), played, ...station, ...searchTracks];
 
+// --- breaking on purpose ----------------------------------------------------------
+
+/** Commands a `*` leaves alone: without them the app could not sign in at all. */
+const NEVER_BROKEN = new Set(["sign_in_with_window", "sign_in_with_token", "sign_out"]);
+
+/**
+ * How a command should fail, if it should: `?fail=my_playlists:api,like_track:bot-filtered`
+ * in the address, or the same list in `localStorage["cloudify.dev.fail"]` (read on
+ * every call, so it can change while the app runs). `*` is every command; the kind
+ * is an `ErrorKind`, or `shape` for an answer the screen does not expect.
+ */
+function planned(command: string): string | null {
+  let rules = new URLSearchParams(location.search).get("fail") ?? "";
+  try {
+    rules = localStorage.getItem("cloudify.dev.fail") ?? rules;
+  } catch {
+    // Storage can be off; the address still works.
+  }
+  for (const rule of rules.split(",")) {
+    const [name, kind = "api"] = rule.trim().split(":");
+    if (name === command || (name === "*" && !NEVER_BROKEN.has(command))) return kind;
+  }
+  return null;
+}
+
+/** What SoundCloud (or its absence) would have said, as the Rust side reports it. */
+function failure(kind: string): ApiError {
+  switch (kind) {
+    case "network":
+      return new ApiError(
+        "network",
+        "network error: error sending request: client error (Connect): dns error: failed to lookup address information (dev)",
+      );
+    case "unauthorized":
+      return new ApiError(
+        "unauthorized",
+        "SoundCloud refused the session (expired or revoked)",
+        401,
+      );
+    case "bot-filtered":
+      return new ApiError(
+        "bot-filtered",
+        "SoundCloud's bot protection (DataDome) refused the request",
+        403,
+      );
+    case "rate-limited":
+      return new ApiError("rate-limited", "SoundCloud is rate limiting this client", 429, 20);
+    case "forbidden":
+      return new ApiError("forbidden", "SoundCloud refused access", 403);
+    case "not-found":
+      return new ApiError("not-found", "not found on SoundCloud", 404);
+    case "decode":
+      return new ApiError(
+        "decode",
+        "unexpected reply: /me/track_likes: missing field `collection`",
+      );
+    case "client-id":
+      return new ApiError("client-id", "no working client_id: none of the scripts carried one");
+    default:
+      return new ApiError(
+        "api",
+        "SoundCloud answered 502: <html> <head><title>502 Bad Gateway</title></head> <body> <center><h1>502 Bad Gateway</h1></center> </body> </html>",
+        502,
+      );
+  }
+}
+
+/** A page with a hole in it, the way a changed SoundCloud answer would trip a screen. */
+function broken(answer: unknown): unknown {
+  if (typeof answer !== "object" || answer === null || !("items" in answer)) return answer;
+  const page = answer as { items: unknown[] };
+  return { ...page, items: [null, ...page.items] };
+}
+
 export async function answer(
   command: string,
   args: Record<string, unknown> = {},
 ): Promise<unknown> {
+  const plan = planned(command);
+  if (plan === null || plan === "shape") {
+    const real = await standIn(command, args);
+    return plan === "shape" ? broken(real) : real;
+  }
+  await wait(250);
+  if (command === "session") {
+    // As the Rust side does: a refused token is a state, not an error.
+    if (plan === "unauthorized") return { state: "expired" } satisfies SessionState;
+    if (plan !== "network") return standIn(command, args);
+  }
+  throw failure(plan);
+}
+
+async function standIn(command: string, args: Record<string, unknown>): Promise<unknown> {
   await wait(250);
   const query = new URLSearchParams(location.search);
   switch (command) {

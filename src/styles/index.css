@@ -157,6 +157,85 @@
   .ribbon-fade {
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
     mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
+    transition: filter 1.6s ease;
+  }
+  /* No network, or a sign-in SoundCloud no longer takes: the light goes grey until it is back. */
+  [data-light="out"] .ribbon-fade {
+    filter: grayscale(1) brightness(0.5);
+  }
+
+  /* The status button arrives quietly; something that did not happen makes it catch the eye. */
+  .status-in {
+    animation: status-in 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .status-ping {
+    animation: status-ping 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes status-in {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+  }
+  @keyframes status-ping {
+    0% {
+      transform: scale(1);
+    }
+    30% {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 6px color-mix(in srgb, var(--glow-1) 35%, transparent);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 14px transparent;
+    }
+  }
+  /* «Что не так» and «Вход устарел» drop from the top bar. */
+  .drop-in {
+    animation: drop-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes drop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ribbon-fade {
+      transition: none;
+    }
+    .status-in,
+    .status-ping,
+    .drop-in {
+      animation: none;
+    }
+  }
+
+  /* The queue rises out of its button in the player; the key help rises from the bar. */
+  .sheet-rise {
+    transform-origin: calc(100% - 172px) calc(100% + 54px);
+    animation: sheet-rise 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .sheet-up {
+    animation: sheet-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @keyframes sheet-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.97);
+    }
+  }
+  @keyframes sheet-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sheet-rise,
+    .sheet-up {
+      animation: none;
+    }
   }
 
   /* Your music under the light: three columns, two rows in a narrow window. */

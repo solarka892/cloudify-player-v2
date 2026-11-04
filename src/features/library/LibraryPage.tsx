@@ -1,4 +1,5 @@
 import type { Me } from "@/api/types";
+import { WallSkeleton } from "@/features/library/CoverWall";
 import {
   type LibraryView,
   SECTION_NAMES,
@@ -12,12 +13,29 @@ import { OverviewView } from "@/features/library/views/OverviewView";
 import { ArtistView, FollowingsView, StationsView } from "@/features/library/views/PeopleViews";
 import { PlaylistView } from "@/features/library/views/PlaylistView";
 import { HistoryView, LikesWallView, RepostsView } from "@/features/library/views/WallViews";
+import { Part } from "@/features/problems/Part";
+import type { Part as Named } from "@/features/problems/words";
 
 /** The cover an opened playlist or person lends the light; sections keep the room's. */
 function openedCover(view: LibraryView): string | null {
   if (view.kind === "playlist") return view.playlist.artworkUrl ?? view.playlist.covers[0] ?? null;
   if (view.kind === "artist") return view.user.avatarUrl;
   return null;
+}
+
+const viewKey = (view: LibraryView) =>
+  view.kind === "section"
+    ? view.section
+    : `${view.kind}:${view.kind === "playlist" ? view.playlist.id : view.user.id}`;
+
+/** What a view is called when it breaks: «Лайки сломались», «Плейлист сломался». */
+function partName(view: LibraryView): Named {
+  if (view.kind === "playlist")
+    return { name: view.playlist.isAlbum ? "Альбом" : "Плейлист", form: "m" };
+  if (view.kind === "artist") return { name: "Страница артиста", form: "f" };
+  if (view.section === "all") return { name: "Библиотека", form: "f" };
+  if (view.section === "history") return { name: "История", form: "f" };
+  return { name: SECTION_NAMES[view.section], form: "pl" };
 }
 
 function View({ view, me }: { view: LibraryView; me: Me }) {
@@ -77,7 +95,9 @@ export function LibraryPage({ me }: { me: Me }) {
             Библиотека
           </h1>
         )}
-        <View view={view} me={me} />
+        <Part key={viewKey(view)} name={partName(view)} frames={<WallSkeleton />}>
+          <View view={view} me={me} />
+        </Part>
       </div>
     </div>
   );

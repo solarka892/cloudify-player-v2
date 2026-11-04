@@ -20,9 +20,10 @@ import {
 import { PersonTile, StationTile, TileGrid, TileSkeleton } from "@/features/library/Tiles";
 import { useListFilter } from "@/features/library/useListFilter";
 import { SectionTitle, SectionTop, useShuffleAllLikes } from "@/features/library/views/actions";
-import { usePlayer } from "@/features/player/store";
+import { Held } from "@/features/problems/Held";
+import { actionFailed } from "@/features/problems/watch";
+import { actionWords } from "@/features/problems/words";
 import { Artwork } from "@/ui/Artwork";
-import { describeError } from "@/ui/errors";
 import { formatCount, plural } from "@/ui/format";
 
 const FOLLOWERS = ["подписчик", "подписчика", "подписчиков"] as const;
@@ -40,7 +41,12 @@ export function useArtistRadio() {
   const radio = useMutation({
     mutationFn: (user: User) => artistStation(user.id),
     onSuccess: (tracks, user) => playInOrder(tracks, { kind: "station", title: user.username }),
-    onError: (error) => usePlayer.getState().say(describeError(error)),
+    onError: (error, user) =>
+      actionFailed(
+        "artist-radio",
+        actionWords("Радио артиста не включилось", `Радио ${user.username} не загрузилось.`, error),
+        error,
+      ),
   });
   return {
     play: (user: User) => radio.mutate(user),
@@ -69,7 +75,7 @@ export function FollowingsView({ me }: { me: Me }) {
       />
       <div ref={start} />
       {followings.error && total === 0 ? (
-        <StageNote error={followings.error} onRetry={followings.retry} />
+        <Held error={followings.error} frames={<TileSkeleton round />} />
       ) : followings.pending ? (
         <TileSkeleton round />
       ) : total === 0 ? (
@@ -142,7 +148,7 @@ export function StationsView({ me }: { me: Me }) {
         title={likes.complete ? "Радио твоих артистов" : "Собираю станции из лайков…"}
       />
       {likes.error && likes.items.length === 0 ? (
-        <StageNote error={likes.error} onRetry={likes.retry} />
+        <Held error={likes.error} frames={<TileSkeleton />} />
       ) : likes.pending ? (
         <TileSkeleton />
       ) : artists.length === 0 ? (
@@ -235,7 +241,7 @@ export function ArtistView({
       <div ref={start} className="mt-5" />
       <SectionTitle id="artist-top" title="Популярное" />
       {top.isError ? (
-        <StageNote error={top.error} onRetry={() => void top.refetch()} />
+        <Held error={top.error} frames={<WallSkeleton count={12} />} />
       ) : top.isPending ? (
         <WallSkeleton count={12} />
       ) : tracks.length === 0 ? (

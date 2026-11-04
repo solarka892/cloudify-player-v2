@@ -6,7 +6,8 @@ import type { Track } from "@/api/types";
 import { useOpener } from "@/features/library/nav";
 import { playInOrder } from "@/features/library/play";
 import { type QueueSource, usePlayer } from "@/features/player/store";
-import { describeError } from "@/ui/errors";
+import { actionFailed, requestFailed, requestSucceeded } from "@/features/problems/watch";
+import { actionWords } from "@/features/problems/words";
 
 const WIDTH = 240;
 /** The menu's height with its four items, to decide whether it opens up or down. */
@@ -41,12 +42,22 @@ function Item({
 async function playRadio(track: Track) {
   try {
     const tracks = await trackStation(track.id);
+    requestSucceeded();
     playInOrder([track, ...tracks.filter((t) => t.id !== track.id)], {
       kind: "station",
       title: track.title,
     });
   } catch (error) {
-    usePlayer.getState().say(describeError(error));
+    requestFailed(error);
+    actionFailed(
+      "track-radio",
+      actionWords(
+        "Радио по треку не включилось",
+        `Радио по «${track.title}» не загрузилось.`,
+        error,
+      ),
+      error,
+    );
   }
 }
 

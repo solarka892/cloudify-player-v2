@@ -20,7 +20,9 @@ import { SectionTitle } from "@/features/library/views/actions";
 import { tileLine, usePlayPlaylist } from "@/features/library/views/CollectionViews";
 import { ArtistView, useArtistRadio } from "@/features/library/views/PeopleViews";
 import { PlaylistView } from "@/features/library/views/PlaylistView";
-import { usePlayer } from "@/features/player/store";
+import { Held } from "@/features/problems/Held";
+import { actionFailed } from "@/features/problems/watch";
+import { actionWords } from "@/features/problems/words";
 import { bestArtist } from "@/features/search/best";
 import { FilterColumn } from "@/features/search/FilterColumn";
 import { hasFilters } from "@/features/search/filters";
@@ -40,7 +42,6 @@ import {
 } from "@/features/search/TrackRows";
 import { useLoadMore } from "@/features/search/useLoadMore";
 import { Artwork } from "@/ui/Artwork";
-import { describeError } from "@/ui/errors";
 import { formatCount, plural } from "@/ui/format";
 
 const TRACKS = ["трек", "трека", "треков"] as const;
@@ -78,7 +79,16 @@ function usePlayTop() {
         queryFn: () => artistTopTracks(user.id, { limit: 50 }),
       }),
     onSuccess: (page, user) => playInOrder(page.items, { kind: "artist", title: user.username }),
-    onError: (error) => usePlayer.getState().say(describeError(error)),
+    onError: (error, user) =>
+      actionFailed(
+        "artist-top",
+        actionWords(
+          "Популярное не включилось",
+          `Популярное ${user.username} не загрузилось.`,
+          error,
+        ),
+        error,
+      ),
   });
   return {
     play: (user: User) => play.mutate(user),
@@ -401,13 +411,7 @@ function Everything({
   if (lists.every((list) => !list.pending && list.items.length === 0)) {
     const failed = lists.find((list) => list.error)?.error;
     return failed ? (
-      <StageNote
-        text="Поиск не получился."
-        error={failed}
-        onRetry={() => {
-          for (const list of lists) list.retry();
-        }}
-      />
+      <Held error={failed} frames={<RowsSkeleton count={BEST_TRACKS} columns={2} />} />
     ) : (
       <StageNote
         text={`По «${query}» на SoundCloud ничего нет. Проверь, как написано, или попробуй короче.`}
@@ -438,7 +442,7 @@ function Everything({
           {tracks.pending ? (
             <RowsSkeleton count={BEST_TRACKS} columns={2} />
           ) : shown.length === 0 ? (
-            <StageNote error={tracks.error} onRetry={tracks.retry} />
+            <Held error={tracks.error} frames={<RowsSkeleton count={BEST_TRACKS} columns={2} />} />
           ) : (
             <TrackRowColumns
               tracks={shown}
@@ -514,7 +518,7 @@ function ShelfOf<T>({
       {list.pending ? (
         <TileSkeleton count={6} round={min !== undefined} />
       ) : items.length === 0 ? (
-        <StageNote error={list.error} onRetry={list.retry} />
+        <Held error={list.error} frames={<TileSkeleton count={6} round={min !== undefined} />} />
       ) : (
         <TileRow
           items={items}
@@ -534,9 +538,7 @@ function ListEnd({ list, skeleton }: { list: SearchList<unknown>; skeleton: Reac
   return (
     <>
       {list.loadingMore && <div className="mt-5">{skeleton}</div>}
-      {list.error && list.items.length > 0 && (
-        <StageNote text="Дальше не загрузилось." error={list.error} onRetry={list.retry} />
-      )}
+      {list.error && list.items.length > 0 && <Held error={list.error} rest />}
       <div ref={end} aria-hidden="true" />
     </>
   );
@@ -573,7 +575,7 @@ function AllTracks({ query }: { query: string }) {
           <RowsSkeleton count={10} />
         ) : tracks.items.length === 0 ? (
           tracks.error ? (
-            <StageNote error={tracks.error} onRetry={tracks.retry} />
+            <Held error={tracks.error} frames={<RowsSkeleton count={10} />} />
           ) : (
             <StageNote
               text={
@@ -606,7 +608,7 @@ function AllPeople({ users }: { users: SearchList<User> }) {
   if (users.pending) return <TileSkeleton round />;
   if (users.items.length === 0) {
     return users.error ? (
-      <StageNote error={users.error} onRetry={users.retry} />
+      <Held error={users.error} frames={<TileSkeleton round />} />
     ) : (
       <StageNote text="Людей с таким именем нет." />
     );
@@ -643,7 +645,7 @@ function AllCollections({
   if (list.pending) return <TileSkeleton />;
   if (list.items.length === 0) {
     return list.error ? (
-      <StageNote error={list.error} onRetry={list.retry} />
+      <Held error={list.error} frames={<TileSkeleton />} />
     ) : (
       <StageNote text={albums ? "Альбомов не нашлось." : "Плейлистов не нашлось."} />
     );

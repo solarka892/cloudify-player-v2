@@ -1,4 +1,5 @@
 import { Pause, Play, SkipForward, ThumbsDown } from "lucide-react";
+import { ApiError } from "@/api/invoke";
 import type { Me } from "@/api/types";
 import { useOpener } from "@/features/library/nav";
 import { currentTrack, usePlayer } from "@/features/player/store";
@@ -6,12 +7,19 @@ import { useLoudness } from "@/features/player/useLoudness";
 import { MOODS, moodById } from "@/features/selection/moods";
 import { useSelection } from "@/features/selection/useSelection";
 import { Artwork } from "@/ui/Artwork";
-import { describeError } from "@/ui/errors";
 import { formatCount } from "@/ui/format";
 import { Ribbon } from "@/ui/Ribbon";
 
 const roundButton =
   "grid size-[54px] shrink-0 place-content-center rounded-full bg-[rgb(10_10_12/0.62)] shadow-[inset_0_0_0_1px_rgb(255_255_255/0.16)] transition-colors duration-150 hover:bg-[rgb(40_40_46/0.72)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[rgb(10_10_12/0.62)]";
+
+/** Why there is nothing to play yet; what exactly broke is in «Что не так». */
+function selectionProblem(error: unknown): string {
+  const { kind } = ApiError.from(error);
+  if (kind === "network") return "Подборка соберётся, как только появится сеть.";
+  if (kind === "unauthorized") return "Подборка соберётся, когда ты снова войдёшь.";
+  return "Подборка не собралась: лайки не загрузились.";
+}
 
 /** «Подборка»: the endless selection, its light, its moods, and the cover that plays. */
 export function Hero({ me }: { me: Me }) {
@@ -26,7 +34,7 @@ export function Hero({ me }: { me: Me }) {
   const likes = me.user.likesCount;
 
   let line = mood.line(likes ? formatCount(likes) : null);
-  if (selection.status === "error") line = describeError(selection.error);
+  if (selection.status === "error") line = selectionProblem(selection.error);
   else if (selection.status === "empty") {
     line =
       selection.mood === "usual" || selection.mood === "fav"

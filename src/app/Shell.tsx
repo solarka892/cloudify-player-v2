@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Me } from "@/api/types";
+import { queryClient } from "@/app/queryClient";
 import { ScrollRoot } from "@/app/scrollRoot";
 import { type Tab, TopBar } from "@/app/TopBar";
 import { HomePage } from "@/features/home/HomePage";
+import { WallSkeleton } from "@/features/library/CoverWall";
 import { LibraryPage } from "@/features/library/LibraryPage";
 import {
   type Opener,
@@ -15,28 +17,32 @@ import { useLikesInBackground } from "@/features/library/play";
 import { ComingSoon } from "@/features/placeholder/ComingSoon";
 import { useCoverGlow } from "@/features/player/coverGlow";
 import { startAudioEngine } from "@/features/player/engine";
+import { useHotkeys } from "@/features/player/hotkeys";
+import { KeysHelp } from "@/features/player/KeysHelp";
 import { PlayerBar } from "@/features/player/PlayerBar";
+import { QueueSheet } from "@/features/player/QueueSheet";
 import { currentTrack, usePlayer } from "@/features/player/store";
+import { Part } from "@/features/problems/Part";
+import { useLightsOut } from "@/features/problems/store";
+import { watchConnection } from "@/features/problems/watch";
+import type { Part as Named } from "@/features/problems/words";
 import { SearchPage } from "@/features/search/SearchPage";
 import { type Opened, useSearch } from "@/features/search/store";
 import { moodById } from "@/features/selection/moods";
 import { useSelection } from "@/features/selection/useSelection";
-import { useSessionExpired } from "@/features/session/useSession";
 
-/** Space plays and pauses, unless it is typing or pressing a button. */
-function useSpaceToPlay() {
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.code !== "Space" || event.repeat || event.metaKey || event.ctrlKey) return;
-      const target = event.target as HTMLElement | null;
-      if (target?.closest("input, textarea, button, [role='slider'], [contenteditable='true']"))
-        return;
-      event.preventDefault();
-      usePlayer.getState().toggle();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+const PAGE: Named = { name: "Страница", form: "f" };
+const PLAYER: Named = { name: "Плеер", form: "m" };
+const QUEUE: Named = { name: "Очередь", form: "f" };
+const KEYS: Named = { name: "Справка по клавишам", form: "f" };
+
+/** A page's shape while it cannot show itself: where the light and the covers would be. */
+function PageFrames() {
+  return (
+    <div className="px-14 pt-[164px] pb-14">
+      <WallSkeleton count={12} />
+    </div>
+  );
 }
 
 /** The signed-in window: the page under the floating top bar, the player at the bottom. */
@@ -45,16 +51,16 @@ export function Shell({ me }: { me: Me }) {
   const [scrolled, setScrolled] = useState(false);
   const page = useRef<HTMLElement>(null);
   const [scroller, setScroller] = useState<HTMLElement | null>(null);
-  const sessionExpired = useSessionExpired();
   const searching = useSearch((s) => s.query !== null);
+  const lightsOut = useLightsOut();
 
   useEffect(() => setScroller(page.current), []);
 
-  useEffect(
-    () => startAudioEngine({ onSessionExpired: () => void sessionExpired() }),
-    [sessionExpired],
-  );
-  useSpaceToPlay();
+  useEffect(() => startAudioEngine(), []);
+  // A lost network is watched for its return; what could not load then loads by itself.
+  useEffect(() => watchConnection(queryClient), []);
+  // Space, the arrows, M, S, R, Q and ? — the same everywhere in the window.
+  useHotkeys();
   // Every like, loading from the start: the library and its shuffle need all of them.
   useLikesInBackground();
 
@@ -110,7 +116,7 @@ export function Shell({ me }: { me: Me }) {
 
   return (
     <OpenerContext value={opener}>
-      <div className="flex h-full flex-col">
+      <div data-light={lightsOut ? "out" : undefined} className="flex h-full flex-col">
         <div className="relative min-h-0 flex-1">
           <TopBar me={me} tab={searching ? null : tab} onTab={open} scrolled={scrolled} />
           <main
@@ -119,19 +125,33 @@ export function Shell({ me }: { me: Me }) {
             className="h-full overflow-y-auto overscroll-contain"
           >
             <ScrollRoot value={scroller}>
-              {searching ? (
-                <SearchPage me={me} />
-              ) : tab === "home" ? (
-                <HomePage me={me} onOpenLibrary={openLibrary} />
-              ) : tab === "library" ? (
-                <LibraryPage me={me} />
-              ) : (
-                <ComingSoon page={tab} />
-              )}
+              {/* A page that breaks is only that page: another tab opens it afresh. */}
+              <Part key={searching ? "search" : tab} name={PAGE} frames={<PageFrames />}>
+                {searching ? (
+                  <SearchPage me={me} />
+                ) : tab === "home" ? (
+                  <HomePage me={me} onOpenLibrary={openLibrary} />
+                ) : tab === "library" ? (
+                  <LibraryPage me={me} />
+                ) : (
+                  <ComingSoon page={tab} />
+                )}
+              </Part>
             </ScrollRoot>
           </main>
         </div>
-        <PlayerBar />
+        <Part
+          name={PLAYER}
+          frames={<div className="h-[84px] shrink-0 border-line border-t bg-dock" />}
+        >
+          <PlayerBar />
+        </Part>
+        <Part name={QUEUE} frames={null}>
+          <QueueSheet />
+        </Part>
+        <Part name={KEYS} frames={null}>
+          <KeysHelp />
+        </Part>
       </div>
     </OpenerContext>
   );

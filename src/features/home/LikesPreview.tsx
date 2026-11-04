@@ -1,12 +1,11 @@
-import { isRetryable } from "@/api/invoke";
 import type { Track } from "@/api/types";
 import { SectionHeader, SectionProblem } from "@/features/home/SectionHeader";
 import { useOpener } from "@/features/library/nav";
 import { useLikes } from "@/features/library/queries";
 import { currentTrack, usePlayer } from "@/features/player/store";
+import { Held } from "@/features/problems/Held";
 import { canPlay } from "@/features/selection/buildQueue";
 import { Artwork } from "@/ui/Artwork";
-import { describeError } from "@/ui/errors";
 import { formatCount, formatDuration } from "@/ui/format";
 import { stateBadge } from "@/ui/trackState";
 
@@ -43,19 +42,9 @@ export function LikesPreview({
         onAll={onAll}
       />
       {likes.isError ? (
-        <SectionProblem
-          text={describeError(likes.error)}
-          {...(isRetryable(likes.error) ? { onRetry: () => void likes.refetch() } : {})}
-        />
+        <Held error={likes.error} frames={<LikesSkeleton />} />
       ) : likes.isPending ? (
-        <ul aria-hidden="true" className="mt-3">
-          {SKELETON.map((key) => (
-            <li key={key} className="flex h-[50px] items-center gap-3.5">
-              <span className="size-11 rounded-[9px] bg-panel" />
-              <span className="h-3 w-1/2 rounded bg-panel" />
-            </li>
-          ))}
-        </ul>
+        <LikesSkeleton />
       ) : tracks.length === 0 ? (
         <SectionProblem text="Пока нет лайков. Поставь сердечко треку на SoundCloud — он появится здесь." />
       ) : (
@@ -115,5 +104,18 @@ export function LikesPreview({
         </ul>
       )}
     </section>
+  );
+}
+
+function LikesSkeleton() {
+  return (
+    <ul aria-hidden="true" className="mt-3">
+      {SKELETON.map((key) => (
+        <li key={key} className="flex h-[50px] items-center gap-3.5">
+          <span className="size-11 rounded-[9px] bg-panel" />
+          <span className="h-3 w-1/2 rounded bg-panel" />
+        </li>
+      ))}
+    </ul>
   );
 }

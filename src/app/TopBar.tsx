@@ -1,7 +1,10 @@
-import { LogOut } from "lucide-react";
+import { Keyboard, LogOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Me, Plan } from "@/api/types";
 import { roomForTrafficLights } from "@/app/chrome";
+import { Keys } from "@/features/player/KeysHelp";
+import { usePanels } from "@/features/player/panels";
+import { StatusButton } from "@/features/problems/StatusButton";
 import { SearchField } from "@/features/search/SearchField";
 import { useSignOut } from "@/features/session/useSession";
 import { Artwork } from "@/ui/Artwork";
@@ -74,6 +77,19 @@ function AccountMenu({ me }: { me: Me }) {
           <button
             type="button"
             role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              usePanels.getState().showKeys(true);
+            }}
+            className="flex h-10 w-full items-center gap-2.5 rounded-xl px-3 font-bold text-fg-muted transition-colors hover:bg-white/[0.06] hover:text-fg"
+          >
+            <Keyboard className="size-[18px]" aria-hidden="true" />
+            <span className="flex-1 text-left">Горячие клавиши</span>
+            <Keys caps={["?"]} small />
+          </button>
+          <button
+            type="button"
+            role="menuitem"
             onClick={() => signOut.mutate()}
             disabled={signOut.isPending}
             className="flex h-10 w-full items-center gap-2.5 rounded-xl px-3 font-bold text-fg-muted transition-colors hover:bg-white/[0.06] hover:text-fg"
@@ -122,6 +138,7 @@ export function TopBar({
         ))}
       </nav>
       <SearchField />
+      <StatusButton />
       <AccountMenu me={me} />
     </header>
   );
