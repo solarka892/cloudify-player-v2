@@ -381,15 +381,15 @@ export function DiaryPage() {
     <div className="relative isolate min-h-full bg-ground">
       <PageLight cover={null} />
       <div className="@container relative z-10 px-14 pb-16">
-        {/* On a short window the word gives way by height too, and the lead steps aside, so plays show in the first view. */}
+        {/* On a short window the word gives way by height too and the header tightens, so plays show in the first view. */}
         <h1 className="whitespace-nowrap pt-[clamp(80px,13vh,104px)] font-display font-extrabold text-[length:min(108px,12.5cqi,15vh)] leading-[0.92] tracking-[-0.055em] [text-shadow:0_10px_50px_rgb(0_0_0/0.35)]">
           Дневник
         </h1>
-        <p className="mt-[18px] max-w-[60ch] text-pretty [@media(max-height:700px)]:hidden text-[17px] text-white/80 leading-[1.45] [text-shadow:0_2px_16px_rgb(0_0_0/0.4)]">
+        <p className="mt-[18px] max-w-[60ch] text-pretty text-[17px] text-white/80 leading-[1.45] [text-shadow:0_2px_16px_rgb(0_0_0/0.4)] [@media(max-height:700px)]:mt-2.5 [@media(max-height:700px)]:text-[15px] [@media(max-height:700px)]:leading-[1.4]">
           Что играло в Cloudify — по дням и частям суток, и чем закончился каждый трек. Нажми на
           строчку — заиграет оттуда.
         </p>
-        <div className="mt-[22px] flex flex-wrap items-center gap-2">
+        <div className="mt-[22px] flex flex-wrap items-center gap-2 [@media(max-height:700px)]:mt-3.5">
           <span className="inline-flex h-9 items-center gap-2 pr-1 font-bold text-white/80 [text-shadow:0_2px_16px_rgb(0_0_0/0.4)]">
             <Laptop className="size-[17px]" aria-hidden="true" />
             Только на этом компьютере
@@ -414,7 +414,7 @@ export function DiaryPage() {
             {guessed && <span className="font-bold opacity-60">· по часовому поясу</span>}
           </SettingChip>
         </div>
-        <div className="h-3.5" />
+        <div className="h-3.5 [@media(max-height:700px)]:h-1.5" />
         <StageActions jump={false}>
           <FilterField value={query} onChange={setQuery} placeholder="Найти в дневнике" />
           <DayStrip days={days.data ?? []} today={today} current={current} onPick={setTarget} />

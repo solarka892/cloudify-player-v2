@@ -84,7 +84,7 @@ export function DayStrip({
               aria-current={lit ? "date" : undefined}
               title={said}
               style={{ width: fit.column - GAP }}
-              className={`group/day grid h-[52px] shrink-0 grid-rows-[1fr_auto] justify-items-center gap-1 rounded-lg pt-0.5 pb-1 font-bold text-[10.5px] tabular-nums leading-none transition-colors disabled:cursor-default ${lit ? "bg-white/[0.08] text-glow-1" : isWeekend(key) ? "text-fg-muted" : "text-fg-faint"} enabled:hover:text-fg`}
+              className={`group/day grid h-[52px] shrink-0 grid-rows-[1fr_auto] justify-items-center gap-1 rounded-lg pt-0.5 pb-1 font-bold text-[10.5px] tabular-nums leading-none transition-colors disabled:cursor-default ${lit ? "bg-[rgb(10_10_12/0.66)] text-fg shadow-[inset_0_0_0_1px_rgb(255_255_255/0.16)]" : isWeekend(key) ? "text-fg-muted" : "text-fg-faint"} enabled:hover:text-fg`}
             >
               <i
                 aria-hidden="true"
