@@ -430,6 +430,66 @@ components:
   panel-option-checked:
     backgroundColor: "rgb(255 255 255 / 0.1)"
     textColor: "{colors.fg}"
+  sheet-desk:
+    backgroundColor: "{colors.panel}"
+    padding: "22px 32px 26px"
+  desk-strip-cover:
+    rounded: "{rounded.md}"
+  mix-slider-rail:
+    backgroundColor: "rgb(255 255 255 / 0.16)"
+    rounded: "{rounded.pill}"
+    height: "6px"
+  mix-slider-knob:
+    backgroundColor: "#ffffff"
+    rounded: "{rounded.pill}"
+    size: "24px"
+  source-row:
+    textColor: "{colors.fg}"
+    rounded: "{rounded.md}"
+    padding: "8px 10px"
+  source-row-hover:
+    backgroundColor: "rgb(255 255 255 / 0.04)"
+  source-well:
+    backgroundColor: "{colors.veil}"
+    textColor: "{colors.fg-muted}"
+    rounded: "10px"
+    size: "34px"
+  source-well-on:
+    textColor: "{colors.glow-1}"
+  weight-group:
+    backgroundColor: "rgb(255 255 255 / 0.06)"
+    rounded: "{rounded.pill}"
+    height: "28px"
+    padding: "2px"
+  weight-option:
+    textColor: "{colors.fg-muted}"
+    rounded: "{rounded.pill}"
+    padding: "0 10px"
+  weight-option-pressed:
+    backgroundColor: "rgb(255 255 255 / 0.14)"
+    textColor: "{colors.fg}"
+  switch-source:
+    backgroundColor: "rgb(255 255 255 / 0.16)"
+    rounded: "{rounded.pill}"
+    width: "38px"
+    height: "22px"
+  switch-source-on:
+    backgroundColor: "{colors.glow-1}"
+  press-chip:
+    backgroundColor: "{colors.veil}"
+    textColor: "{colors.fg}"
+    rounded: "{rounded.pill}"
+    height: "30px"
+    padding: "0 6px 0 12px"
+  learn-badge:
+    backgroundColor: "rgb(255 255 255 / 0.06)"
+    textColor: "{colors.fg-muted}"
+    rounded: "{rounded.pill}"
+    height: "28px"
+    padding: "0 12px 0 10px"
+  learn-badge-on-light:
+    backgroundColor: "rgb(10 10 12 / 0.66)"
+    textColor: "rgb(255 255 255 / 0.85)"
 ---
 
 # Design System: Cloudify
@@ -469,12 +529,12 @@ The three hex values in the frontmatter are the registered initial values shown 
 - **Panel** (`panel`): every card, tile, popover and skeleton block.
 - **Panel Lift** (`panel-hover`): hover state of panels, and the fill behind artwork while it loads or when it is missing.
 - **Dock** (`dock`): the player bar, one step above ground so it reads as a separate floor.
-- **Line** (`line`): the hairline on top of the player bar, around floating menus and the sheets that rise over the player (the queue, and the key help on all but its bottom edge), the separators between groups inside the search suggestions and between the diary's keep choices and «Стереть дневник», and the one rule under a wide list's column heads. Nowhere else.
+- **Line** (`line`): the hairline on top of the player bar, around floating menus and the sheets that rise over the player (the queue, and the key help and «Настроить подборку» on all but their bottom edge), the separators between groups inside the search suggestions and between the diary's keep choices and «Стереть дневник», and the one rule under a wide list's column heads. Nowhere else.
 - **Paper White** (`fg`): primary text and icons on hover.
 - **Muted** (`fg-muted`): artist names, secondary lines, idle icons, nav tabs at rest.
 - **Faint** (`fg-faint`): counts, durations, timestamps, the disclaimer. It is the lowest text tone allowed and is used only for short labels.
 - **Ink** (`ink`): text and icons on white pills and the selected chip.
-- **Smoke** (`smoke`, `smoke-hover`) with **Rim** (`rim`): the translucent dark fill and 1 px inner rim of everything that sits on the light: secondary round buttons, mood, section and setting chips, the library's and the diary's filter well and its jump round, and the day on screen in the diary's day strip. Over a cover (the heart and «…» rounds on a track tile) the smoke deepens to black at 72 %, 90 % on hover, so the rounds hold up on any artwork.
+- **Smoke** (`smoke`, `smoke-hover`) with **Rim** (`rim`): the translucent dark fill and 1 px inner rim of everything that sits on the light: secondary round buttons, mood, section and setting chips, the library's and the diary's filter well and its jump round, the day on screen in the diary's day strip, and the learning badge beside the mood chips. Over a cover (the heart and «…» rounds on a track tile) the smoke deepens to black at 72 %, 90 % on hover, so the rounds hold up on any artwork.
 - **Veil** (`veil`): white at 7 % for wells on ground or panel: the top bar's search field, the token input, the city field in «Где ты», state badges, the keyboard hint, keycaps.
 
 ### Named Rules
@@ -503,15 +563,15 @@ Both are self-hosted through fontsource, with Cyrillic, and ship inside the app.
 - **Display** (Unbounded 800, `min(132px, 15cqi)`, 0.92, −0.055em, single line): the one big word of a full screen: «Подборка», «Cloudify» on sign-in, the offline title. It scales with its container so it never wraps or clips in a 960 px window, and carries a soft dark text shadow to sit on the light. «Библиотека» is the same face one step smaller (`min(108px, 12.5cqi)`), because its actions and chips share the first screen; «Дневник» is that size again, also held to 15vh so a short window still shows plays in its first view.
 - **Fitted name** (Unbounded 800, 0.92, −0.055em, same text shadow): the name of an opened playlist or person, and the search page's title (the found artist's name, or the query itself), which can be anything. It is measured, not guessed: one line up to 112 px while that stays at 64 px or more; otherwise balanced over two lines up to 84 px (no smaller than 44 px); a very long name gets three lines at 34–60 px. Never clipped mid-letter, never shrunk to body size.
 - **Headline** (Unbounded 800, `clamp(64px, 8vw, 112px)`, 0.92, −0.055em): the title of a section page that is not built yet.
-- **Section** (Unbounded 700, 19px, 1, −0.02em): section titles («Продолжить», «Лайки», «Плейлисты»), the key help's «Клавиши», the diary's day dates («Сегодня, 4 ноября», the date after the comma in `fg-muted`), and the wordmark beside the mark; 15px in the titles of the diary's small panels («Сколько хранить», «Где ты»).
+- **Section** (Unbounded 700, 19px, 1, −0.02em): section titles («Продолжить», «Лайки», «Плейлисты»), the key help's «Клавиши», the desk's «Настроить подборку», the diary's day dates («Сегодня, 4 ноября», the date after the comma in `fg-muted`), and the wordmark beside the mark; 15px in the titles of the diary's small panels («Сколько хранить», «Где ты»).
 - **Lead** (Manrope 600, 17px, 1.45, max 42–52ch): the one line under a display word, in white at 80 % with a soft shadow when it sits on the light. The diary's lead drops to 15px at 1.4 when the window is 700 px tall or less.
 - **Title** (Manrope 800, 14–16.5px, about 1.25): track and playlist titles in rows, cards, tiles and the player (14.5px under a track tile and in a found track's row, 14px under playlist and person tiles and in the search suggestions); 19px bold under the hero cover; 15.5px for a diary part's name («Ночь на 4-е», «Утро»).
 - **Body** (Manrope 600, 14px, 1.4): the default for everything; nav tabs and secondary buttons go to 700 at 15px.
-- **Label** (Manrope 700, 12.5–13.5px, tabular figures): counts, durations, times, timestamps, plan names, helper text; the count inside a section chip (12.5px at 55 %), the match count inside the filter («120 из 1 312»), the line under a playlist, person or station tile; the filter column's group names, genre counts and the found rows' genre, plays and date cells (12.5px faint); in the diary, a play's time, source and ending (12.5px), a day's and a part's facts (13px faint), the sky word (12.5px faint) and the day strip's dates (10.5px).
+- **Label** (Manrope 700, 12.5–13.5px, tabular figures): counts, durations, times, timestamps, plan names, helper text; the count inside a section chip (12.5px at 55 %), the match count inside the filter («120 из 1 312»), the line under a playlist, person or station tile; the filter column's group names, genre counts and the found rows' genre, plays and date cells (12.5px faint); in the diary, a play's time, source and ending (12.5px), a day's and a part's facts (13px faint), the sky word (12.5px faint) and the day strip's dates (10.5px); in the selection's desk, the column names in 13px faint 800 and the source lines, legend and artist figures (12–12.5px); the player's «почему» line (12.5px faint).
 - **Badge** (Manrope 800, 11px, 1): state badges on rows («Go+ · 30 с», «не в твоём регионе») and the keyboard hint; 10.5px on the Go+ chip that sits on a cover.
 
 ### Named Rules
-**The Place Name Rule.** Unbounded names places: the hero word, page titles, section titles, the titles of panels and sheets («Клавиши», «Что не так», «Вход устарел», «Сколько хранить», «Где ты»), the diary's day dates and the wordmark. It never sets a track title, a button, a label or a sentence.
+**The Place Name Rule.** Unbounded names places: the hero word, page titles, section titles, the titles of panels and sheets («Клавиши», «Настроить подборку», «Что не так», «Вход устарел», «Сколько хранить», «Где ты»), the diary's day dates and the wordmark. It never sets a track title, a button, a label or a sentence.
 
 **The Heavy Body Rule.** Manrope never drops below 600. Hierarchy among small text comes from weight (600 / 700 / 800) and the three text tones, not from thin weights.
 
@@ -520,7 +580,7 @@ Both are self-hosted through fontsource, with Cyrillic, and ship inside the app.
 A full-height window: the page scrolls under a floating 68 px top bar, and an 84 px player bar is pinned below the scroll area. The window is never narrower than 960 × 600 (1280 × 820 by default); on macOS the top bar starts at 94 px to clear the traffic lights, otherwise at 28 px.
 
 - **Gutter:** 56 px on both sides of every page; 28 px inside the top bar and the player bar.
-- **Hero:** a two-column grid, the text column flexible and the cover column `clamp(220px, 21vw, 300px)`, 48 px apart. The text starts at `clamp(88px, 13vh, 112px)` from the top, so it clears the top bar on short windows. Inside the text column the rhythm is 18 px (word to lead), 26 px (lead to actions), 22 px (actions to moods); actions are 12 px apart, chips 8 px.
+- **Hero:** a two-column grid, the text column flexible and the cover column `clamp(220px, 21vw, 300px)`, 48 px apart. The text starts at `clamp(88px, 13vh, 112px)` from the top, so it clears the top bar on short windows. Inside the text column the rhythm is 18 px (word to lead), 26 px (lead to actions), 22 px (actions to moods); actions are 12 px apart, chips 8 px. The actions are the primary pill, then the 54 px rounds (next, «не то», the sliders round that opens the desk); the learning badge follows the five mood chips on their row while the selection is still learning.
 - **Home grid:** three columns at 400 : 520 : 344 with 32 px gaps («Продолжить», «Лайки», «Плейлисты»). At 1179 px and narrower it becomes two columns with a 40 px row gap: resume and playlists on top, likes across the full width below.
 - **Sections:** an 18 px gap from the section title to its content (12 px for track lists, whose rows carry their own padding). Track rows are 50 px tall.
 - **Library page:** no side column. The light spans the full width (a 480 px box, the ribbon 420 px tall from 24 px down), and the content sits on it at the 56 px gutter: «Библиотека» from `clamp(88px, 13vh, 104px)` with 24 px below it, then the actions row (the white shuffle pill, the 340 px filter well, the jump round pushed to the far end; 12 px apart), then the section chips (8 px apart, 32 px below), then the content.
@@ -531,8 +591,8 @@ A full-height window: the page scrolls under a floating 68 px top bar, and an 84
 - **Walls (a section in full):** track covers in columns of at least 196 px (six across a 1440 px window), 24 px apart across and 28 px down, the caption included in each row. Playlist, person and station tiles use a 164 px minimum grid with 18 / 20 px gaps.
 - **Opened playlist or person:** a back link, the fitted name with its lead line, and the face at the right (`clamp(180px, 20cqi, 240px)`, 40 px from the text, bottoms aligned). The face hides when the content column is narrower than 768 px; the name then takes the full width.
 - **Sticky actions:** the actions row (the library's, the diary's find well and day strip, or search's kinds) sticks 68 px from the top, under the top bar, and spans the full width; once the page has scrolled past it, it grows the top bar's backing (ground at 80 %, strong blur) over 200 ms.
-- **Player bar:** three columns: now playing at `clamp(180px, 24vw, 320px)`, the transport with the waveform taking all remaining width, then secondary controls and a 92 px volume slider; column gaps `clamp(16px, 2.2vw, 30px)`. At 1100 px and narrower the now-playing column is a fixed 180 px and the volume slider 72 px, so the waveform keeps its room.
-- **Sheets over the player:** the queue floats 16 px from the right edge and 12 px above the bar (`bottom: 96px`), `min(430px, 100vw − 32px)` wide and `min(660px, 100vh − 180px)` tall, so it never reaches under the top bar. The key help spans the full width directly on top of the bar (from 84 px up), 32 px side padding, its keyboard at the left and its text 36 px to the right; its key map is one column, two from 1100 px. Only one shows at a time: while the key help is open the queue steps aside and comes back after.
+- **Player bar:** three columns: now playing at `clamp(180px, 24vw, 320px)`, the transport with the waveform taking all remaining width, then secondary controls and a 92 px volume slider; column gaps `clamp(16px, 2.2vw, 30px)`. At 1100 px and narrower the now-playing column is a fixed 180 px and the volume slider 72 px, so the waveform keeps its room; while the selection plays, the right-hand controls also tighten to 6 px apart, and the separator, the disabled lyrics round and the disabled shuffle step out.
+- **Sheets over the player:** the queue floats 16 px from the right edge and 12 px above the bar (`bottom: 96px`), `min(430px, 100vw − 32px)` wide and `min(660px, 100vh − 180px)` tall, so it never reaches under the top bar. The key help spans the full width directly on top of the bar (from 84 px up), 32 px side padding, its keyboard at the left and its text 36 px to the right; its key map is one column, two from 1100 px. «Настроить подборку» takes the key help's place and material: full width directly on top of the bar, 22 / 32 / 26 px padding, up to 76 px from the window's top (the top bar's line) and scrolling inside beyond that. Its header row (title, learning badge, × at the far end, 14 px apart) sits 18 px above three columns at 1.15 : 1 : 0.85 with 32 px gaps; at 1179 px and narrower they become two, the balance column spanning both with its strip of covers 12 across in one row, the sources and «Что подборка знает о тебе» side by side below. Only one shows at a time: the queue and the desk take turns (opening one closes the other), and while the key help is open either steps aside and comes back after.
 - **Full-screen states** (sign-in, unreachable): the same light centred vertically, content capped at 1100 px, scrolling instead of clipping in a small window, the disclaimer pinned at the bottom.
 
 ### Named Rules
@@ -560,7 +620,9 @@ Depth is tonal and luminous, not shadowed. Surfaces step up from ground (`ground
 - **Opened face**: the face beside an opened playlist or person, and a found artist's face on the search page, use the hero cover shadow; they are that cover's twins.
 - **Play round over a cover** (`box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.8)` on the 56 px round of a track tile, `0 10px 24px -10px rgb(0 0 0 / 0.8)` on the 44 px round of a playlist or station tile): the white round floats over artwork.
 - **Inner rim** (`box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16)`): the edge of smoky buttons, chips and the filter well on the light, the day on screen in the diary's strip, and of the rounds on a cover. It is an edge, not a lift.
-- **Sheet over the player**: the queue uses the floating-menu shadow; the key help, which rises from the bar's full width, throws it upward (`box-shadow: 0 -24px 60px -20px rgb(0 0 0 / 0.8)`).
+- **Sheet over the player**: the queue uses the floating-menu shadow; the key help and «Настроить подборку», which rise from the bar's full width, throw it upward (`box-shadow: 0 -24px 60px -20px rgb(0 0 0 / 0.8)`).
+- **Slider knob** (`box-shadow: 0 4px 14px -4px rgb(0 0 0 / 0.7)`): the white knob of the desk's balance slider, a small lift so it reads over its fill.
+- **New-track ring** (`box-shadow: 0 0 0 2px` in `glow-1` at 70 %): a cover in the desk's strip that comes from the new side (stations, related), and its legend tag at 1.5 px. A ring in the music's colour, not a lift.
 - **Dragged row** (`box-shadow: 0 18px 40px -12px rgb(0 0 0 / 0.85)` with the inner rim): the ghost of a queue row held by its grip, on `panel-hover`, floating over the list.
 - **Key edges** (`inset 0 -1px 0 rgb(255 255 255 / 0.06)` on a keycap; `inset 0 -2px 0` in `glow-1` at 70 % on a drawn key that does something): a bottom edge, not a lift.
 - **Status ping** (`box-shadow: 0 0 0 6px` in `glow-1` at 35 %, widening to 14 px as it fades, with a 1.08 scale, over 900 ms): the status button when an action fails. A ring that fades, not a lift; none under reduced motion.
@@ -576,7 +638,7 @@ Depth is tonal and luminous, not shadowed. Surfaces step up from ground (`ground
 
 ## Shapes
 
-Everything is round. Interactive controls are full pills or circles; containers use large soft radii that shrink as they nest: hero cover and an opened playlist's face 26 px, cards, the diary's part blocks and empty panel, the sheets over the player and the panels under the status button 22 px (the key help only at its top corners), tiles and section notices 18 px, popovers (the diary's two panels too) and the cards inside «Что не так» 16 px, artwork inside a card 14 px, track covers on walls and shelves, inner controls, menu items, row highlights and mosaics 12 px, filter choices 10 px, list thumbnails 9 px, badges and the day strip's columns 8 px, keycaps and drawn keys 7 px, the Go+ chip on a cover 6 px. People are always circles: a followed or found artist's tile, an opened or found artist's face, and an artist among the search suggestions. Progress tracks, waveform bars and the diary's heard-bars are 4 px and 2 px rounded strips; the day strip's bars are 10 px wide with 3 px top corners. Mosaics clip four covers into one rounded square. The mark is a single rounded stroke: one swell of a sound wave.
+Everything is round. Interactive controls are full pills or circles; containers use large soft radii that shrink as they nest: hero cover and an opened playlist's face 26 px, cards, the diary's part blocks and empty panel, the sheets over the player and the panels under the status button 22 px (the key help and the desk only at their top corners), tiles and section notices 18 px, popovers (the diary's two panels too) and the cards inside «Что не так» 16 px, artwork inside a card 14 px, track covers on walls and shelves, inner controls, menu items, row highlights and mosaics 12 px, filter choices and the desk's source icon wells 10 px, list thumbnails 9 px, badges and the day strip's columns 8 px, keycaps and drawn keys 7 px, the Go+ chip on a cover 6 px. People are always circles: a followed or found artist's tile, an opened or found artist's face, and an artist among the search suggestions. Progress tracks, waveform bars, the diary's heard-bars and the desk's artist bars are 4 px and 2 px rounded strips, the balance slider's rail a 6 px one; the learning badge's marks are 4 × 10 px rounded bars; the day strip's bars are 10 px wide with 3 px top corners. Mosaics clip four covers into one rounded square. The mark is a single rounded stroke: one swell of a sound wave.
 
 ## Components
 
@@ -585,16 +647,16 @@ Confident and soft: big pills, quick spring on press.
 - **Shape:** full pill or circle (9999px).
 - **Primary:** white fill, ink text, Manrope 800 at 16px, 54 px tall with an icon on the left. One per region; it is the action the screen exists for («Слушать подборку», «Войти через SoundCloud»).
 - **Hover / Active:** scales to 1.03 on hover and 0.97 on press over 150 ms; disabled drops to 50 % opacity and stops scaling.
-- **Round secondary:** 54 px circle (or a 54 px pill with a label), smoke fill with the 1 px inner rim, white icon; hover deepens the smoke. Used beside the primary pill on the light.
+- **Round secondary:** 54 px circle (or a 54 px pill with a label), smoke fill with the 1 px inner rim, white icon; hover deepens the smoke. Used beside the primary pill on the light. A round that opens a sheet (the hero's sliders round, «Настроить подборку») keeps the deeper smoke while it is open.
 - **Player play:** a 44 px white circle with ink icon; scales to 1.05 / 0.95.
 - **Icon button:** 32 px circle, no fill, `fg-muted` icon that goes to `fg` on hover. Controls that do not work yet are disabled at 40 % with a title saying "скоро", never hidden behind fake behaviour.
-- **Mode round:** an icon button that is a mode (shuffle, repeat). On, its icon is `glow-1` with a 4 px `glow-1` dot just under it; off, it is a plain icon button. A round that opens a panel (the queue) instead sits on a white-10 % circle with a white icon while the panel is open.
+- **Mode round:** an icon button that is a mode (shuffle, repeat). On, its icon is `glow-1` with a 4 px `glow-1` dot just under it; off, it is a plain icon button. «Больше такого» in the player is a mode round too: once pressed on the playing track it stays `glow-1` with the dot until the track changes. A round that opens a panel (the queue, the desk's sliders round) instead sits on a white-10 % circle with a white icon while the panel is open.
 - **Quiet text button:** «Все» and «Ещё раз»: muted bold text, or a 32 px white-10 % pill.
 - **Focus:** a 2 px `glow-1` outline at 3 px offset everywhere.
 
 ### Chips
 - **Style:** 36 px pills, smoke fill with the inner rim and a 6 px backdrop blur, Manrope 700, white at 90 %.
-- **State:** the selected mood turns solid white with ink text and drops the rim. One is always selected.
+- **State:** the selected mood turns solid white with ink text and drops the rim. One is always selected. «Любимое» and «Незнакомое» pin the desk's balance to its ends.
 - **Section chips:** the library's sections («Всё», «Лайки», «Плейлисты», …) in the same material, each with its count after the name in label figures at 55 %, filled in as each list arrives; sections that are made, not stored (stations, history) carry no count. The current section is white. They navigate (`aria-current`), they are not toggles.
 - **Setting chips (diary):** «Хранить всегда» and «Свет и темнота: Москва» in the same material, a 16 px icon before the words and a 15 px chevron at 70 % after; they open a panel (`aria-expanded`), and while it is open the smoke deepens. A place guessed from the time zone adds «· по часовому поясу» at 60 %. Disabled at 50 % until the settings are read.
 - **Kind chips (search):** «Всё», «Треки», «Люди», «Плейлисты», «Альбомы» in the same material and the same count anatomy; the counts are SoundCloud's totals for this search.
@@ -668,13 +730,14 @@ From a tile's «…» round: a 240 px `panel` with a `line` border, 16 px corner
 Three stroked bands (130, 70 and 26 px wide in a 1440 × 440 drawing), blurred by 48 and 26 px, drawn in two gradients across `glow-2`, `glow-1` and `glow-3`, blended with `screen`, painted into a quarter-size canvas and stretched. Their swell follows the playing track's loudness curve; moods set energy (height), pace (speed) and a hue turn. It reads its colours from its own element, so a wrapper that sets `--glow-*` relights it without touching the rest of the window. It sits behind the hero (440 px tall, from 40 px below the top), behind the library (420 px, under a 480 px grain box) and behind the full-screen states, always with grain and faded edges.
 
 ### Player Notice
-Under the playing title the player names the artist, and the name opens their page. The line under the playing title in the player bar can carry a short notice («Дальше: …», «Ссылка на трек скопирована») in white instead of the artist, for 7 seconds. It may carry one action that takes back what it reports («Вернуть»), set in Manrope 800 `glow-1`, underlined on hover; pressing it clears the notice. Taking a track out of the queue («Убрал «…»»), taking a play out of the diary («Убрал из дневника: …») and clearing what is next all report here with «Вернуть»; nothing asks for confirmation first.
+Under the playing title the player names the artist, and the name opens their page. The line under the playing title in the player bar can carry a short notice («Дальше: …», «Ссылка на трек скопирована») in white instead of the artist, for 7 seconds. It may carry one action that takes back what it reports («Вернуть»), set in Manrope 800 `glow-1`, underlined on hover; pressing it clears the notice. Taking a track out of the queue («Убрал «…»»), taking a play out of the diary («Убрал из дневника: …»), clearing what is next and the selection's two presses all report here with «Вернуть»; nothing asks for confirmation first. At 1100 px and narrower a notice keeps its words: it takes the second line, wrapping to two, in its short form where it has one («Больше такого», «Не то — убрал»), its full text as the title, and «Вернуть» moves to the line below.
 
 ### Waveform Seek
 The player's progress bar is the playing track's real waveform: 4 px bars with 2 px gaps, 8–34 px tall, the played part filled with a `glow-1` → `glow-2` vertical gradient and the rest white at 18 %. It is a keyboard slider (arrows ±5 s, Page keys ±30 s). Without a waveform it draws a quiet even line.
 
 ### Player Bar
-The 84 px `dock` floor. Now playing at the left: a 56 px cover (12 px corners), the title in Manrope 800 at 15px, and under it the artist (a link) then « · » and where the queue came from, both muted 13px; the artist keeps its room and the source label is the one that truncates. The transport: shuffle, back, the 44 px white play round, next, repeat, 6 px apart, with shuffle and repeat as mode rounds (repeat cycles off → queue → track; repeat-one shows the repeat icon with a 1). Shuffle is disabled for the endless selection, which is already mixed, and its title says so. Then times in faint tabular figures around the waveform. At the right: heart, lyrics, the queue round (lit while the queue is open), mute and volume, 10 px apart. Every control's title names its key («Перемешать (S)», «Очередь (Q)»).
+The 84 px `dock` floor. Now playing at the left: a 56 px cover (12 px corners), the title in Manrope 800 at 15px, and under it the artist (a link) then « · » and where the queue came from, both muted 13px; the artist keeps its room and the source label is the one that truncates. The transport: shuffle, back, the 44 px white play round, next, repeat, 6 px apart, with shuffle and repeat as mode rounds (repeat cycles off → queue → track; repeat-one shows the repeat icon with a 1). Shuffle is disabled for the endless selection, which is already mixed, and its title says so. Then times in faint tabular figures around the waveform. At the right: heart, lyrics, the sliders round that opens «Настроить подборку» (lit while it is open), the queue round (lit while the queue is open), mute and volume, 10 px apart. Every control's title names its key («Перемешать (S)», «Очередь (Q)»).
+- **While the selection plays:** the now-playing column holds three lines: the title, the artist, then the «почему» line in 12.5px faint, one line with its full text as the title, two lines at 1100 px and narrower (see The Worked-Out Reason Rule). It replaces the « · source» label, since where the track came from is in it, and gives way while a notice shows. Before the heart stand «не то» (thumbs down) and «больше такого» (thumbs up), both icon buttons, then a 1 px white-12 % separator 20 px tall.
 
 ### Queue Sheet
 «Дальше»: the queue in the floating-menu material (`panel`, `line` border, the floating-menu shadow) with 22 px corners, rising out of the queue round over the page (200 ms, from 10 px lower at 97 % scale, anchored toward the round; no motion under reduced motion). It takes the focus when it opens and gives it back to the queue round; Esc, Q, its × or a press outside it (the player bar and menus over it do not count) close it.
@@ -694,12 +757,34 @@ A sheet that rises 24 px out of the player bar over 240 ms (no motion under redu
 - **Keyboard:** a drawn keyboard of 34 px keys 4 px apart (wide keys in whole key widths), the arrows as a 34 × 25 px upside-down T at the end of the bottom row, the Mac or PC bottom row by platform, labels in Manrope 700 at 11.5px. A key that does something is white at 10 % with a `glow-1` underline; a key that does nothing is dimmed almost away; the pointed key, or every key of a pointed line, fills `glow-1` with ink text; a pressed key dips 1 px and shrinks to 96 %. Pointing at or pressing a key says what it does, and a press really does it.
 - **Text column:** «Клавиши» in Section type with a 32 px × round; a white-5 % banner (14 px corners, at least 62 px tall, announced politely) with the keycaps and the action in 15.5px 800, or, at rest, an invitation to point or press; then every line of the map as a 30 px row, muted 13px with its keycaps at the right, white at 6 % with white text while it is the line spoken of; last a faint note that keys are quiet while typing and that the layout does not matter.
 
-**The Quiet Keys Rule.** The window's single keys (space, arrows, digits, letters) stay silent while typing in a field, leave a focused control the keys it handles itself (a slider's arrows, a keyboard-focused button's space, a queue row's arrows), and never take Cmd or Ctrl shortcuts; the only ones the app uses are ⌘K / Ctrl+K and ⌘F / Ctrl+F, handled by the search and the filter. Held down, only seek and volume repeat. Esc closes the key help first, then the queue, and leaves an open menu its own Escape.
+**The Quiet Keys Rule.** The window's single keys (space, arrows, digits, letters) stay silent while typing in a field, leave a focused control the keys it handles itself (a slider's arrows, a keyboard-focused button's space, a queue row's arrows), and never take Cmd or Ctrl shortcuts; the only ones the app uses are ⌘K / Ctrl+K and ⌘F / Ctrl+F, handled by the search and the filter. Held down, only seek and volume repeat. Esc closes the key help first, then the desk, then the queue, and leaves an open menu its own Escape.
 
 **The Physical Keys Rule.** Hotkeys are read by the key's place on the keyboard, not the letter it types, so Q, S, R and M work the same in the Russian layout; the help draws them in Latin.
 
 ### Keycap
 A key name as a cap, used in the key help and in the account menu («Горячие клавиши ?»): veil, 7 px corners, a 1 px white-6 % bottom edge, Manrope 800 white, 26 px tall (12px text) or 22 px small (11px); arrows are drawn as icons, a range as «0 … 9», the modifier by platform (⌘ / ⌥ on a Mac, Ctrl / Alt elsewhere).
+
+### «Настроить подборку» (Selection Desk)
+The selection set in one place, rising out of the player bar like the key help and in its material: full width, `panel` with a `line` border on all but its bottom edge, 22 px top corners, the upward sheet shadow, the same 240 ms rise (none under reduced motion). The player bar under it stays usable. It takes the focus itself and gives it back on close; Esc, the × or a press outside close it (the player bar and the sliders rounds do not count). Its layout is under Layout.
+- **Header:** «Настроить подборку» in Section type, the learning badge (see Learning Badge), a 32 px × round at the far end (muted; white at 8 % with a white icon on hover).
+- **Columns:** each named in 13px faint 800 («Знакомое и новое», «Из чего», «Что подборка знает о тебе»), 12 px above its content.
+- **Balance column:** the balance slider (see Balance Slider); under it its sentence in 14px bold white («Каждый третий трек — новый»); when the balance asks for new tracks and the radios offer none, a muted 12.5px note that says so and that familiar music plays meanwhile. Then, 18 px down, the strip of the next twelve covers, 6 × 2 (12 × 1 in two-column mode), 10 px apart: each a 12 px-cornered cover with a 24 px black-78 % round tag at its top left (a familiar track: the white icon of its source; a new one: a `glow-1` Sparkles, and the cover takes the new-track ring), its title in 12.5px 800 and the first part of its reason in 11.5px faint, the whole reason in its title. As the balance moves, covers slide to their new places in 160 ms on `cubic-bezier(0.2, 0.8, 0.2, 1)` and new ones fade in from 94 % scale; still under reduced motion. While the selection plays the strip is what the queue holds next, else what would play. A 12px faint legend draws the two tags (20 px rounds) with what each side is made of. Last, this session's presses as 30 px veil chips («Больше такого, как «…»» / «Меньше такого, как «…»» after a 14 px `glow-1` thumb), each with a 22 px × that takes it back.
+- **Source rows:** likes, history, last winter, this week a year ago, stations, related: a 12 px-cornered row (white at 4 % on hover) of a 34 px icon well (10 px corners; `glow-1` at 15 % with a `glow-1` icon when on, veil with a muted icon when off), the name in 14px 800, then one 12.5px line saying what it holds now (faint) or, when empty, why and when it fills (muted, see The Honest Source Rule); when on and not empty, a 28 px white-6 % pressed-button group «реже / как обычно / чаще» (the pressed one white at 14 % with white text); at the right a 38 × 22 px switch (white at 16 %, `glow-1` when on, a 16 px white knob).
+- **Что подборка знает о тебе:** in muted 13.5px with the figures in white 800: «Выучено по N прослушиваниям дневника» (or «Учусь: N из 30 …», or the rules it plays by when nothing is learned or the diary cannot be read); then «Дослушиваешь» and «Бросаешь в первые секунды» (12.5px faint 800 names) over artist rows: the name in 13.5px 800, «дослушиваешь 14 из 19» in faint tabular figures, and a 4 px bar on white at 10 % filled with the `glow-1` → `glow-2` gradient for what was heard out, white at 40 % for what was left early; rows split by a white-5 % hairline; last, how many tracks were sent away with «не то».
+
+### Balance Slider
+«Знакомое ↔ Новое» in thirteen stops. A 40 px hit area; inside it a 6 px rail (white at 16 %, inset 12 px) with thirteen 4 px dots at white 30 %, filled from the left with `glow-1` → `glow-2`, and a 24 px white knob with the slider-knob shadow that grows to 1.1 while held. The end labels («Знакомое», «Новое», 13.5px bold) are muted, and the one on the side the knob is in brightens to white. Drag, click a place, arrows ±1, Page keys ±3, Home / End; the arrows stay the slider's while it has the focus (The Quiet Keys Rule). Its value is read out as its sentence.
+
+### Learning Badge
+How much the selection has learned, said honestly: a 28 px pill of ten 4 × 10 px marks (white at 22 %, filling `glow-1` one per three plays over the first 30) and the words: «Правила по умолчанию» before the first play, «Учусь: N из 30» while learning, «Дневник не читается — по правилам» when the diary cannot be read. Its title says what the marks mean. On a panel (the desk's header) it is white at 6 % with muted 12.5px bold text; on the light (after the mood chips) it is smoke with the rim and a 6 px backdrop blur, text white at 85 %. Gone once it has learned.
+
+**The Worked-Out Reason Rule.** The «почему» line, the strip's reasons and the desk's counts quote only facts the engine worked out from the diary as it is now, and they are worked out again whenever the diary changes: an erased diary reads «пока по правилам — тебя ещё не выучил», never what it said before. The most telling part comes first («Дослушал 7 из 11 · из твоих лайков»), at most two parts, and its figures are held whole by no-break spaces so a narrow line never splits «7 из 11».
+
+**The One Song Rule.** One song is one identity across its uploads: a version or re-upload plays once in the selection, and a re-upload of a song you liked or just played is never offered as new.
+
+**The Honest Source Rule.** A source with nothing to give says why and when it will fill («Пусто: появится в октябре 2027, когда дневнику будет год»), in muted text where a full source's line is faint; its weight group stays hidden until there is something to weigh.
+
+**The Rules By Default Rule.** Before the diary holds a play the selection says it plays by default rules («Правила по умолчанию»; «Пока по правилам: два лайка, потом трек со станции» as «Как обычно»'s lead), while learning it says how far («Учусь: N из 30»), once learned how much it learned from («Подбираю по твоему дневнику — N прослушиваний»). It never claims to know you before it does.
 
 ### Status Button
 The one place for what went wrong: a 38 px pill in the top bar between the search field and the account, there only while something is wrong. White at 8 % (13 % on hover, 16 % while open), Manrope 800 at 13.5px, a 17 px icon or an 8 px dot before the words. It arrives over 250 ms from 92 % scale.
@@ -744,7 +829,7 @@ A part of a day as a `panel` block, 22 px corners, 6 px padding, 12 px apart.
 
 ### Play Row
 One play, in a 56 px grid with 12 px between parts, 12 px corners, 10 px side padding: the time it started (46 px, right-aligned, 12.5px faint figures), the 44 px cover (9 px corners), the title (14.5px 800, one line, its full name as a tooltip) with the artist under it (a muted 13px link that opens them), then, when the stage is wide enough (from 896 px), where it came from in 12.5px faint («из лайков», «подборка», «поиск «…»», «радио · …», «из дневника · …»), with « · ты добавил» in `glow-1` for a track added by hand; then how it ended; last a 32 px × round that shows on hover or focus. The whole row plays its part from here (the one sounding pauses); hover or focus tints it white at 4 % and lays the play veil (black at 45 %) on the cover. The row that is sounding has its title in `glow-1` and a black-55 % veil with a `glow-1` sound icon (pause on hover).
-- **Ending:** a 44 px heard-bar (4 px, white at 12 %) filled to how far it got (never under 4 %), then the words. Played to the end: «дослушал» in white with a `glow-1` → `glow-2` fill, a 13 px repeat icon when it was started again. Left early: «пропустил на 0:12», ««не то» на 0:05», «остановил на 2:30» in `fg-muted` with a white-42 % fill, and the cover and the title column at 62 % until pointed at. Sounding now: «играет · 0:31» or «на паузе · 0:31» in `glow-1` with the glow fill, read from the player four times a second. A heart filled `glow-1` follows when it was liked while it played.
+- **Ending:** a 44 px heard-bar (4 px, white at 12 %) filled to how far it got (never under 4 %), then the words. Played to the end: «дослушал» in white with a `glow-1` → `glow-2` fill, a 13 px repeat icon when it was started again. Left early: «пропустил на 0:12», ««не то» на 0:05», «остановил на 2:30» in `fg-muted` with a white-42 % fill, and the cover and the title column at 62 % until pointed at. Sounding now: «играет · 0:31» or «на паузе · 0:31» in `glow-1` with the glow fill, read from the player four times a second. A heart filled `glow-1` follows when it was liked while it played, and a 13 px `glow-1` thumbs-up when «больше такого» was pressed during it.
 - **×:** takes the play out at once and says so in the player notice with «Вернуть»; nothing asks first.
 
 ### Diary Panels
@@ -781,6 +866,7 @@ A `panel` card (22 px corners, 26 / 28 px padding, at most 640 px) on the ground
 - **Do** gather everything that went wrong in the status button and «Что не так», and show the button only while something is wrong.
 - **Do** keep a failed or broken part's shape as its skeleton at 45 % with one smoke pill, and grey the light while there is no network or sign-in.
 - **Do** say how each play ended («дослушал», «пропустил на 0:12») with a bar of how far it got, and play a part again in its own order.
+- **Do** let the selection explain itself only from what the diary holds now: why this track, why a source is empty and when it fills, how much is learned, «правила по умолчанию» before anything is.
 
 ### Don't:
 - **Don't** add a fixed brand accent, SoundCloud's orange as a UI colour, or Yandex Music's signature yellow; a mood turn must never produce yellow.

@@ -85,7 +85,6 @@ export function PlayerBar() {
 
   const shownVolume = muted ? 0 : volume;
   const VolumeIcon = shownVolume === 0 ? VolumeX : shownVolume < 0.5 ? Volume1 : Volume2;
-  // While the selection plays, the line under the title says why this track, not just where from.
   // While the selection plays, a third line says why this track; where it came from is in it.
   const why = pick ? whyLine(pick.facts, Date.now()) : "";
   const fromLabel = why ? "" : from(source);

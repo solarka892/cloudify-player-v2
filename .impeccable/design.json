@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-04T18:00:00Z",
+  "generatedAt": "2026-11-04T21:00:00Z",
   "title": "Design System: Cloudify",
   "extensions": {
     "colorMeta": {
@@ -217,7 +217,7 @@
       {
         "name": "inner-rim",
         "value": "inset 0 0 0 1px rgb(255 255 255 / 0.16)",
-        "purpose": "Edge of smoky buttons, chips, the filter well on the light, and the rounds on a cover."
+        "purpose": "Edge of smoky buttons, chips, the filter well on the light, and the rounds on a cover. Also the learning badge on the light."
       },
       {
         "name": "play-round-over-cover",
@@ -242,7 +242,7 @@
       {
         "name": "sheet-up",
         "value": "0 -24px 60px -20px rgb(0 0 0 / 0.8)",
-        "purpose": "The key help sheet rising from the player bar's full width; the queue sheet uses floating-menu."
+        "purpose": "The key help and «Настроить подборку», rising from the player bar's full width; the queue sheet uses floating-menu."
       },
       {
         "name": "drag-ghost",
@@ -263,6 +263,16 @@
         "name": "status-ping",
         "value": "0 0 0 6px color-mix(in srgb, var(--glow-1) 35%, transparent) → 0 0 0 14px transparent",
         "purpose": "The status button when an action fails: a fading glow-1 ring with a 1.08 scale, not a lift."
+      },
+      {
+        "name": "slider-knob",
+        "value": "0 4px 14px -4px rgb(0 0 0 / 0.7)",
+        "purpose": "The 24px white knob of the desk's balance slider."
+      },
+      {
+        "name": "new-track-ring",
+        "value": "0 0 0 2px color-mix(in srgb, var(--glow-1) 70%, transparent)",
+        "purpose": "A cover from the new side in the desk's strip (1.5px on its legend tag). A ring, not a lift."
       }
     ],
     "motion": [
@@ -334,7 +344,7 @@
       {
         "name": "sheet-up",
         "value": "240ms ease-sheet, from opacity 0, translateY(24px)",
-        "purpose": "The key help rising out of the player bar; none under reduced motion."
+        "purpose": "The key help and «Настроить подборку» rising out of the player bar; none under reduced motion."
       },
       {
         "name": "gap-slide",
@@ -375,6 +385,16 @@
         "name": "offline-dot",
         "value": "animate-pulse (motion-safe)",
         "purpose": "The grey dot of «Нет сети»."
+      },
+      {
+        "name": "strip-slide",
+        "value": "transform 160ms ease-sheet; new covers from opacity 0, scale(0.94)",
+        "purpose": "Covers in the desk's strip moving to their new places as the balance changes; still under reduced motion."
+      },
+      {
+        "name": "knob-hold",
+        "value": "transform 100ms, scale 1.1 while held",
+        "purpose": "The balance slider's knob while dragged."
       }
     ],
     "breakpoints": [
@@ -384,7 +404,8 @@
       },
       {
         "name": "home-grid-two-columns",
-        "value": "1179px"
+        "value": "1179px",
+        "purpose": "At and below: the home grid and «Настроить подборку» go to two columns (the desk's balance spans both, its strip 12 across)."
       },
       {
         "name": "window-default",
@@ -409,7 +430,7 @@
       {
         "name": "player-compact",
         "value": "1100px",
-        "purpose": "At and below: now-playing column 180px, volume slider 72px; key map in one column."
+        "purpose": "At and below: now-playing column 180px, volume slider 72px; key map in one column; while the selection plays, right-hand controls 6px apart, separator, lyrics and shuffle step out, the «почему» line and a notice wrap to two lines."
       }
     ]
   },
@@ -645,6 +666,38 @@
       "description": "«Сколько хранить» dropped from its chip, in the floating-menu material, with the erase asked once in place.",
       "html": "<div class=\"ds-dpanel\" role=\"dialog\" aria-label=\"Сколько хранить дневник\"><h3>Сколько хранить</h3><p>Дневник лежит только на этом компьютере и никуда не отправляется. Что старше срока, стирается само.</p><div role=\"menu\"><button type=\"button\" role=\"menuitemradio\" aria-checked=\"false\">30 дней</button><button type=\"button\" role=\"menuitemradio\" aria-checked=\"false\">180 дней</button><button type=\"button\" role=\"menuitemradio\" aria-checked=\"false\">Год</button><button type=\"button\" role=\"menuitemradio\" aria-checked=\"true\">Всегда<svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></button></div><hr><div class=\"ds-dpanel-ask\"><p>Сотру 1 240 записей. Вернуть их будет нельзя.</p><button type=\"button\" class=\"ds-dpanel-yes\">Стереть</button><button type=\"button\" class=\"ds-dpanel-no\">Не надо</button></div></div>",
       "css": ".ds-dpanel { width: 340px; padding: 8px; border: 1px solid var(--color-line, rgb(255 255 255 / 0.08)); border-radius: 16px; background: var(--color-panel, #121215); box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.8); color: var(--color-fg, #f4f4f6); font-family: \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; } .ds-dpanel h3 { margin: 0; padding: 10px 10px 6px; font: 700 15px/1 \"Unbounded Variable\", ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.02em; } .ds-dpanel > p, .ds-dpanel-ask p { margin: 0; padding: 4px 10px 8px; font-weight: 600; font-size: 13px; line-height: 1.45; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-dpanel [role=\"menu\"] button { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 40px; padding: 0 12px; border: none; border-radius: 12px; background: transparent; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font: 700 14px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; text-align: left; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-dpanel [role=\"menu\"] button:hover, .ds-dpanel [role=\"menu\"] button:focus-visible { background: rgb(255 255 255 / 0.06); color: #f4f4f6; outline: none; } .ds-dpanel [role=\"menu\"] button[aria-checked=\"true\"] { background: rgb(255 255 255 / 0.1); color: #f4f4f6; } .ds-dpanel [role=\"menu\"] svg { color: var(--glow-1, #ff9d6b); } .ds-dpanel hr { margin: 6px 4px; border: none; border-top: 1px solid var(--color-line, rgb(255 255 255 / 0.08)); } .ds-dpanel-ask { padding: 4px 0 6px; } .ds-dpanel-ask p { padding-bottom: 10px; } .ds-dpanel-ask button { height: 34px; margin-left: 10px; padding: 0 14px; border: none; border-radius: 9999px; font: 800 13.5px/1 \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: transform 150ms, background-color 150ms; } .ds-dpanel-ask button + button { margin-left: 8px; } .ds-dpanel-yes { background: #fff; color: var(--color-ink, #0b0b0d); } .ds-dpanel-yes:hover { transform: scale(1.03); } .ds-dpanel-yes:active { transform: scale(0.97); } .ds-dpanel-no { background: rgb(255 255 255 / 0.1); color: #f4f4f6; } .ds-dpanel-no:hover { background: rgb(255 255 255 / 0.16); } .ds-dpanel-ask button:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Selection Desk",
+      "kind": "custom",
+      "refersTo": "sheet-desk",
+      "description": "«Настроить подборку»: the key help's sheet material out of the player bar; balance with the next covers, sources, what was learned.",
+      "html": "<section class=\"ds-desk\" role=\"dialog\" aria-label=\"Настроить подборку\"><header><h2>Настроить подборку</h2><button type=\"button\" class=\"ds-desk-x\" aria-label=\"Закрыть\">×</button></header><div class=\"ds-desk-cols\"><div><h3>Знакомое и новое</h3><p class=\"ds-desk-said\">Каждый третий трек — новый</p><ul class=\"ds-desk-strip\"><li><span class=\"ds-desk-cover\"></span><span class=\"ds-desk-tag\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"/></svg></span></li><li><span class=\"ds-desk-cover new\"></span><span class=\"ds-desk-tag new\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z\"/></svg></span></li><li><span class=\"ds-desk-cover\"></span><span class=\"ds-desk-tag\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"/></svg></span></li></ul></div><div><h3>Из чего</h3><div class=\"ds-desk-src\"><span class=\"ds-desk-well on\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z\"/></svg></span><div><b>Лайки</b><small>1 312 треков · недавно игравшие — в конце</small><div class=\"ds-desk-weights\" role=\"group\"><button type=\"button\" aria-pressed=\"false\">реже</button><button type=\"button\" aria-pressed=\"true\">как обычно</button><button type=\"button\" aria-pressed=\"false\">чаще</button></div></div><button type=\"button\" role=\"switch\" aria-checked=\"true\" aria-label=\"Лайки\" class=\"ds-desk-switch\"></button></div></div><div><h3>Что подборка знает о тебе</h3><p class=\"ds-desk-text\">Выучено по <b>188</b> прослушиваниям дневника.</p><div class=\"ds-desk-artist\"><b>Kate NV</b><span>дослушиваешь 10 из 13</span><i><s style=\"width:77%\"></s></i></div></div></div></section>",
+      "css": ".ds-desk { font-family: \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; background: var(--color-panel, #121215); color: var(--color-fg, #f4f4f6); border: 1px solid var(--color-line, rgb(255 255 255 / 0.08)); border-bottom: 0; border-radius: 22px 22px 0 0; box-shadow: 0 -24px 60px -20px rgb(0 0 0 / 0.8); padding: 22px 32px 26px; } .ds-desk header { display: flex; align-items: center; gap: 14px; } .ds-desk h2 { margin: 0; font-family: \"Unbounded Variable\", ui-sans-serif, sans-serif; font-weight: 700; font-size: 19px; line-height: 1; letter-spacing: -0.02em; } .ds-desk-x { margin-left: auto; width: 32px; height: 32px; border: none; border-radius: 9999px; background: none; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font-size: 20px; cursor: pointer; transition: background 150ms, color 150ms; } .ds-desk-x:hover { background: rgb(255 255 255 / 0.08); color: var(--color-fg, #f4f4f6); } .ds-desk-x:focus-visible, .ds-desk button:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-desk-cols { margin-top: 18px; display: grid; grid-template-columns: 1.15fr 1fr 0.85fr; gap: 32px; } .ds-desk h3 { margin: 0 0 12px; font-weight: 800; font-size: 13px; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); } .ds-desk-said { margin: 0; font-weight: 700; font-size: 14px; } .ds-desk-strip { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; } .ds-desk-strip li { position: relative; } .ds-desk-cover { display: block; aspect-ratio: 1; border-radius: 12px; background: var(--color-panel-hover, #18181c); } .ds-desk-cover.new { box-shadow: 0 0 0 2px color-mix(in srgb, var(--glow-1, #ff9d6b) 70%, transparent); } .ds-desk-tag { position: absolute; top: 6px; left: 6px; display: grid; place-content: center; width: 24px; height: 24px; border-radius: 9999px; background: rgb(0 0 0 / 0.78); color: #fff; } .ds-desk-tag.new { color: var(--glow-1, #ff9d6b); } .ds-desk-src { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 0 12px; align-items: start; padding: 8px 10px; border-radius: 12px; transition: background 150ms; } .ds-desk-src:hover { background: rgb(255 255 255 / 0.04); } .ds-desk-well { display: grid; place-content: center; width: 34px; height: 34px; border-radius: 10px; background: rgb(255 255 255 / 0.07); color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-desk-well.on { background: color-mix(in srgb, var(--glow-1, #ff9d6b) 15%, transparent); color: var(--glow-1, #ff9d6b); } .ds-desk-src b { display: block; font-weight: 800; font-size: 14px; } .ds-desk-src small { display: block; margin-top: 2px; font-weight: 700; font-size: 12.5px; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); } .ds-desk-weights { margin-top: 8px; display: flex; width: max-content; height: 28px; padding: 2px; border-radius: 9999px; background: rgb(255 255 255 / 0.06); } .ds-desk-weights button { border: none; border-radius: 9999px; padding: 0 10px; background: none; font: inherit; font-weight: 700; font-size: 12px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); cursor: pointer; transition: color 150ms, background 150ms; } .ds-desk-weights button:hover { color: var(--color-fg, #f4f4f6); } .ds-desk-weights button[aria-pressed=true] { background: rgb(255 255 255 / 0.14); color: var(--color-fg, #f4f4f6); } .ds-desk-switch { position: relative; margin-top: 6px; width: 38px; height: 22px; border: none; border-radius: 9999px; background: rgb(255 255 255 / 0.16); cursor: pointer; transition: background 150ms; } .ds-desk-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 9999px; background: #fff; transition: transform 200ms; } .ds-desk-switch[aria-checked=true] { background: var(--glow-1, #ff9d6b); } .ds-desk-switch[aria-checked=true]::after { transform: translateX(16px); } .ds-desk-text { margin: 0; font-weight: 600; font-size: 13.5px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-desk-text b { font-weight: 800; color: var(--color-fg, #f4f4f6); } .ds-desk-artist { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 10px; padding: 7px 0; border-bottom: 1px solid rgb(255 255 255 / 0.05); } .ds-desk-artist b { font-weight: 800; font-size: 13.5px; } .ds-desk-artist span { font-weight: 700; font-size: 12.5px; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); font-variant-numeric: tabular-nums; } .ds-desk-artist i { grid-column: span 2; margin-top: 6px; height: 4px; border-radius: 9999px; background: rgb(255 255 255 / 0.1); overflow: hidden; } .ds-desk-artist s { display: block; height: 100%; background: linear-gradient(to right, var(--glow-1, #ff9d6b), var(--glow-2, #ff4fa3)); }"
+    },
+    {
+      "name": "Balance Slider",
+      "kind": "input",
+      "refersTo": "mix-slider-rail",
+      "description": "«Знакомое ↔ Новое» in thirteen stops: a 6px rail with dots, glow fill, a 24px white knob; the end label on the knob's side brightens.",
+      "html": "<div class=\"ds-mix\"><span class=\"on\">Знакомое</span><div class=\"ds-mix-hit\" role=\"slider\" tabindex=\"0\" aria-label=\"Знакомое или новое\" aria-valuemin=\"0\" aria-valuemax=\"12\" aria-valuenow=\"4\" aria-valuetext=\"Каждый третий трек — новый\"><div class=\"ds-mix-rail\"><span class=\"ds-mix-fill\" style=\"width:33.3%\"></span><span class=\"ds-mix-knob\" style=\"left:33.3%\"></span></div></div><span>Новое</span></div>",
+      "css": ".ds-mix { font-family: \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; width: 420px; padding: 16px; background: var(--color-panel, #121215); } .ds-mix > span { font-weight: 700; font-size: 13.5px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-mix > span.on { color: var(--color-fg, #f4f4f6); } .ds-mix-hit { position: relative; height: 40px; border-radius: 9999px; cursor: pointer; } .ds-mix-hit:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 2px; } .ds-mix-rail { position: absolute; left: 12px; right: 12px; top: 50%; height: 6px; transform: translateY(-50%); border-radius: 9999px; background: rgb(255 255 255 / 0.16) radial-gradient(circle, rgb(255 255 255 / 0.3) 2px, transparent 2.5px) 0 50% / calc(100% / 12) 6px repeat-x; } .ds-mix-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 9999px; background: linear-gradient(to right, var(--glow-1, #ff9d6b), var(--glow-2, #ff4fa3)); } .ds-mix-knob { position: absolute; top: 50%; width: 24px; height: 24px; border-radius: 9999px; background: #fff; box-shadow: 0 4px 14px -4px rgb(0 0 0 / 0.7); transform: translate(-50%, -50%); transition: transform 100ms; } .ds-mix-hit:active .ds-mix-knob { transform: translate(-50%, -50%) scale(1.1); }"
+    },
+    {
+      "name": "Learning Badge",
+      "kind": "chip",
+      "refersTo": "learn-badge",
+      "description": "Ten marks filling glow-1 over the first 30 plays and the honest words; white 6% on a panel, smoke with rim on the light; gone once learned.",
+      "html": "<div class=\"ds-learn-wrap\"><span class=\"ds-learn\"><span class=\"ds-learn-marks\" aria-hidden=\"true\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i></i><i></i><i></i><i></i><i></i><i></i></span>Учусь: 12 из 30</span><span class=\"ds-learn light\"><span class=\"ds-learn-marks\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>Правила по умолчанию</span></div>",
+      "css": ".ds-learn-wrap { display: flex; gap: 12px; padding: 16px; background: linear-gradient(90deg, var(--color-panel, #121215) 50%, #3a2a3a 50%); } .ds-learn { font-family: \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px 0 10px; border-radius: 9999px; background: rgb(255 255 255 / 0.06); color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); font-weight: 700; font-size: 12.5px; } .ds-learn.light { background: rgb(10 10 12 / 0.66); color: rgb(255 255 255 / 0.85); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16); backdrop-filter: blur(6px); } .ds-learn-marks { display: flex; gap: 2px; } .ds-learn-marks i { width: 4px; height: 10px; border-radius: 4px; background: rgb(255 255 255 / 0.22); } .ds-learn-marks i.on { background: var(--glow-1, #ff9d6b); }"
+    },
+    {
+      "name": "Selection Presses",
+      "kind": "button",
+      "refersTo": "player-mode-on",
+      "description": "«не то» and «больше такого» before the heart while the selection plays, then a 1px separator; «больше такого» stays lit with the mode dot once pressed. The «почему» line sits under the artist.",
+      "html": "<div class=\"ds-press\"><div class=\"ds-press-now\"><b>Цветами радуги</b><span>pyrokinesis</span><small>Дослушал 7 из 11 · из твоих лайков</small></div><button type=\"button\" class=\"ds-press-round\" aria-label=\"Не то\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M17 14V2\"/><path d=\"M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z\"/></svg></button><button type=\"button\" class=\"ds-press-round on\" aria-pressed=\"true\" aria-label=\"Больше такого\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 10v12\"/><path d=\"M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z\"/></svg></button><span class=\"ds-press-sep\" aria-hidden=\"true\"></span></div>",
+      "css": ".ds-press { font-family: \"Manrope Variable\", ui-sans-serif, system-ui, sans-serif; display: flex; align-items: center; gap: 10px; padding: 16px; background: var(--color-dock, #0c0c0f); color: var(--color-fg, #f4f4f6); } .ds-press-now { width: 240px; margin-right: 16px; } .ds-press-now b { display: block; font-weight: 800; font-size: 15px; } .ds-press-now span { display: block; font-weight: 700; font-size: 13px; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); } .ds-press-now small { display: block; font-weight: 700; font-size: 12.5px; line-height: 1.25; color: var(--color-fg-faint, rgb(244 244 246 / 0.5)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-press-round { position: relative; display: grid; place-content: center; width: 32px; height: 32px; border: none; border-radius: 9999px; background: none; color: var(--color-fg-muted, rgb(244 244 246 / 0.62)); cursor: pointer; transition: color 150ms; } .ds-press-round:hover { color: var(--color-fg, #f4f4f6); } .ds-press-round:focus-visible { outline: 2px solid var(--glow-1, #ff9d6b); outline-offset: 3px; } .ds-press-round.on { color: var(--glow-1, #ff9d6b); } .ds-press-round.on::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 9999px; background: var(--glow-1, #ff9d6b); } .ds-press-sep { width: 1px; height: 20px; margin: 0 2px; background: rgb(255 255 255 / 0.12); }"
     }
   ],
   "narrative": {
@@ -692,7 +745,7 @@
       },
       {
         "name": "The Place Name Rule",
-        "body": "Unbounded names places: the hero word, page titles, section titles, the titles of panels and sheets («Клавиши», «Что не так», «Вход устарел») and the wordmark. It never sets a track title, a button, a label or a sentence.",
+        "body": "Unbounded names places: the hero word, page titles, section titles, the titles of panels and sheets («Клавиши», «Настроить подборку», «Что не так», «Вход устарел», «Сколько хранить», «Где ты»), the diary's day dates and the wordmark. It never sets a track title, a button, a label or a sentence.",
         "section": "typography"
       },
       {
@@ -757,12 +810,32 @@
       },
       {
         "name": "The Quiet Keys Rule",
-        "body": "The window's single keys (space, arrows, digits, letters) stay silent while typing in a field, leave a focused control the keys it handles itself (a slider's arrows, a keyboard-focused button's space, a queue row's arrows), and never take Cmd or Ctrl shortcuts; the only ones the app uses are ⌘K / Ctrl+K and ⌘F / Ctrl+F, handled by the search and the filter. Held down, only seek and volume repeat. Esc closes the key help first, then the queue, and leaves an open menu its own Escape.",
+        "body": "The window's single keys (space, arrows, digits, letters) stay silent while typing in a field, leave a focused control the keys it handles itself (a slider's arrows, a keyboard-focused button's space, a queue row's arrows), and never take Cmd or Ctrl shortcuts; the only ones the app uses are ⌘K / Ctrl+K and ⌘F / Ctrl+F, handled by the search and the filter. Held down, only seek and volume repeat. Esc closes the key help first, then the desk, then the queue, and leaves an open menu its own Escape.",
         "section": "components"
       },
       {
         "name": "The Physical Keys Rule",
         "body": "Hotkeys are read by the key's place on the keyboard, not the letter it types, so Q, S, R and M work the same in the Russian layout; the help draws them in Latin.",
+        "section": "components"
+      },
+      {
+        "name": "The Worked-Out Reason Rule",
+        "body": "The «почему» line, the strip's reasons and the desk's counts quote only facts the engine worked out from the diary as it is now, and they are worked out again whenever the diary changes: an erased diary reads «пока по правилам — тебя ещё не выучил», never what it said before. The most telling part comes first («Дослушал 7 из 11 · из твоих лайков»), at most two parts, and its figures are held whole by no-break spaces so a narrow line never splits «7 из 11».",
+        "section": "components"
+      },
+      {
+        "name": "The One Song Rule",
+        "body": "One song is one identity across its uploads: a version or re-upload plays once in the selection, and a re-upload of a song you liked or just played is never offered as new.",
+        "section": "components"
+      },
+      {
+        "name": "The Honest Source Rule",
+        "body": "A source with nothing to give says why and when it will fill («Пусто: появится в октябре 2027, когда дневнику будет год»), in muted text where a full source's line is faint; its weight group stays hidden until there is something to weigh.",
+        "section": "components"
+      },
+      {
+        "name": "The Rules By Default Rule",
+        "body": "Before the diary holds a play the selection says it plays by default rules («Правила по умолчанию»; «Пока по правилам: два лайка, потом трек со станции» as «Как обычно»'s lead), while learning it says how far («Учусь: N из 30»), once learned how much it learned from («Подбираю по твоему дневнику — N прослушиваний»). It never claims to know you before it does.",
         "section": "components"
       },
       {
@@ -813,7 +886,8 @@
       "**Do** say what really happened and what will happen: «Уже играло» only for what played, and how the queue ends where it ends.",
       "**Do** gather everything that went wrong in the status button and «Что не так», and show the button only while something is wrong.",
       "**Do** keep a failed or broken part's shape as its skeleton at 45 % with one smoke pill, and grey the light while there is no network or sign-in.",
-      "**Do** say how each play ended («дослушал», «пропустил на 0:12») with a bar of how far it got, and play a part again in its own order."
+      "**Do** say how each play ended («дослушал», «пропустил на 0:12») with a bar of how far it got, and play a part again in its own order.",
+      "**Do** let the selection explain itself only from what the diary holds now: why this track, why a source is empty and when it fills, how much is learned, «правила по умолчанию» before anything is."
     ],
     "donts": [
       "**Don't** add a fixed brand accent, SoundCloud's orange as a UI colour, or Yandex Music's signature yellow; a mood turn must never produce yellow.",
